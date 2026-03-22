@@ -2,67 +2,73 @@
 
 ## What This Is
 
-Cozy Studio is a Blender add-on that brings Git-style version control to `.blend` projects by serializing datablocks into readable JSON files. It is for Blender users who want reviewable history, safe checkout/branching, and merge/rebase workflows without giving up Blender's normal save and autosave behavior.
+Cozy Studio is a Blender add-on that brings Git-style version control to Blender datablocks. It serializes datablocks into readable JSON files, tracks them in a Git repository, and restores them back into Blender when users revisit earlier history.
+
+It is designed to fit Blender's workflow instead of fighting it: autosave stays on, users can stage and commit changes from inside Blender, and the project stays understandable through history, diffs, checkout, merge, and rebase flows.
 
 ## Core Value
 
-Provide trustworthy, readable version control for Blender scenes and datablocks without making the Blender workflow brittle.
+Let Blender projects use trustworthy Git history at datablock granularity without breaking autosave or forcing a non-Blender workflow.
 
 ## Requirements
 
 ### Validated
 
-- ✓ Users can initialize a Cozy Studio repository from the Blender UI.
-- ✓ Supported datablocks are captured into JSON-backed block files.
-- ✓ Users can stage, commit, checkout, branch, merge, and rebase from the add-on UI.
+- ✓ Initialize a Git/Cozy Studio repository from Blender — existing feature
+- ✓ Serialize individual datablocks into JSON files — existing feature
+- ✓ Stage and unstage individual datablocks or grouped updates — existing feature
+- ✓ Commit from inside Blender with clear blockers when something is wrong — existing feature
+- ✓ Check out older commits, switch branches, and create branches from commits — existing feature
+- ✓ Merge and rebase with conflict-resolution tools — existing feature
+- ✓ Keep Blender autosave enabled without interference — existing behavior
 
 ### Active
 
-- [ ] Dependency bootstrap and repository setup stay reliable in fresh Blender installs.
-- [ ] Datablock capture and restore stay correct for supported types.
-- [ ] UI state stays responsive and reflects Git status without blocking draw paths.
-- [ ] Conflicts and blockers are surfaced before destructive repo actions complete.
+- [ ] Keep the datablock history workflow reliable across real Blender projects
+- [ ] Improve the usability of staging, checkout, and recovery flows as the product evolves
+- [ ] Preserve compatibility with Blender autosave and repo state during future changes
 
 ### Out of Scope
 
-- Real-time multi-user collaboration — the add-on is local-first Git version control.
-- Cloud sync or hosted project storage — project data stays in the user's repo.
-- Non-Blender file formats as a primary source of truth — `.blend` datablocks remain the core model.
+- Full-file `.blend` snapshot versioning — conflicts with datablock-level history and readable diffs
+- Recording raw user input instead of datablock state — too fragile for dependable history
+- Disabling Blender autosave — the product is meant to work alongside it
 
 ## Context
 
-This is an existing Blender add-on codebase with layered architecture around add-on registration, UI state, Git orchestration, and datablock serialization. The current codebase map highlights a few important concerns: runtime dependency bootstrap inside Blender, a known UUID-tracking bug, incomplete restore paths for some datablocks, shallow manifest validation, and performance pressure from full-scene capture.
+This project is an existing Blender add-on. The repository already contains the core add-on code, UI, and tests, and the product description in `README.md` matches the current direction: version control for Blender datablocks with Git-backed history.
+
+The main emphasis is on preserving a Blender-native experience while keeping the data model reviewable, reversible, and friendly to Git workflows.
 
 ## Constraints
 
-- **Runtime**: Must run inside Blender's embedded Python environment — the add-on depends on `bpy`.
-- **Architecture**: Local Git repo rooted at the project `.blend` directory — all history lives on disk.
-- **Compatibility**: Must preserve autosave and existing Blender workflows — version control cannot break normal editing.
-- **Performance**: UI refresh and scene capture must stay responsive — large scenes already stress full-scene scans.
+- **Compatibility**: Must keep working with Blender's autosave and repo state — regressions here are high risk
+- **Workflow**: Must feel native inside Blender — the add-on should not require users to leave the editor for basic Git actions
+- **Data model**: Must keep datablock-level serialization readable and reversible — this is the product's differentiator
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Git-backed datablock serialization | Keeps history readable and diffable instead of storing full `.blend` copies | ✓ Good |
-| Local-first repository model | Fits Blender project folders and avoids external service dependencies | ✓ Good |
+| Use datablock-level JSON serialization | Keeps history readable and diffs actionable | ✓ Good |
+| Keep autosave enabled | Avoids disrupting Blender's native safety net | ✓ Good |
 
 ## Evolution
 
 This document evolves at phase transitions and milestone boundaries.
 
-**After each phase transition** (`/gsd-transition`):
+**After each phase transition** (via `/gsd-transition`):
 1. Requirements invalidated? → Move to Out of Scope with reason
 2. Requirements validated? → Move to Validated with phase reference
 3. New requirements emerged? → Add to Active
 4. Decisions to log? → Add to Key Decisions
 5. "What This Is" still accurate? → Update if drifted
 
-**After each milestone** (`/gsd-complete-milestone`):
+**After each milestone** (via `/gsd-complete-milestone`):
 1. Full review of all sections
 2. Core Value check — still the right priority?
 3. Audit Out of Scope — reasons still valid?
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-22 after initialization*
+*Last updated: 2026-03-21 after initialization*

@@ -1,62 +1,62 @@
-# Roadmap: Cozy Studio
+# Cozy Studio Roadmap
 
-**Defined:** 2026-03-22
+## Phases
 
-## Phase 1 — Foundation and Bootstrap
+- [ ] **Phase 1: Bootstrap Safety** - Initialize Cozy Studio repos in Blender and surface blockers before any repo action runs.
+- [ ] **Phase 2: Datablock Capture & Review** - Serialize datablocks, restore history, and show staged/unstaged changes in Blender.
+- [ ] **Phase 3: Commit & Branch History** - Commit tracked changes and navigate commits/branches safely from inside Blender.
+- [ ] **Phase 4: Merge & Rebase Recovery** - Merge and rebase branches while surfacing conflicts through the add-on workflow.
 
-**Goal:** Make repo setup and dependency checks reliable in fresh Blender environments.
+## Phase Details
 
-**Requirements:** BOOT-01, BOOT-02
+### Phase 1: Bootstrap Safety
+**Goal**: Users can start a Cozy Studio repository in Blender and see setup problems before any repo action runs.
+**Depends on**: Nothing (first phase)
+**Requirements**: BOOT-01, BOOT-02
+**Success Criteria** (what must be TRUE):
+1. User can initialize a Cozy Studio repository from inside Blender.
+2. When dependencies or setup are missing, the add-on shows a clear blocker before repo actions run.
+3. After initialization, the add-on clearly reflects that the repository is ready for Git actions.
+**Plans**: TBD
 
-**Success Criteria:**
-1. Blender can initialize a Cozy Studio repo from the add-on UI.
-2. Missing Python dependencies fail with clear user-facing blockers.
-3. Repo bootstrap does not silently mutate or corrupt the project state.
+### Phase 2: Datablock Capture & Review
+**Goal**: Users can see, review, and restore datablock-level history inside Blender.
+**Depends on**: Phase 1
+**Requirements**: DATA-01, DATA-02, DATA-03, UI-01
+**Success Criteria** (what must be TRUE):
+1. Supported datablock edits are written as per-datablock JSON block files.
+2. Users can inspect staged and unstaged datablock changes before committing.
+3. Users can restore supported datablocks from stored block data when checking out history.
+4. Repository status, history, and change groups appear in the Blender UI without freezing the panel.
+**Plans**: TBD
 
-## Phase 2 — Capture and UI State
+### Phase 3: Commit & Branch History
+**Goal**: Users can record meaningful history and move between commits and branches without leaving Blender.
+**Depends on**: Phase 2
+**Requirements**: HIST-01, HIST-02, HIST-03
+**Success Criteria** (what must be TRUE):
+1. User can commit tracked changes from Blender.
+2. When preconditions fail, the add-on shows clear blockers instead of creating a bad commit.
+3. User can check out earlier commits and branches and the scene matches the selected history.
+4. User can create branches from commits inside Blender.
+**Plans**: TBD
 
-**Goal:** Keep datablock capture, staging, and status display correct and responsive.
+### Phase 4: Merge & Rebase Recovery
+**Goal**: Users can merge and rebase branches while seeing and resolving conflicts in the add-on workflow.
+**Depends on**: Phase 3
+**Requirements**: CONF-01, CONF-02
+**Success Criteria** (what must be TRUE):
+1. User can merge branches from inside Blender.
+2. When automatic merge resolution fails, conflicts are surfaced clearly in the UI.
+3. User can rebase branches from inside Blender.
+4. Conflicts during rebase can be resolved through the add-on workflow.
+**Plans**: TBD
 
-**Requirements:** DATA-01, DATA-02, DATA-03, UI-01
+## Progress Table
 
-**Success Criteria:**
-1. Supported datablocks serialize into stable JSON block files.
-2. Staged versus unstaged changes are visible before commit.
-3. UI status updates come from cached state instead of direct draw-time Git work.
-4. Capture and refresh paths stay responsive on larger scenes.
-
-## Phase 3 — Commit and History
-
-**Goal:** Make commit, checkout, and branching workflows dependable inside Blender.
-
-**Requirements:** HIST-01, HIST-02, HIST-03
-
-**Success Criteria:**
-1. Commit preflight surfaces blockers before destructive actions proceed.
-2. Older commits restore the expected scene state.
-3. Branch creation is available from the Blender UI.
-
-## Phase 4 — Merge and Rebase
-
-**Goal:** Support conflict-aware merge and rebase workflows with clear UI feedback.
-
-**Requirements:** CONF-01, CONF-02
-
-**Success Criteria:**
-1. Merge conflicts are visible and actionable in the add-on UI.
-2. Rebase conflicts are routed through the same recovery workflow.
-3. Conflict state persists clearly enough to resume work after interruption.
-
-## Coverage
-
-| Phase | Requirements | Status |
-|-------|--------------|--------|
-| 1 | BOOT-01, BOOT-02 | Pending |
-| 2 | DATA-01, DATA-02, DATA-03, UI-01 | Pending |
-| 3 | HIST-01, HIST-02, HIST-03 | Pending |
-| 4 | CONF-01, CONF-02 | Pending |
-
-**Coverage:** 11/11 v1 requirements mapped
-
----
-*Last updated: 2026-03-22 after initialization*
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 1. Bootstrap Safety | 0/1 | Not started | - |
+| 2. Datablock Capture & Review | 0/1 | Not started | - |
+| 3. Commit & Branch History | 0/1 | Not started | - |
+| 4. Merge & Rebase Recovery | 0/1 | Not started | - |

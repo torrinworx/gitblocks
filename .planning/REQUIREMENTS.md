@@ -55,17 +55,17 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BOOT-01 | Phase 1 | Pending |
-| BOOT-02 | Phase 1 | Pending |
-| DATA-01 | Phase 2 | Pending |
-| DATA-02 | Phase 2 | Pending |
-| DATA-03 | Phase 2 | Pending |
-| UI-01 | Phase 2 | Pending |
-| HIST-01 | Phase 3 | Pending |
-| HIST-02 | Phase 3 | Pending |
-| HIST-03 | Phase 3 | Pending |
-| CONF-01 | Phase 4 | Pending |
-| CONF-02 | Phase 4 | Pending |
+| BOOT-01 | Phase 1: Bootstrap Safety | Pending |
+| BOOT-02 | Phase 1: Bootstrap Safety | Pending |
+| DATA-01 | Phase 2: Datablock Capture & Review | Pending |
+| DATA-02 | Phase 2: Datablock Capture & Review | Pending |
+| DATA-03 | Phase 2: Datablock Capture & Review | Pending |
+| UI-01 | Phase 2: Datablock Capture & Review | Pending |
+| HIST-01 | Phase 3: Commit & Branch History | Pending |
+| HIST-02 | Phase 3: Commit & Branch History | Pending |
+| HIST-03 | Phase 3: Commit & Branch History | Pending |
+| CONF-01 | Phase 4: Merge & Rebase Recovery | Pending |
+| CONF-02 | Phase 4: Merge & Rebase Recovery | Pending |
 
 **Coverage:**
 - v1 requirements: 11 total
