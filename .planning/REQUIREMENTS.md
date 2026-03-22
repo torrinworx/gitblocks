@@ -1,7 +1,7 @@
 # Requirements: Cozy Studio
 
-**Defined:** 2026-03-22
-**Core Value:** Provide trustworthy, readable version control for Blender scenes and datablocks without making the Blender workflow brittle.
+**Defined:** 2026-03-21
+**Core Value:** Let Blender projects use trustworthy Git history at datablock granularity without breaking autosave or forcing a non-Blender workflow.
 
 ## v1 Requirements
 
@@ -73,5 +73,5 @@
 - Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-03-22*
-*Last updated: 2026-03-22 after initialization*
+*Requirements defined: 2026-03-21*
+*Last updated: 2026-03-21 after initialization*
