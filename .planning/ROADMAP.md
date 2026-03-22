@@ -17,7 +17,10 @@
 1. User can initialize a Cozy Studio repository from inside Blender.
 2. When dependencies or setup are missing, the add-on shows a clear blocker before repo actions run.
 3. After initialization, the add-on clearly reflects that the repository is ready for Git actions.
-**Plans**: TBD
+**Plans**:
+1. Route startup and repo-entry actions through one preflight path so missing dependencies, import failures, or invalid project state block Git actions early.
+2. Harden project setup to distinguish fresh projects, nested parent repos, and mismatched working trees, and always leave a clear ready/blocked state in the UI.
+3. Expand bootstrap coverage with tests for addon enablement, dependency installation, and project initialization so startup regressions are caught before later phases.
 
 ### Phase 2: Datablock Capture & Review
 **Goal**: Users can see, review, and restore datablock-level history inside Blender.
@@ -56,7 +59,7 @@
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Bootstrap Safety | 0/1 | Not started | - |
+| 1. Bootstrap Safety | 1/1 | Planned | - |
 | 2. Datablock Capture & Review | 0/1 | Not started | - |
 | 3. Commit & Branch History | 0/1 | Not started | - |
 | 4. Merge & Rebase Recovery | 0/1 | Not started | - |

@@ -3,13 +3,13 @@
 ## Project Reference
 
 - **Core value**: Let Blender projects use trustworthy Git history at datablock granularity without breaking autosave or forcing a non-Blender workflow.
-- **Current focus**: Roadmap approved and ready for phase planning.
+- **Current focus**: Phase 1 bootstrap safety is planned and ready for implementation.
 
 ## Current Position
 
 - **Milestone**: Initial roadmap
-- **Phase**: Not started
-- **Status**: Awaiting approval
+- **Phase**: Phase 1 planned
+- **Status**: Ready for implementation
 - **Progress**: 0%
 
 ## Performance Metrics
@@ -27,6 +27,6 @@
 
 ## Session Continuity
 
-- **Next action**: User review/approval of ROADMAP.md.
-- **After approval**: Run `/gsd-plan-phase 1`.
+- **Next action**: Implement Phase 1 bootstrap safety work.
+- **After Phase 1**: Run `/gsd-transition`.
 - **Traceability**: REQUIREMENTS.md already maps every v1 requirement to a phase.
