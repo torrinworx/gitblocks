@@ -1,14 +1,14 @@
 # Blender Data Block Serialization
-This library is courtesy of [Swann Martinez](https://gitlab.com/slumber),  extracted from his Blender addon [multi-user](https://gitlab.com/slumber/multi-user/-/tree/master/multi_user/bl_types?ref_type=heads).
+This library is courtesy of [Swann Martinez](https://gitlab.com/slumber), extracted from his Blender add-on [multi-user](https://gitlab.com/slumber/multi-user/-/tree/master/multi_user/bl_types?ref_type=heads).
 
-The goal of pulling this out into it's own library is to make an independent blender data block serialization library so that blender data blocks can be stored, transmitted, and modified in a way that is serializable and deserializable back into a .blend file. This library can allow for far more advanced applications and manipulations of data blocks.
+The goal of pulling this out into its own library is to make an independent Blender data block serialization library so that Blender data blocks can be stored, transmitted, and modified in a way that is serializable and deserializable back into a `.blend` file. This library can support far more advanced applications and manipulations of data blocks.
 
-Right now, bl_types runs on it's own without any dependencies. Slumber's original implementation used a python library written for replicating data called [replication](https://gitlab.com/slumber/replication), powering the multi-user addon. bl_types uses a couple of classes to define methods for each bl_type, and a couple other helpers from from the replication library, so I've ripped those out and placed them into /bl_types/replicate.
+Right now, `bl_types` runs on its own without any dependencies. Slumber's original implementation used a Python library written for replicating data called [replication](https://gitlab.com/slumber/replication), powering the multi-user add-on. `bl_types` uses a couple of classes to define methods for each `bl_type`, plus a few helpers from the replication library, so those pieces were extracted into `/bl_types/replicate`.
 
-I've disabled some features using the "deepdiff" library, this is just for testing, for the purposes of cozystudio_addon and our data block based git implementation I'm not sure we'll be needing this functionality. But I've left the commented code in here so that eventually we can build a library that can be merged back into multi-user so that we can abstract this logic into it's own library.
+Some `deepdiff`-powered features are disabled for now. For GitBlocks and its data-block Git workflow, that functionality is not currently needed, but the commented code remains so the library can grow without losing the original implementation notes.
 
 # Usage
-The `bl_types` library provides a standardized way to **serialize**, **deserialize**, and **sync** Blender data blocks (objects, cameras, materials, scenes, etc.) between different states or even external systems. It allows tools like Cozy Studio to treat Blender data as structured data suitable for version control and remote collaboration.
+The `bl_types` library provides a standardized way to **serialize**, **deserialize**, and **sync** Blender data blocks (objects, cameras, materials, scenes, etc.) between different states or even external systems. It allows tools like GitBlocks to treat Blender data as structured data suitable for version control and remote collaboration.
 
 The system revolves around two key classes:
 
@@ -170,7 +170,7 @@ They are automatically imported and registered when `get_data_translation_protoc
 ---
 
 # Caveats
-As stated in the multi-user main readme, there are several data blocks that aren't fully supported yet:
+As stated in the multi-user main README, there are several data blocks that aren't fully supported yet:
 
 multi-user roadmap/board has multiple issues that I would like to keept rack of here or work on myself:  
 https://gitlab.com/slumber/multi-user/-/boards/929107
@@ -186,4 +186,4 @@ speaker sound sync: (think this is something multi user needs to worry about, fo
 https://gitlab.com/slumber/multi-user/-/issues/65
 
 
-Another thing to note for cozystudio_addon is that we only check the data blocks in the class list, so we never have to worry about an unsupported data block from crashing our system, we just get updates based on the list provided by `implementations.items()`
+Another thing to note for GitBlocks is that we only check the data blocks in the class list, so we never have to worry about an unsupported data block crashing the system; updates are driven by the list provided by `implementations.items()`.
