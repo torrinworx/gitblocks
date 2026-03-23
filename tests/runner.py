@@ -9,14 +9,55 @@ Usage (from the GitBlocks add-on root):
 import sys
 import shutil
 import subprocess
+import argparse
+import types
 from pathlib import Path
 import importlib.util
 
-import bpy
 import pytest
+
+try:
+    import bpy  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - Blender-only dependency
+    bpy = types.ModuleType("bpy")
+    bpy.types = types.SimpleNamespace(Operator=object, AddonPreferences=object)
+    bpy.ops = types.SimpleNamespace(
+        preferences=types.SimpleNamespace(
+            addon_disable=lambda *args, **kwargs: {"CANCELLED"},
+        ),
+        wm=types.SimpleNamespace(
+            read_factory_settings=lambda *args, **kwargs: None,
+            save_as_mainfile=lambda *args, **kwargs: None,
+            open_mainfile=lambda *args, **kwargs: None,
+        ),
+        gitblocks=types.SimpleNamespace(),
+    )
+    bpy.utils = types.SimpleNamespace(user_resource=lambda *args, **kwargs: "/tmp")
+    bpy.app = types.SimpleNamespace(background=True, timers=types.SimpleNamespace(is_registered=lambda *args, **kwargs: False))
+    bpy.context = types.SimpleNamespace(preferences=types.SimpleNamespace(addons={}), window=None, window_manager=types.SimpleNamespace(event_timer_add=lambda *args, **kwargs: None, modal_handler_add=lambda *args, **kwargs: None, event_timer_remove=lambda *args, **kwargs: None), scene=None, view_layer=None)
+    bpy.data = types.SimpleNamespace(filepath="")
+    sys.modules["bpy"] = bpy
 
 
 # Helpers
+def build_parser():
+    parser = argparse.ArgumentParser(description="Run GitBlocks tests inside Blender")
+    parser.add_argument("target_dir", type=Path, help="Directory where test data should be prepared")
+    parser.add_argument(
+        "--blender-version",
+        help="Blender version selected by the outer harness for this run",
+    )
+    return parser
+
+
+def select_target_directory(target: Path, version: str | None):
+    return target / version if version else target
+
+
+def parse_runner_args(argv: list[str] | None = None):
+    return build_parser().parse_args(argv)
+
+
 def ensure_pytest_installed():
     if (
         importlib.util.find_spec("pytest") is not None
@@ -80,7 +121,9 @@ def sanitize_target_directory(target: Path):
 if __name__ == "__main__":
     argv = sys.argv
     argv = argv[argv.index("--") + 1 :] if "--" in argv else []
-    target_path = Path(argv[0]).absolute() if argv else Path.cwd()
+    parsed = parse_runner_args(argv) if argv else None
+    target_path = parsed.target_dir.absolute() if parsed else Path.cwd()
+    target_path = select_target_directory(target_path, getattr(parsed, "blender_version", None))
 
     ensure_pytest_installed()
 
