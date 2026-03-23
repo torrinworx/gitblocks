@@ -84,7 +84,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- Preserve branch history context (general)
 
 ### Blockers/Concerns
 
