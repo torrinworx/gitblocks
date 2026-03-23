@@ -20,7 +20,7 @@ Goal: Remove the remaining legacy brand surfaces and compatibility aliases so Gi
 **Requirements:** [BRAND-06, BRAND-07]
 
 Plans:
-- [ ] 02-gitblocks-brand-cleanup-01-PLAN.md — rebrand the runtime addon surface and UI registration to GitBlocks only
-- [ ] 02-gitblocks-brand-cleanup-02-PLAN.md — remove legacy storage namespace and internal identifier fallbacks
-- [ ] 02-gitblocks-brand-cleanup-03-PLAN.md — update tests and harnesses to the renamed identifiers
-- [ ] 02-gitblocks-brand-cleanup-04-PLAN.md — finish docs, metadata, and the final zero-legacy sweep
+- [x] 02-gitblocks-brand-cleanup-01-PLAN.md — rebrand the runtime addon surface and UI registration to GitBlocks only
+- [x] 02-gitblocks-brand-cleanup-02-PLAN.md — remove legacy storage namespace and internal identifier fallbacks
+- [x] 02-gitblocks-brand-cleanup-03-PLAN.md — update tests and harnesses to the renamed identifiers
+- [x] 02-gitblocks-brand-cleanup-04-PLAN.md — finish docs, metadata, and the final zero-legacy sweep

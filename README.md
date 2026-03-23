@@ -34,5 +34,3 @@ This runs alongside Blender's autosave without interfering with it, so you can k
 2. In Blender: **Edit > Preferences > Add-ons > Install...**
 3. Enable **GitBlocks**.
 4. In the add-on preferences, click **Install Dependencies**.
-
-> Legacy aliases remain in a few compatibility surfaces so existing workspaces and scripts keep working, but GitBlocks is the primary brand everywhere new users look.

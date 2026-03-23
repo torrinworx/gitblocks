@@ -19,8 +19,8 @@ Planned for the GitBlocks brand cleanup phase.
 
 ### Brand Clean-up
 
-- [ ] **BRAND-06**: Remove compatibility aliases once all consumers have moved to GitBlocks.
-- [ ] **BRAND-07**: Rename remaining internal identifiers if and only if the compatibility layer is retired.
+- [x] **BRAND-06**: Remove compatibility aliases once all consumers have moved to GitBlocks.
+- [x] **BRAND-07**: Rename remaining internal identifiers if and only if the compatibility layer is retired.
 
 ## Out of Scope
 
@@ -38,8 +38,8 @@ Planned for the GitBlocks brand cleanup phase.
 | BRAND-03 | Phase 02 | Complete |
 | BRAND-04 | Phase 03 | Complete |
 | BRAND-05 | Phase 05 | Complete |
-| BRAND-06 | Phase 02 | Planned |
-| BRAND-07 | Phase 02 | Planned |
+| BRAND-06 | Phase 02 | Complete |
+| BRAND-07 | Phase 02 | Complete |
 
 **Coverage:**
 - v1 requirements: 5 total
@@ -48,4 +48,4 @@ Planned for the GitBlocks brand cleanup phase.
 
 ---
 *Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after Phase 01 Plan 01*
+*Last updated: 2026-03-23 after Phase 02 cleanup*
