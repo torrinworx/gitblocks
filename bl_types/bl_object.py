@@ -164,6 +164,8 @@ def load_pose(target_bone, data):
 
 def find_data_from_name(name=None):
     instance = None
+
+    grease_pencils_v3 = getattr(bpy.data, 'grease_pencils_v3', None)
     if not name:
         pass
     elif name in bpy.data.meshes.keys():
@@ -180,8 +182,8 @@ def find_data_from_name(name=None):
         instance = bpy.data.armatures[name]
     elif name in bpy.data.grease_pencils.keys():
         instance = bpy.data.grease_pencils[name]
-    elif name in bpy.data.grease_pencils_v3.keys():
-        instance = bpy.data.grease_pencils_v3[name]
+    elif grease_pencils_v3 is not None and name in grease_pencils_v3.keys():
+        instance = grease_pencils_v3[name]
     elif name in bpy.data.curves.keys():
         instance = bpy.data.curves[name]
     elif name in bpy.data.lattices.keys():

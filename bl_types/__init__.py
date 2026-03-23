@@ -44,6 +44,6 @@ def get_data_translation_protocol()-> DataTranslationProtocol:
             impl = importlib.import_module(f".{module_name}", __package__)
         else:
             impl = globals()[module_name]
-        if impl and hasattr(impl, "_type") and hasattr(impl, "_type"):
+        if impl and getattr(impl, "_type", None) is not None and getattr(impl, "_class", None) is not None:
             bpy_protocol.register_implementation(impl._type, impl._class)
     return bpy_protocol

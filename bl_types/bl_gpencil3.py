@@ -33,6 +33,10 @@ STROKE = [
 ]
 
 
+GREASE_PENCIL_V3_TYPE = getattr(bpy.types, "GreasePencilv3", None)
+GREASE_PENCIL_V3_DATA = getattr(bpy.data, "grease_pencils_v3", None)
+
+
 def dump_drawing_attributes(drawing):
     """ Dump a grease pencil drawing to a dict
 
@@ -180,14 +184,16 @@ def frame_changed(data: dict) -> bool:
 
 class BlGpencil3(ReplicatedDatablock):
     bl_id = "grease_pencils_v3"
-    bl_class = bpy.types.GreasePencilv3
+    bl_class = GREASE_PENCIL_V3_TYPE
     bl_check_common = False
     bl_icon = 'GREASEPENCIL'
     bl_reload_parent = False
 
     @staticmethod
     def construct(data: dict) -> object:
-        return bpy.data.grease_pencils_v3.new(data["name"])
+        if GREASE_PENCIL_V3_DATA is None:
+            return bpy.data.grease_pencils.new(data["name"])
+        return GREASE_PENCIL_V3_DATA.new(data["name"])
 
     @staticmethod
     def load(data: dict, datablock: object):
@@ -260,5 +266,6 @@ class BlGpencil3(ReplicatedDatablock):
             or is_annotating(bpy.context)
 
 
-_type = bpy.types.GreasePencilv3
-_class = BlGpencil3
+if GREASE_PENCIL_V3_TYPE is not None:
+    _type = GREASE_PENCIL_V3_TYPE
+    _class = BlGpencil3
