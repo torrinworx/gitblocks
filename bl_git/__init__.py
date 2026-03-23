@@ -52,11 +52,9 @@ class BpyGit(
         Track(self.bpy_protocol).start()
 
         self.path = Path(bpy.path.abspath("//")).resolve()
-        self.gitblocks_path, self.cozystudio_path = namespace_roots(self.path)
+        self.gitblocks_path = namespace_roots(self.path)
         self.blockspath = self.gitblocks_path / "blocks"
         self.manifestpath = self.gitblocks_path / "manifest.json"
-        self.legacy_blockspath = self.cozystudio_path / "blocks"
-        self.legacy_manifestpath = self.cozystudio_path / "manifest.json"
 
         self.repo = None
         self.manifest = None
@@ -67,7 +65,7 @@ class BpyGit(
         self.suspend_checks = False
         self.last_integrity_report = None
         self.last_capture_issues = []
-        self.carryover_message_prefix = "cozystudio-carryover"
+        self.carryover_message_prefix = "gitblocks-carryover"
         self.last_carryover_error = None
         self.ui_state = self._empty_ui_state()
 
@@ -106,7 +104,7 @@ class BpyGit(
             return
 
         try:
-            if self.manifestpath.exists() or self.legacy_manifestpath.exists():
+            if self.manifestpath.exists():
                 self.initiated = True
                 self.restore_ref()
                 self._ensure_bootstrap_file()

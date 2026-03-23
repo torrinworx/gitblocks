@@ -212,29 +212,26 @@ class ManifestMixin:
         if not ref:
             return self._empty_manifest()
 
-        for manifest_rel in (manifest_relpath(), manifest_relpath(namespace=".cozystudio")):
-            try:
-                raw = self.repo.git.show(f"{ref}:{manifest_rel}")
-                data = json.loads(raw)
-                if not isinstance(data, dict):
-                    continue
+        manifest_rel = manifest_relpath()
+        try:
+            raw = self.repo.git.show(f"{ref}:{manifest_rel}")
+            data = json.loads(raw)
+            if isinstance(data, dict):
                 return data
-            except Exception:
-                continue
+        except Exception:
+            pass
         return self._empty_manifest()
 
     def _load_manifest_working(self):
-        for manifest_file in (self.manifestpath, self.legacy_manifestpath):
-            if not manifest_file.exists():
-                continue
+        manifest_file = self.manifestpath
+        if manifest_file.exists():
             try:
                 with open(manifest_file, "r", encoding="utf-8") as handle:
                     data = json.load(handle)
-                if not isinstance(data, dict):
-                    continue
-                return data
+                if isinstance(data, dict):
+                    return data
             except Exception:
-                continue
+                pass
         return self._empty_manifest()
 
     def _empty_manifest(self):
