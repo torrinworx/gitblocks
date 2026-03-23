@@ -8,4 +8,4 @@ This repository uses the GSD workflow.
 - Preserve Blender add-on behavior and avoid breaking autosave or repo state.
 - Run the relevant tests before marking a phase complete.
 
-Current project: Cozy Studio — Blender Git version control for datablocks.
+Current project: GitBlocks — Blender Git version control for datablocks.

@@ -160,7 +160,7 @@ class CheckoutMixin:
                 "error": "Working tree has non-Cozy changes. Commit or stash them first.",
             }
 
-        cozy_paths = self._cozy_dirty_paths(dirty_paths)
+        cozy_paths = sorted(self._cozy_dirty_paths(dirty_paths))
         if not cozy_paths:
             return {"ok": True, "stashed": False}
 
@@ -177,10 +177,7 @@ class CheckoutMixin:
             "-m",
             message,
             "--",
-            manifest_relpath(namespace=".gitblocks"),
-            manifest_relpath(namespace=".cozystudio"),
-            ".gitblocks/blocks",
-            ".cozystudio/blocks",
+            *cozy_paths,
         )
         after_entries = self._managed_carryover_entries()
         for entry in after_entries:
@@ -193,7 +190,7 @@ class CheckoutMixin:
     def reapply_parked_changes(self):
         parked = self._managed_carryover()
         if not parked:
-            return {"ok": False, "error": "No parked Cozy changes were found."}
+                return {"ok": False, "error": "No parked Cozy changes were found."}
         if self._blocking_dirty_paths(self._dirty_paths()):
             return {
                 "ok": False,
@@ -219,10 +216,7 @@ class CheckoutMixin:
                     "--staged",
                     "--worktree",
                     "--",
-                    manifest_relpath(namespace=".gitblocks"),
-                    manifest_relpath(namespace=".cozystudio"),
-                    ".gitblocks/blocks",
-                    ".cozystudio/blocks",
+                    *cozy_paths,
                 )
             except Exception:
                 pass

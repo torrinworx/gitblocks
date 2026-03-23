@@ -35,4 +35,4 @@ This runs alongside Blender's autosave without interfering with it, so you can k
 3. Enable **GitBlocks**.
 4. In the add-on preferences, click **Install Dependencies**.
 
-> Legacy Cozy Studio names remain in a few compatibility surfaces so existing workspaces and scripts keep working, but GitBlocks is the primary brand everywhere new users look.
+> Legacy aliases remain in a few compatibility surfaces so existing workspaces and scripts keep working, but GitBlocks is the primary brand everywhere new users look.
