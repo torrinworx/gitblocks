@@ -7,7 +7,7 @@ import bpy
 from .helpers import enable_addon, init_git_repo_for_test
 
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 @pytest.fixture(scope="session")

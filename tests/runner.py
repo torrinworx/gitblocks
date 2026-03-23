@@ -94,7 +94,7 @@ if __name__ == "__main__":
     bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))
     bpy.ops.wm.open_mainfile(filepath=str(blend_path))
 
-    addon_name = "cozystudio_addon"  # legacy package name kept for compatibility
+    addon_name = "gitblocks_addon"  # GitBlocks addon package name
     addon_src = Path(__file__).parent.parent.resolve()
 
     # reset environment for the addon

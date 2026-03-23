@@ -21,7 +21,7 @@ from ..helpers import (
 )
 
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 def _setup_flow_repo(prefix: str):
@@ -36,7 +36,7 @@ def _setup_flow_repo(prefix: str):
 
 def _find_object_by_uuid(uuid):
     for obj in bpy.data.objects:
-        if getattr(obj, "cozystudio_uuid", None) == uuid:
+        if getattr(obj, "gitblocks_uuid", None) == uuid:
             return obj
     return None
 
@@ -68,7 +68,7 @@ def _assert_only_gitblocks_dirty(git_inst):
 
 def _reapply_parked_if_needed(git_inst):
     if git_inst._managed_carryover_entries():
-        result = bpy.ops.cozystudio.reapply_parked_changes("EXEC_DEFAULT")
+        result = bpy.ops.gitblocks.reapply_parked_changes("EXEC_DEFAULT")
         assert "FINISHED" in result
         assert_no_parked_changes(git_inst)
 
@@ -88,26 +88,26 @@ def test_flow_happy_path_merge():
     git_inst._check()
     assert wait_for_block_file(git_inst, uuid)
 
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Happy Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Happy Base")
     assert "FINISHED" in result
 
     git_inst.repo.git.checkout("-b", "flow_happy_feature")
     obj.location.x = 4.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Happy Feature")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Happy Feature")
     assert "FINISHED" in result
 
     git_inst.repo.git.checkout(base_branch)
     git_inst.restore_ref(base_branch, park_changes=False)
-    result = bpy.ops.cozystudio.merge(
+    result = bpy.ops.gitblocks.merge(
         "EXEC_DEFAULT", ref_name="flow_happy_feature", strategy="manual"
     )
     assert "FINISHED" in result
@@ -137,11 +137,11 @@ def test_flow_checkout_with_dirty_changes_reapplies():
     git_inst._check()
     assert wait_for_block_file(git_inst, uuid)
 
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Dirty Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Dirty Base")
     assert "FINISHED" in result
 
     git_inst.repo.git.checkout("-b", "flow_dirty_feature")
@@ -153,13 +153,13 @@ def test_flow_checkout_with_dirty_changes_reapplies():
     dirty_blocks = get_dirty_block_paths(git_inst)
     assert dirty_blocks
 
-    result = bpy.ops.cozystudio.checkout_branch(
+    result = bpy.ops.gitblocks.checkout_branch(
         "EXEC_DEFAULT", branch_name="flow_dirty_feature"
     )
     assert "FINISHED" in result
 
     if git_inst._managed_carryover_entries():
-        result = bpy.ops.cozystudio.reapply_parked_changes("EXEC_DEFAULT")
+        result = bpy.ops.gitblocks.reapply_parked_changes("EXEC_DEFAULT")
         assert "FINISHED" in result
         assert_no_parked_changes(git_inst)
 
@@ -189,42 +189,42 @@ def test_flow_conflict_resolution_paths():
         git_inst._check()
         assert wait_for_block_file(git_inst, uuid)
 
-        result = bpy.ops.cozystudio.add_group(
+        result = bpy.ops.gitblocks.add_group(
             "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
         )
         assert "FINISHED" in result
-        result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message=f"{object_name} base")
+        result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message=f"{object_name} base")
         assert "FINISHED" in result
 
         git_inst.repo.git.checkout("-b", branch_name)
         obj.location.x = 1.0
         git_inst._check()
-        result = bpy.ops.cozystudio.add_group(
+        result = bpy.ops.gitblocks.add_group(
             "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
         )
         assert "FINISHED" in result
-        result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message=f"{object_name} theirs")
+        result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message=f"{object_name} theirs")
         assert "FINISHED" in result
 
         git_inst.repo.git.checkout(base_branch)
         git_inst.restore_ref(base_branch, park_changes=False)
         obj.location.x = 2.0
         git_inst._check()
-        result = bpy.ops.cozystudio.add_group(
+        result = bpy.ops.gitblocks.add_group(
             "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
         )
         assert "FINISHED" in result
-        result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message=f"{object_name} ours")
+        result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message=f"{object_name} ours")
         assert "FINISHED" in result
 
-        merge_result = bpy.ops.cozystudio.merge(
+        merge_result = bpy.ops.gitblocks.merge(
             "EXEC_DEFAULT", ref_name=branch_name, strategy="manual"
         )
         assert "FINISHED" in merge_result
         return uuid
 
     theirs_uuid = make_conflict("flow_conflict_theirs", "GitBlocksFlowTheirsObject")
-    result = bpy.ops.cozystudio.resolve_conflict_version(
+    result = bpy.ops.gitblocks.resolve_conflict_version(
         "EXEC_DEFAULT", conflict_uuid=theirs_uuid, resolution="theirs"
     )
     assert "FINISHED" in result
@@ -235,7 +235,7 @@ def test_flow_conflict_resolution_paths():
     git_inst.repo.git.branch("-D", "flow_conflict_theirs")
 
     ours_uuid = make_conflict("flow_conflict_ours", "GitBlocksFlowOursObject")
-    result = bpy.ops.cozystudio.resolve_conflict_version(
+    result = bpy.ops.gitblocks.resolve_conflict_version(
         "EXEC_DEFAULT", conflict_uuid=ours_uuid, resolution="ours"
     )
     assert "FINISHED" in result
@@ -246,7 +246,7 @@ def test_flow_conflict_resolution_paths():
     git_inst.repo.git.branch("-D", "flow_conflict_ours")
 
     manual_uuid = make_conflict("flow_conflict_manual", "GitBlocksFlowManualObject")
-    result = bpy.ops.cozystudio.resolve_conflict(
+    result = bpy.ops.gitblocks.resolve_conflict(
         "EXEC_DEFAULT", conflict_uuid=manual_uuid
     )
     assert "FINISHED" in result
@@ -274,37 +274,37 @@ def test_flow_rebase_chain():
     git_inst._check()
     assert wait_for_block_file(git_inst, uuid)
 
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Rebase Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Rebase Base")
     assert "FINISHED" in result
 
     git_inst.repo.git.checkout("-b", "flow_rebase_feature")
     obj.location.x = 2.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Rebase Step 1")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Rebase Step 1")
     assert "FINISHED" in result
 
     obj.location.x = 5.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Rebase Step 2")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Rebase Step 2")
     assert "FINISHED" in result
 
     git_inst.repo.git.checkout(base_branch)
     git_inst.restore_ref(base_branch, park_changes=False)
     git_inst.repo.git.checkout("flow_rebase_feature")
 
-    result = bpy.ops.cozystudio.rebase(
+    result = bpy.ops.gitblocks.rebase(
         "EXEC_DEFAULT", ref_name=base_branch, strategy="manual"
     )
     assert "FINISHED" in result
@@ -336,45 +336,45 @@ def test_flow_order_stress_sequence():
     git_inst._check()
     assert wait_for_block_file(git_inst, uuid)
 
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.unstage_group(
+    result = bpy.ops.gitblocks.unstage_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Order Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Order Base")
     assert "FINISHED" in result
     base_commit = git_inst.repo.head.commit.hexsha
 
     git_inst.repo.git.checkout("-b", "flow_order_feature")
     obj.location.x = 6.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group(
+    result = bpy.ops.gitblocks.add_group(
         "EXEC_DEFAULT", group_id=_group_id_for_uuid(git_inst, uuid)
     )
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Flow Order Feature")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Flow Order Feature")
     assert "FINISHED" in result
 
-    result = bpy.ops.cozystudio.checkout_commit(
+    result = bpy.ops.gitblocks.checkout_commit(
         "EXEC_DEFAULT", commit_hash=base_commit
     )
     assert "FINISHED" in result
     assert git_inst.repo.head.is_detached
 
-    result = bpy.ops.cozystudio.checkout_branch(
+    result = bpy.ops.gitblocks.checkout_branch(
         "EXEC_DEFAULT", branch_name=base_branch
     )
     assert "FINISHED" in result
     assert not git_inst.repo.head.is_detached
 
-    result = bpy.ops.cozystudio.merge(
+    result = bpy.ops.gitblocks.merge(
         "EXEC_DEFAULT", ref_name="flow_order_feature", strategy="manual"
     )
     assert "FINISHED" in result

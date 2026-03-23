@@ -1,4 +1,4 @@
-from cozystudio_addon.bl_git import BpyGit
+from gitblocks_addon.bl_git import BpyGit
 
 
 def test_summarize_block_diff_reports_transform_changes():

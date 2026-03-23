@@ -10,7 +10,7 @@ from ..helpers import (
     wait_for_uuid,
 )
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 @pytest.mark.order(6)
@@ -18,9 +18,9 @@ def test_object_rooted_grouping_shared_material():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    obj_a = create_test_object(name="CozyGroupA")
-    obj_b = create_test_object(name="CozyGroupB")
-    shared_mat = bpy.data.materials.new("CozySharedMat")
+    obj_a = create_test_object(name="GitBlocksGroupA")
+    obj_b = create_test_object(name="GitBlocksGroupB")
+    shared_mat = bpy.data.materials.new("GitBlocksSharedMat")
     shared_mat.use_nodes = True
 
     obj_a.data.materials.append(shared_mat)
@@ -61,9 +61,9 @@ def test_ui_semantic_diffs_keep_backend_grouping_and_metadata():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    obj_a = create_test_object(name="CozySemanticA")
-    obj_b = create_test_object(name="CozySemanticB")
-    shared_mat = bpy.data.materials.new("CozySemanticSharedMat")
+    obj_a = create_test_object(name="GitBlocksSemanticA")
+    obj_b = create_test_object(name="GitBlocksSemanticB")
+    shared_mat = bpy.data.materials.new("GitBlocksSemanticSharedMat")
     shared_mat.use_nodes = True
 
     obj_a.data.materials.append(shared_mat)
@@ -80,9 +80,9 @@ def test_ui_semantic_diffs_keep_backend_grouping_and_metadata():
     assert mat_uuid
 
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=mat_uuid)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=mat_uuid)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Base semantic grouping")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Base semantic grouping")
     assert "FINISHED" in result, f"commit returned {result}"
 
     shared_mat.diffuse_color = (0.2, 0.3, 0.4, 1.0)
@@ -102,5 +102,5 @@ def test_ui_semantic_diffs_keep_backend_grouping_and_metadata():
     assert material_group["label"].startswith("Shared: ")
     assert material_diff["group_id"] == mat_uuid
     assert material_diff["datablock_type"] == "materials"
-    assert material_diff["display_name"].startswith("CozySemanticSharedMat")
+    assert material_diff["display_name"].startswith("GitBlocksSemanticSharedMat")
     assert material_diff["summary"] in {"Updated diffuse color", "Updated 1 sections"}

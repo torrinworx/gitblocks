@@ -37,10 +37,10 @@ def wait_for_git_instance(ui_mod, timeout=3.0):
     return None
 
 
-def wait_for_install_finished(cozy_mod, timeout=120.0):
+def wait_for_install_finished(gitblocks_mod, timeout=120.0):
     start = time.time()
     while time.time() - start < timeout:
-        thread = getattr(cozy_mod, "_install_thread", None)
+        thread = getattr(gitblocks_mod, "_install_thread", None)
         if thread is None:
             return True
         if not thread.is_alive():
@@ -103,23 +103,23 @@ def install_addon_to_extensions(addon_src: Path, addon_name: str):
     return addon_dest
 
 
-def ensure_install_operator(cozy_mod):
-    if hasattr(bpy.ops.cozystudio, "install_deps"):
+def ensure_install_operator(gitblocks_mod):
+    if hasattr(bpy.ops.gitblocks, "install_deps"):
         return
     try:
-        cozy_mod.register()
+        gitblocks_mod.register()
     except Exception:
         pass
 
-    if hasattr(bpy.ops.cozystudio, "install_deps"):
+    if hasattr(bpy.ops.gitblocks, "install_deps"):
         return
 
     try:
-        bpy.utils.register_class(cozy_mod.COZYSTUDIO_OT_install_deps)
+        bpy.utils.register_class(gitblocks_mod.GITBLOCKS_OT_install_deps)
     except Exception:
         pass
     try:
-        bpy.utils.register_class(cozy_mod.CozyStudioPreferences)
+        bpy.utils.register_class(gitblocks_mod.GitBlocksPreferences)
     except Exception:
         pass
 
@@ -133,7 +133,7 @@ def init_git_repo_for_test(ui_mod, timeout=5.0):
     if git_inst is None:
         raise RuntimeError("git_instance was never created")
 
-    result = bpy.ops.cozystudio.setup_project()
+    result = bpy.ops.gitblocks.setup_project()
     if "FINISHED" not in result and "CANCELLED" not in result:
         raise RuntimeError(f"setup_project returned {result}")
 
@@ -174,7 +174,7 @@ def init_git_repo_for_test(ui_mod, timeout=5.0):
     return git_inst
 
 
-def create_test_object(name="CozyTestObject"):
+def create_test_object(name="GitBlocksTestObject"):
     mesh = bpy.data.meshes.new(name + "Mesh")
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
@@ -182,7 +182,7 @@ def create_test_object(name="CozyTestObject"):
 
 
 def ensure_tracking_assignments(git_inst):
-    from cozystudio_addon.bl_git.tracking import Track
+    from gitblocks_addon.bl_git.tracking import Track
 
     Track(git_inst.bpy_protocol)._run_assign_loop()
 
@@ -190,7 +190,7 @@ def ensure_tracking_assignments(git_inst):
 def wait_for_uuid(obj, timeout=3.0):
     start = time.time()
     while time.time() - start < timeout:
-        uuid = getattr(obj, "cozystudio_uuid", None)
+        uuid = getattr(obj, "gitblocks_uuid", None)
         if uuid:
             return uuid
         bpy.app.timers.is_registered

@@ -7,7 +7,7 @@ import bpy
 import pytest
 
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 @pytest.mark.order(0)
@@ -33,7 +33,7 @@ def test_zip_install_addon():
             shutil.rmtree(scripts_addon_dir, ignore_errors=True)
 
     addon_src = Path(__file__).resolve().parents[2]
-    staging_root = Path(tempfile.mkdtemp(prefix="cozystudio_addon_zip_"))
+    staging_root = Path(tempfile.mkdtemp(prefix="gitblocks_addon_zip_"))
     staging_addon = staging_root / ADDON_MODULE
     shutil.copytree(
         addon_src,
@@ -56,4 +56,4 @@ def test_zip_install_addon():
         f"addon_enable returned {enable_result}"
 
     assert ADDON_MODULE in bpy.context.preferences.addons
-    assert hasattr(bpy.ops.cozystudio, "install_deps")
+    assert hasattr(bpy.ops.gitblocks, "install_deps")

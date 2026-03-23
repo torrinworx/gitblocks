@@ -14,12 +14,12 @@ from ..helpers import (
     wait_for_uuid,
 )
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 def _find_object_by_uuid(uuid):
     for obj in bpy.data.objects:
-        if getattr(obj, "cozystudio_uuid", None) == uuid:
+        if getattr(obj, "gitblocks_uuid", None) == uuid:
             return obj
     return None
 
@@ -33,7 +33,7 @@ def test_git_flow_stage_commit_checkout():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyFlowObject")
+    test_obj = create_test_object(name="GitBlocksFlowObject")
     test_obj.location.x = 1.0
 
     ensure_tracking_assignments(git_inst)
@@ -49,18 +49,18 @@ def test_git_flow_stage_commit_checkout():
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
 
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Commit 1")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Commit 1")
     assert "FINISHED" in result, f"commit returned {result}"
     commit1 = git_inst.repo.head.commit.hexsha
 
     test_obj.location.x = 2.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Commit 2")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Commit 2")
     assert "FINISHED" in result, f"commit returned {result}"
 
     git_inst.checkout(commit1)
@@ -68,7 +68,7 @@ def test_git_flow_stage_commit_checkout():
     block_data_raw = git_inst.repo.git.show(f"{commit1}:{rel_path}")
     restored_data = json.loads(block_data_raw)
     assert restored_data.get("type_id") == "Object"
-    assert restored_data.get("name", "").startswith("CozyFlowObject")
+    assert restored_data.get("name", "").startswith("GitBlocksFlowObject")
 
     matrix = restored_data.get("transforms", {}).get("matrix_basis", [])
     assert matrix and abs(matrix[0][3] - 1.0) < 1e-4
@@ -79,7 +79,7 @@ def test_deserialize_reuses_existing_object():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyCheckoutObject")
+    test_obj = create_test_object(name="GitBlocksCheckoutObject")
     test_obj.location.x = 1.0
 
     ensure_tracking_assignments(git_inst)
@@ -98,7 +98,7 @@ def test_deserialize_reuses_existing_object():
     matches = [
         obj
         for obj in bpy.data.objects
-        if getattr(obj, "cozystudio_uuid", None) == uuid
+        if getattr(obj, "gitblocks_uuid", None) == uuid
         or getattr(obj, "uuid", None) == uuid
     ]
     assert matches, "No object found before deserialize"
@@ -108,7 +108,7 @@ def test_deserialize_reuses_existing_object():
     matches = [
         obj
         for obj in bpy.data.objects
-        if getattr(obj, "cozystudio_uuid", None) == uuid
+        if getattr(obj, "gitblocks_uuid", None) == uuid
         or getattr(obj, "uuid", None) == uuid
     ]
     assert len(matches) == 1, "Duplicate objects were created during deserialize"
@@ -119,7 +119,7 @@ def test_checkout_does_not_dirty_blocks():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyNoDiffObject")
+    test_obj = create_test_object(name="GitBlocksNoDiffObject")
     test_obj.location.x = 1.0
 
     ensure_tracking_assignments(git_inst)
@@ -139,17 +139,17 @@ def test_checkout_does_not_dirty_blocks():
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Commit A")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Commit A")
     assert "FINISHED" in result, f"commit returned {result}"
     commit_a = git_inst.repo.head.commit.hexsha
 
     test_obj.location.x = 2.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Commit B")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Commit B")
     assert "FINISHED" in result, f"commit returned {result}"
     commit_b = git_inst.repo.head.commit.hexsha
 
@@ -193,7 +193,7 @@ def test_commit_ignores_blend_file():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyNoBlendCommitObject")
+    test_obj = create_test_object(name="GitBlocksNoBlendCommitObject")
     ensure_tracking_assignments(git_inst)
 
     uuid = wait_for_uuid(test_obj)
@@ -211,12 +211,12 @@ def test_commit_ignores_blend_file():
         for (path, stage) in git_inst.repo.index.entries.keys()
         if stage == 0
     }
-    assert blend_name not in staged_paths, ".blend file should not stage through Cozy"
+    assert blend_name not in staged_paths, ".blend file should not stage through GitBlocks"
 
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
 
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Commit Without Blend")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Commit Without Blend")
     assert "FINISHED" in result, f"commit returned {result}"
 
     commit = git_inst.repo.head.commit
@@ -236,7 +236,7 @@ def test_branch_switch_restores_manifest_state():
     assert base_branch
     git_inst.switch_branch(base_branch)
 
-    test_obj = create_test_object(name="CozyBranchSwitchObject")
+    test_obj = create_test_object(name="GitBlocksBranchSwitchObject")
     test_obj.location.x = 0.0
     ensure_tracking_assignments(git_inst)
 
@@ -247,9 +247,9 @@ def test_branch_switch_restores_manifest_state():
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Base Branch State")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Base Branch State")
     assert "FINISHED" in result, f"commit returned {result}"
 
     git_inst.repo.git.checkout("-b", "feature_switch")
@@ -257,12 +257,12 @@ def test_branch_switch_restores_manifest_state():
 
     test_obj.location.x = 4.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Feature Branch State")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Feature Branch State")
     assert "FINISHED" in result, f"commit returned {result}"
 
-    result = bpy.ops.cozystudio.checkout_branch(
+    result = bpy.ops.gitblocks.checkout_branch(
         "EXEC_DEFAULT", branch_name=base_branch
     )
     assert "FINISHED" in result, f"checkout_branch returned {result}"
@@ -285,7 +285,7 @@ def test_branch_switch_restores_manifest_state():
         f"Unexpected target block diff after branch switch: {dirty_blocks}"
     )
 
-    result = bpy.ops.cozystudio.checkout_branch(
+    result = bpy.ops.gitblocks.checkout_branch(
         "EXEC_DEFAULT", branch_name="feature_switch"
     )
     assert "FINISHED" in result, f"checkout_branch returned {result}"
@@ -308,7 +308,7 @@ def test_branch_switch_restores_manifest_state():
         f"Unexpected target block diff after branch switch: {dirty_blocks}"
     )
 
-    result = bpy.ops.cozystudio.checkout_branch(
+    result = bpy.ops.gitblocks.checkout_branch(
         "EXEC_DEFAULT", branch_name=base_branch
     )
     assert "FINISHED" in result, f"checkout_branch returned {result}"
@@ -320,7 +320,7 @@ def test_ui_state_payload_tracks_repo_branch_conflicts_and_counts():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyUiStateObject")
+    test_obj = create_test_object(name="GitBlocksUiStateObject")
     test_obj.location.x = 1.0
     ensure_tracking_assignments(git_inst)
 
@@ -332,7 +332,7 @@ def test_ui_state_payload_tracks_repo_branch_conflicts_and_counts():
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
 
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
 
     git_inst.refresh_ui_state()
@@ -342,7 +342,7 @@ def test_ui_state_payload_tracks_repo_branch_conflicts_and_counts():
     assert ui_state["changes"]["staged"] >= 1
     assert ui_state["changes"]["staged_groups"]
 
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="UI State Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="UI State Base")
     assert "FINISHED" in result, f"commit returned {result}"
     commit1 = git_inst.repo.head.commit.hexsha
     base_branch = get_repo_branch_name(git_inst.repo)
@@ -350,9 +350,9 @@ def test_ui_state_payload_tracks_repo_branch_conflicts_and_counts():
 
     test_obj.location.x = 3.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="UI State Updated")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="UI State Updated")
     assert "FINISHED" in result, f"commit returned {result}"
 
     git_inst.checkout(commit1)
@@ -369,7 +369,7 @@ def test_ui_state_payload_tracks_repo_branch_conflicts_and_counts():
         {
             "uuid": uuid,
             "reason": "Synthetic test conflict",
-            "label": "CozyUiStateObject",
+            "label": "GitBlocksUiStateObject",
             "datablock_type": "objects",
             "operation": "merge",
             "ours_ref": commit1,
@@ -385,7 +385,7 @@ def test_ui_state_payload_tracks_repo_branch_conflicts_and_counts():
     ui_state = git_inst.ui_state
     assert ui_state["conflicts"]["has_conflicts"]
     assert ui_state["conflicts"]["items"][0]["uuid"] == uuid
-    assert ui_state["conflicts"]["items"][0]["label"] == "CozyUiStateObject"
+    assert ui_state["conflicts"]["items"][0]["label"] == "GitBlocksUiStateObject"
     assert ui_state["conflicts"]["operation"] == "merge"
     assert not ui_state["integrity"]["ok"]
     assert "Unresolved conflicts present in manifest." in ui_state["integrity"]["errors"]
@@ -396,13 +396,13 @@ def test_ui_state_payload_tracks_repo_branch_conflicts_and_counts():
 
 
 @pytest.mark.order(13)
-def test_checkout_branch_auto_stashes_and_reapplies_cozy_changes():
+def test_checkout_branch_auto_stashes_and_reapplies_gitblocks_changes():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
     base_branch = get_repo_branch_name(git_inst.repo)
     assert base_branch
 
-    test_obj = create_test_object(name="CozyCarryoverBranchObject")
+    test_obj = create_test_object(name="GitBlocksCarryoverBranchObject")
     test_obj.location.x = 0.0
     ensure_tracking_assignments(git_inst)
 
@@ -413,9 +413,9 @@ def test_checkout_branch_auto_stashes_and_reapplies_cozy_changes():
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Carryover base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Carryover base")
     assert "FINISHED" in result
 
     git_inst.repo.git.checkout("-b", "feature_carryover_branch")
@@ -425,7 +425,7 @@ def test_checkout_branch_auto_stashes_and_reapplies_cozy_changes():
     test_obj.location.x = 7.0
     git_inst._check()
 
-    result = bpy.ops.cozystudio.checkout_branch(
+    result = bpy.ops.gitblocks.checkout_branch(
         "EXEC_DEFAULT", branch_name="feature_carryover_branch"
     )
     assert "FINISHED" in result, f"checkout_branch returned {result}"
@@ -464,7 +464,7 @@ def test_git_named_commit_checkout_and_branch_checkout_operators():
     base_branch = get_repo_branch_name(git_inst.repo)
     assert base_branch
 
-    test_obj = create_test_object(name="CozyProductOpsObject")
+    test_obj = create_test_object(name="GitBlocksProductOpsObject")
     test_obj.location.x = 1.0
     ensure_tracking_assignments(git_inst)
 
@@ -475,20 +475,20 @@ def test_git_named_commit_checkout_and_branch_checkout_operators():
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Git Language Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Git Language Base")
     assert "FINISHED" in result
     commit1 = git_inst.repo.head.commit.hexsha
 
     test_obj.location.x = 5.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Git Language Updated")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Git Language Updated")
     assert "FINISHED" in result
 
-    result = bpy.ops.cozystudio.checkout_commit("EXEC_DEFAULT", commit_hash=commit1)
+    result = bpy.ops.gitblocks.checkout_commit("EXEC_DEFAULT", commit_hash=commit1)
     assert "FINISHED" in result
     assert git_inst.repo.head.is_detached
 
@@ -496,7 +496,7 @@ def test_git_named_commit_checkout_and_branch_checkout_operators():
     assert restored_obj is not None
     assert abs(restored_obj.location.x - 1.0) < 1e-4
 
-    result = bpy.ops.cozystudio.checkout_branch("EXEC_DEFAULT", branch_name=base_branch)
+    result = bpy.ops.gitblocks.checkout_branch("EXEC_DEFAULT", branch_name=base_branch)
     assert "FINISHED" in result
     assert not git_inst.repo.head.is_detached
     assert git_inst.repo.active_branch.name == base_branch
@@ -505,7 +505,7 @@ def test_git_named_commit_checkout_and_branch_checkout_operators():
     assert restored_obj is not None
     assert abs(restored_obj.location.x - 5.0) < 1e-4
 
-    result = bpy.ops.cozystudio.run_diagnostics("EXEC_DEFAULT")
+    result = bpy.ops.gitblocks.run_diagnostics("EXEC_DEFAULT")
     assert "FINISHED" in result
 
 
@@ -531,7 +531,7 @@ def test_create_branch_normalizes_human_friendly_name():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyBranchNameObject")
+    test_obj = create_test_object(name="GitBlocksBranchNameObject")
     ensure_tracking_assignments(git_inst)
 
     uuid = wait_for_uuid(test_obj)
@@ -541,12 +541,12 @@ def test_create_branch_normalizes_human_friendly_name():
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Branch Name Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Branch Name Base")
     assert "FINISHED" in result
 
-    result = bpy.ops.cozystudio.create_branch(
+    result = bpy.ops.gitblocks.create_branch(
         "EXEC_DEFAULT",
         branch_name="adding purple cone",
     )
@@ -561,7 +561,7 @@ def test_history_scoped_to_current_branch():
     base_branch = get_repo_branch_name(git_inst.repo)
     assert base_branch
 
-    test_obj = create_test_object(name="CozyHistoryScopeObject")
+    test_obj = create_test_object(name="GitBlocksHistoryScopeObject")
     test_obj.location.x = 1.0
     ensure_tracking_assignments(git_inst)
 
@@ -572,9 +572,9 @@ def test_history_scoped_to_current_branch():
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
     )
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="History Base")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="History Base")
     assert "FINISHED" in result
 
     branch_name = "feature_history_scope"
@@ -582,9 +582,9 @@ def test_history_scoped_to_current_branch():
 
     test_obj.location.x = 2.0
     git_inst._check()
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="History Feature")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="History Feature")
     assert "FINISHED" in result
     feature_commit = git_inst.repo.head.commit.hexsha
 

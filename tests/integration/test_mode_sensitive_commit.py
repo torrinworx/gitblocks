@@ -10,10 +10,10 @@ from ..helpers import (
     wait_for_uuid,
 )
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
-def create_cube_object(name="CozySculptCube"):
+def create_cube_object(name="GitBlocksSculptCube"):
     mesh = bpy.data.meshes.new(name + "Mesh")
     mesh.from_pydata(
         [
@@ -55,7 +55,7 @@ def test_passive_check_defers_mesh_capture_in_sculpt_mode():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    cube = create_cube_object(name="CozyPassiveSculptCube")
+    cube = create_cube_object(name="GitBlocksPassiveSculptCube")
     ensure_tracking_assignments(git_inst)
 
     mesh_uuid = wait_for_uuid(cube.data)
@@ -85,7 +85,7 @@ def test_commit_captures_mesh_changes_while_in_sculpt_mode():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    cube = create_cube_object(name="CozyInteractiveSculptCube")
+    cube = create_cube_object(name="GitBlocksInteractiveSculptCube")
     ensure_tracking_assignments(git_inst)
 
     object_uuid = wait_for_uuid(cube)
@@ -101,9 +101,9 @@ def test_commit_captures_mesh_changes_while_in_sculpt_mode():
         git_inst.state.get("entries", {}).get(object_uuid, {}).get("group_id") or object_uuid
     )
 
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Baseline Sculpt Commit")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Baseline Sculpt Commit")
     assert "FINISHED" in result, f"commit returned {result}"
 
     baseline_block = mesh_path.read_text(encoding="utf-8")
@@ -112,9 +112,9 @@ def test_commit_captures_mesh_changes_while_in_sculpt_mode():
     cube.data.update()
     bpy.ops.object.mode_set(mode="SCULPT")
 
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Commit Sculpt Mesh")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Commit Sculpt Mesh")
     assert "FINISHED" in result, f"commit returned {result}"
 
     assert bpy.context.mode == "SCULPT"

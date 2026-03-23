@@ -10,7 +10,7 @@ import bpy
 
 from ..helpers import init_git_repo_for_test
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 @pytest.mark.order(4)
@@ -44,7 +44,7 @@ def test_new_file_save_init_commit_flow():
         assert git_inst is not None
         assert git_inst.path == project_dir
 
-        result = bpy.ops.cozystudio.setup_project()
+        result = bpy.ops.gitblocks.setup_project()
         assert "FINISHED" in result, f"setup_project returned {result}"
 
         git_inst._check()
@@ -64,7 +64,7 @@ def test_new_file_save_init_commit_flow():
             git_inst.state.get("entries", {}).get(entry_ids[0], {}).get("group_id")
             or entry_ids[0]
         )
-        result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+        result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
         assert "FINISHED" in result, f"add_group returned {result}"
 
         result = git_inst.commit(message="Initial Commit")
@@ -101,7 +101,7 @@ def test_setup_project_prefers_local_repo_over_parent_repo():
         assert git_inst.path == project_dir
         assert git_inst.repo is None
 
-        result = bpy.ops.cozystudio.setup_project()
+        result = bpy.ops.gitblocks.setup_project()
         assert "FINISHED" in result, f"setup_project returned {result}"
 
         assert (project_dir / ".git").exists()

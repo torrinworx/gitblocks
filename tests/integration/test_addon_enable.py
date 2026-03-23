@@ -1,7 +1,7 @@
 import bpy
 import pytest
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 @pytest.mark.order(1)

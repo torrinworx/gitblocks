@@ -11,7 +11,7 @@ from ..helpers import (
     wait_for_uuid,
 )
 
-ADDON_MODULE = "cozystudio_addon"
+ADDON_MODULE = "gitblocks_addon"
 
 
 def _staged_paths(git_inst):
@@ -41,7 +41,7 @@ def test_group_stage_stages_all_members():
     group_id = entries.get(obj_uuid, {}).get("group_id") or obj_uuid
     group_members = groups.get(group_id, {}).get("members", [])
 
-    result = bpy.ops.cozystudio.add_group("EXEC_DEFAULT", group_id=group_id)
+    result = bpy.ops.gitblocks.add_group("EXEC_DEFAULT", group_id=group_id)
     assert "FINISHED" in result, f"add_group returned {result}"
 
     staged = _staged_paths(git_inst)
@@ -70,7 +70,7 @@ def test_commit_autostages_missing_group_members_and_manifest():
     first_member = group_members[0]
     git_inst.stage(changes=[f".gitblocks/blocks/{first_member}.json"])
 
-    result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Group Commit")
+    result = bpy.ops.gitblocks.commit("EXEC_DEFAULT", message="Group Commit")
     assert "FINISHED" in result, f"commit returned {result}"
 
     commit = git_inst.repo.head.commit
