@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-gitblocks-brand-migration-04-PLAN.md
-last_updated: "2026-03-23T15:56:12.777Z"
+stopped_at: Completed 01-gitblocks-brand-migration-05-PLAN.md
+last_updated: "2026-03-23T16:04:01.805Z"
 last_activity: 2026-03-23
 progress:
   total_phases: 1
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 5
-  completed_plans: 4
+  completed_plans: 5
   percent: 20
 ---
 
@@ -55,6 +55,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 01-gitblocks-brand-migration P02 | 5 min | 2 tasks | 5 files |
 | Phase 01-gitblocks-brand-migration P03 | 8 min | 2 tasks | 15 files |
 | Phase 01-gitblocks-brand-migration P04 | 2 min | 2 tasks | 5 files |
+| Phase 01-gitblocks-brand-migration P05 | 9 min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,9 @@ Recent decisions affecting current work:
 - [Phase 01-gitblocks-brand-migration]: GitBlocks is the public brand; Cozy Studio stays only for compatibility or provenance.
 - [Phase 01-gitblocks-brand-migration]: Harness compatibility is preserved by falling back to legacy env vars instead of breaking existing local setups.
 - [Phase 01-gitblocks-brand-migration]: Internal compatibility-sensitive identifiers were left intact because this plan was about copy, not runtime renaming.
+- [Phase 01-gitblocks-brand-migration]: GitBlocks is the public brand; Cozy Studio stays only as a compatibility alias where the runtime contract still needs it.
+- [Phase 01-gitblocks-brand-migration]: The system Python environment is not the right test host here; the bundled Blender runner is the reliable verification path.
+- [Phase 01-gitblocks-brand-migration]: Checkout carryover logic should only stash/restore paths that exist in the current dirty set.
 
 ### Pending Todos
 
@@ -88,6 +92,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T15:56:12.775Z
-Stopped at: Completed 01-gitblocks-brand-migration-04-PLAN.md
+Last session: 2026-03-23T16:04:01.801Z
+Stopped at: Completed 01-gitblocks-brand-migration-05-PLAN.md
 Resume file: None

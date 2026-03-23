@@ -11,4 +11,4 @@ Plans:
 - [x] 01-gitblocks-brand-migration-02-PLAN.md — migrate runtime UI and addon metadata to GitBlocks
 - [x] 01-gitblocks-brand-migration-03-PLAN.md — migrate storage paths and redraw hooks to GitBlocks-compatible namespaces
 - [x] 01-gitblocks-brand-migration-04-PLAN.md — update docs and local harnesses for the new brand
-- [ ] 01-gitblocks-brand-migration-05-PLAN.md — update tests and run the final brand verification sweep
+- [x] 01-gitblocks-brand-migration-05-PLAN.md — update tests and run the final brand verification sweep
