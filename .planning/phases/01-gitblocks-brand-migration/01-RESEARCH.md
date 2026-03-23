@@ -27,6 +27,15 @@
 
 ## Proposed Brand Contract
 
+| Contract item | Canonical value | Legacy compatibility stance |
+| --- | --- | --- |
+| Brand name | `GitBlocks` | `Cozy Studio` becomes legacy-only prose |
+| Public slug | `gitblocks` | `cozystudio` remains an alias in frozen identifiers |
+| Workspace namespace | `.gitblocks/` | `.cozystudio/` stays readable/writable for old workspaces |
+| Block storage | `.gitblocks/blocks/{uuid}.json` | Legacy `.cozystudio/blocks/{uuid}.json` continues to load |
+| Manifest path | `.gitblocks/manifest.json` | Legacy `.cozystudio/manifest.json` continues to load |
+| Blender API IDs | `gitblocks`-style only in new branding | `cozystudio_*` names stay frozen until a later alias-removal plan |
+
 ### Canonical brand
 
 - **Public brand:** `GitBlocks`
