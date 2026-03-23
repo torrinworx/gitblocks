@@ -20,23 +20,29 @@ def load_env(env_path: Path):
             os.environ[key] = value
 
 
+def read_env(primary: str, legacy: str, default: str) -> str:
+    return os.environ.get(primary) or os.environ.get(legacy) or default
+
+
 def main():
     addon_root = Path(__file__).parent.resolve()
     load_env(addon_root / ".env")
 
-    blender_bin = os.environ.get(
+    blender_bin = read_env(
+        "GITBLOCKS_BLENDER_BIN",
         "COZYSTUDIO_BLENDER_BIN",
         "/home/torrin/blender-4.5.3-linux-x64/blender",
     )
-    test_dir = os.environ.get(
+    test_dir = read_env(
+        "GITBLOCKS_TEST_DIR",
         "COZYSTUDIO_TEST_DIR",
-        "/tmp/cozystudio_addon_tests",
+        "/tmp/gitblocks_addon_tests",
     )
 
     blender_path = Path(blender_bin)
     if not blender_path.exists():
-        print(f"Blender binary not found at {blender_path}")
-        print("Set COZYSTUDIO_BLENDER_BIN in cozystudio_addon/.env")
+        print(f"GitBlocks Blender binary not found at {blender_path}")
+        print("Set GITBLOCKS_BLENDER_BIN in .env (or COZYSTUDIO_BLENDER_BIN for compatibility)")
         sys.exit(1)
 
     runner = addon_root / "tests" / "runner.py"
@@ -54,7 +60,7 @@ def main():
         str(test_dir),
     ]
 
-    print("Running Blender tests:")
+    print("Running GitBlocks Blender tests:")
     print(" ".join(cmd))
     result = subprocess.call(cmd, cwd=str(addon_root))
     sys.exit(result)

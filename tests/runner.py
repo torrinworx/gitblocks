@@ -1,7 +1,7 @@
 """
-Create a clean test environment and run pytest inside Blender.
+Create a clean GitBlocks test environment and run pytest inside Blender.
 
-Usage (from cozystudio_addon/):
+Usage (from the GitBlocks add-on root):
 
   python test.py
 """
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     ensure_pytest_installed()
 
     # Silence Blender's banner in pytest output
-    print("\n\033[36m[ runner ] Preparing clean Blender test environment\033[0m")
+    print("\n\033[36m[ runner ] Preparing clean GitBlocks test environment\033[0m")
 
     sanitize_target_directory(target_path)
 
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     bpy.ops.wm.save_as_mainfile(filepath=str(blend_path))
     bpy.ops.wm.open_mainfile(filepath=str(blend_path))
 
-    addon_name = "cozystudio_addon"
+    addon_name = "cozystudio_addon"  # legacy package name kept for compatibility
     addon_src = Path(__file__).parent.parent.resolve()
 
     # reset environment for the addon
@@ -121,7 +121,7 @@ if __name__ == "__main__":
 
     # Run pytest with its own coloured output
     tests_dir = Path(__file__).parent
-    print(f"\033[36m[ runner ] Launching pytest in {tests_dir}\033[0m\n")
+    print(f"\033[36m[ runner ] Launching GitBlocks pytest in {tests_dir}\033[0m\n")
 
     #  -q  : quiet start banner
     #  -rA : show test summary
