@@ -89,6 +89,8 @@ Recent decisions affecting current work:
 
 - Preserve branch history context (general)
 - Add Blender compatibility preflight (testing)
+- Add multi-version Blender test harness (testing)
+- Add individual test shorthand (testing)
 
 ### Blockers/Concerns
 
