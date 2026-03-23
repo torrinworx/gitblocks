@@ -78,10 +78,10 @@ def install_packages():
         _install_thread_error = f"Failed to install dependencies: {e}"
 
 
-class COZYSTUDIO_OT_install_deps(bpy.types.Operator):
+class GITBLOCKS_OT_install_deps(bpy.types.Operator):
     """Install missing requirements asynchronously."""
 
-    bl_idname = "cozystudio.install_deps"
+    bl_idname = "gitblocks.install_deps"
     bl_label = "Install Dependencies"
     bl_options = {"REGISTER", "INTERNAL"}
 
@@ -173,7 +173,7 @@ class COZYSTUDIO_OT_install_deps(bpy.types.Operator):
         return {"PASS_THROUGH"}
 
 
-class CozyStudioPreferences(bpy.types.AddonPreferences):
+class GitBlocksPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__
 
     def draw(self, context):
@@ -187,7 +187,7 @@ class CozyStudioPreferences(bpy.types.AddonPreferences):
             layout.label(
                 text="Missing: " + ", ".join(MISSING_DEPENDENCIES), icon="ERROR"
             )
-            layout.operator(COZYSTUDIO_OT_install_deps.bl_idname, icon="CONSOLE")
+            layout.operator(GITBLOCKS_OT_install_deps.bl_idname, icon="CONSOLE")
 
 
 def register():
@@ -200,25 +200,25 @@ def register():
     _core_classes_registered = False
 
     try:
-        existing_install = getattr(bpy.types, COZYSTUDIO_OT_install_deps.__name__, None)
-        if existing_install is not None and existing_install is not COZYSTUDIO_OT_install_deps:
+        existing_install = getattr(bpy.types, GITBLOCKS_OT_install_deps.__name__, None)
+        if existing_install is not None and existing_install is not GITBLOCKS_OT_install_deps:
             if getattr(existing_install, "bl_rna", None) is not None:
                 try:
                     bpy.utils.unregister_class(existing_install)
                 except Exception:
                     pass
-        if getattr(bpy.types, COZYSTUDIO_OT_install_deps.__name__, None) is not COZYSTUDIO_OT_install_deps:
-            bpy.utils.register_class(COZYSTUDIO_OT_install_deps)
+        if getattr(bpy.types, GITBLOCKS_OT_install_deps.__name__, None) is not GITBLOCKS_OT_install_deps:
+            bpy.utils.register_class(GITBLOCKS_OT_install_deps)
 
-        existing_prefs = getattr(bpy.types, CozyStudioPreferences.__name__, None)
-        if existing_prefs is not None and existing_prefs is not CozyStudioPreferences:
+        existing_prefs = getattr(bpy.types, GitBlocksPreferences.__name__, None)
+        if existing_prefs is not None and existing_prefs is not GitBlocksPreferences:
             if getattr(existing_prefs, "bl_rna", None) is not None:
                 try:
                     bpy.utils.unregister_class(existing_prefs)
                 except Exception:
                     pass
-        if getattr(bpy.types, CozyStudioPreferences.__name__, None) is not CozyStudioPreferences:
-            bpy.utils.register_class(CozyStudioPreferences)
+        if getattr(bpy.types, GitBlocksPreferences.__name__, None) is not GitBlocksPreferences:
+            bpy.utils.register_class(GitBlocksPreferences)
         _core_classes_registered = True
     except Exception as e:
         print(f"[{UI_LOG_PREFIX}] Error registering core classes:", e)
@@ -250,13 +250,13 @@ def unregister():
     global _core_classes_registered
     if _core_classes_registered:
         try:
-            existing_prefs = getattr(bpy.types, CozyStudioPreferences.__name__, None)
+            existing_prefs = getattr(bpy.types, GitBlocksPreferences.__name__, None)
             if existing_prefs is not None and getattr(existing_prefs, "bl_rna", None) is not None:
                 bpy.utils.unregister_class(existing_prefs)
         except Exception as e:
             print(f"[{UI_LOG_PREFIX}] Error unregistering preferences:", e)
         try:
-            existing_install = getattr(bpy.types, COZYSTUDIO_OT_install_deps.__name__, None)
+            existing_install = getattr(bpy.types, GITBLOCKS_OT_install_deps.__name__, None)
             if existing_install is not None and getattr(existing_install, "bl_rna", None) is not None:
                 bpy.utils.unregister_class(existing_install)
         except Exception as e:
