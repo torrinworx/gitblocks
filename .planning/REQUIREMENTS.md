@@ -11,7 +11,7 @@
 - [x] **BRAND-02**: Define and document the canonical GitBlocks brand contract, including compatibility policy for legacy names and on-disk paths.
 - [x] **BRAND-03**: Migrate runtime UI and public-facing addon metadata to GitBlocks branding through a shared brand contract.
 - [x] **BRAND-04**: Migrate backend storage/path handling and UI refresh identifiers to GitBlocks-compatible namespaces.
-- [ ] **BRAND-05**: Update docs, test harnesses, and automated tests, then verify only intentional legacy aliases remain.
+- [x] **BRAND-05**: Update docs, test harnesses, and automated tests, then verify only intentional legacy aliases remain.
 
 ## v2 Requirements
 
@@ -37,7 +37,7 @@ Deferred until the migration phase is complete.
 | BRAND-02 | Phase 01 | Complete |
 | BRAND-03 | Phase 02 | Complete |
 | BRAND-04 | Phase 03 | Complete |
-| BRAND-05 | Phase 05 | Pending |
+| BRAND-05 | Phase 05 | Complete |
 
 **Coverage:**
 - v1 requirements: 5 total

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 01-gitblocks-brand-migration-03-PLAN.md
-last_updated: "2026-03-23T15:53:59.241Z"
+stopped_at: Completed 01-gitblocks-brand-migration-04-PLAN.md
+last_updated: "2026-03-23T15:56:12.777Z"
 last_activity: 2026-03-23
 progress:
   total_phases: 1
   completed_phases: 0
   total_plans: 5
-  completed_plans: 3
+  completed_plans: 4
   percent: 20
 ---
 
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 ## Current Position
 
 Phase: 1 of 1 (GitBlocks brand migration)
-Plan: 4 of 5 in current phase
+Plan: 5 of 5 in current phase
 Status: Ready to execute
 Last activity: 2026-03-23
 
@@ -54,6 +54,7 @@ Progress: [██░░░░░░░░] 20%
 | Phase 01-gitblocks-brand-migration P01 | 1 min | 3 tasks | 5 files |
 | Phase 01-gitblocks-brand-migration P02 | 5 min | 2 tasks | 5 files |
 | Phase 01-gitblocks-brand-migration P03 | 8 min | 2 tasks | 15 files |
+| Phase 01-gitblocks-brand-migration P04 | 2 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 01-gitblocks-brand-migration]: GitBlocks is the canonical on-disk namespace; Cozy Studio remains compatibility-only for reads and old repos.
 - [Phase 01-gitblocks-brand-migration]: Shared path helpers keep backend and UI compatibility behavior explicit while avoiding duplicated namespace literals.
 - [Phase 01-gitblocks-brand-migration]: Backend redraw targets should stay centralized so later panel renames only touch the brand constants.
+- [Phase 01-gitblocks-brand-migration]: GitBlocks is the public brand; Cozy Studio stays only for compatibility or provenance.
+- [Phase 01-gitblocks-brand-migration]: Harness compatibility is preserved by falling back to legacy env vars instead of breaking existing local setups.
+- [Phase 01-gitblocks-brand-migration]: Internal compatibility-sensitive identifiers were left intact because this plan was about copy, not runtime renaming.
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T15:53:59.238Z
-Stopped at: Completed 01-gitblocks-brand-migration-03-PLAN.md
+Last session: 2026-03-23T15:56:12.775Z
+Stopped at: Completed 01-gitblocks-brand-migration-04-PLAN.md
 Resume file: None
