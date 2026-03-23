@@ -2,7 +2,7 @@ from fnmatch import fnmatch
 
 from ..branding import UI_REFRESH_PANEL_IDS
 from ..utils.redraw import redraw, redraw_many
-from .paths import CANONICAL_MANIFEST_REL, LEGACY_MANIFEST_REL
+from .paths import CANONICAL_MANIFEST_REL
 
 
 class DiffsMixin:
@@ -11,7 +11,6 @@ class DiffsMixin:
             "*.blend",
             "*.blend1",
             CANONICAL_MANIFEST_REL,
-            LEGACY_MANIFEST_REL,
         ]
 
         if not changes:

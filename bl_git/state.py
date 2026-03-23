@@ -109,8 +109,8 @@ class StateMixin:
                 "state": "idle",
                 "summary": None,
                 "detail": None,
-                "dirty_cozy": 0,
-                "dirty_non_cozy": 0,
+                "dirty_gitblocks": 0,
+                "dirty_non_gitblocks": 0,
                 "has_conflicts": False,
                 "can_switch": True,
                 "can_create": True,
@@ -189,22 +189,22 @@ class StateMixin:
         except Exception:
             return 0, 0
 
-    def _workflow_blockers(self, ui_state, dirty_paths, cozy_paths, blocking_paths):
+    def _workflow_blockers(self, ui_state, dirty_paths, gitblocks_paths, blocking_paths):
         blockers = []
         workflow = ui_state["workflow"]
         branch_ui = ui_state["branch"]
         carryover_ui = ui_state["carryover"]
         conflicts_ui = ui_state["conflicts"]
 
-        workflow["dirty_cozy"] = len(cozy_paths)
-        workflow["dirty_non_cozy"] = len(blocking_paths)
+        workflow["dirty_gitblocks"] = len(gitblocks_paths)
+        workflow["dirty_non_gitblocks"] = len(blocking_paths)
         workflow["has_conflicts"] = conflicts_ui.get("has_conflicts", False)
 
         if carryover_ui.get("has_parked"):
-            blockers.append("Restore parked Cozy changes before switching, merging, or rebasing.")
+            blockers.append("Restore parked GitBlocks changes before switching, merging, or rebasing.")
             workflow["state"] = "parked"
             workflow["summary"] = "Parked changes pending"
-            workflow["detail"] = "Restore or clear parked Cozy changes before other branch actions."
+            workflow["detail"] = "Restore or clear parked GitBlocks changes before other branch actions."
         elif conflicts_ui.get("has_conflicts"):
             operation = conflicts_ui.get("operation") or "merge"
             blockers.append(f"Resolve {operation} conflicts before more branch actions.")
@@ -220,11 +220,11 @@ class StateMixin:
             workflow["summary"] = f"On branch {branch_ui.get('current') or 'unknown'}"
             workflow["detail"] = branch_ui.get("head_summary") or ""
 
-        if cozy_paths and not carryover_ui.get("has_parked") and not conflicts_ui.get("has_conflicts"):
-            workflow["detail"] = "Local Cozy changes will be parked and restored during branch switches or integrations."
+        if gitblocks_paths and not carryover_ui.get("has_parked") and not conflicts_ui.get("has_conflicts"):
+            workflow["detail"] = "Local GitBlocks changes will be parked and restored during branch switches or integrations."
 
         if blocking_paths:
-            blockers.append("Working tree has non-Cozy changes. Commit or stash them first.")
+            blockers.append("Working tree has non-GitBlocks changes. Commit or stash them first.")
 
         workflow["can_fetch"] = not conflicts_ui.get("has_conflicts", False)
         workflow["can_switch"] = not carryover_ui.get("has_parked") and not conflicts_ui.get(
@@ -523,7 +523,7 @@ class StateMixin:
 
         if self.repo is not None:
             dirty_paths = self._dirty_paths()
-            cozy_paths = self._cozy_dirty_paths(dirty_paths)
+            gitblocks_paths = self._gitblocks_dirty_paths(dirty_paths)
             blocking_paths = self._blocking_dirty_paths(dirty_paths)
             head_hash = None
             if self.repo.head.is_valid():
@@ -646,7 +646,7 @@ class StateMixin:
             ]
             ui_state["history"]["count"] = len(ui_state["history"]["items"])
 
-            self._workflow_blockers(ui_state, dirty_paths, cozy_paths, blocking_paths)
+            self._workflow_blockers(ui_state, dirty_paths, gitblocks_paths, blocking_paths)
 
         diffs = list(self.diffs or [])
         staged = [diff for diff in diffs if diff.get("status", "").startswith("staged")]

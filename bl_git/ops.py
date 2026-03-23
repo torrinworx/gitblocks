@@ -15,7 +15,7 @@ from .constants import (
     MANIFEST_VERSION,
     MANIFEST_VERSION_KEY,
 )
-from .paths import CANONICAL_BLOCKS_PREFIX, LEGACY_BLOCKS_PREFIX, block_relpath
+from .paths import CANONICAL_BLOCKS_PREFIX, block_relpath
 
 
 class OpsMixin:
@@ -57,7 +57,7 @@ class OpsMixin:
             result["blockers"].append("Unresolved conflicts present in manifest.")
 
         if self._managed_carryover():
-            result["blockers"].append("Restore parked Cozy changes before committing.")
+            result["blockers"].append("Restore parked GitBlocks changes before committing.")
 
         if self.repo.head.is_detached:
             result["blockers"].append("Checkout a branch before committing.")
@@ -165,7 +165,7 @@ class OpsMixin:
         self._update_diffs()
         pass
 
-    def commit(self, message="CozyStudio Commit"):
+    def commit(self, message="GitBlocks Commit"):
         if self.manifest is None or not self.repo:
             return {"ok": False, "errors": ["Repository is not initialized."], "blockers": []}
         try:
@@ -279,7 +279,7 @@ class OpsMixin:
         staged_block_paths = {
             path
             for path in staged_paths
-            if path.startswith(CANONICAL_BLOCKS_PREFIX) or path.startswith(LEGACY_BLOCKS_PREFIX)
+            if path.startswith(CANONICAL_BLOCKS_PREFIX)
         }
         staged_uuids = {Path(path).stem for path in staged_block_paths}
         staged_group_ids = set()

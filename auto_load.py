@@ -48,7 +48,7 @@ def register():
             bpy.utils.register_class(cls)
             registered_classes.append(cls)
         except Exception as e:
-            print("[CozyStudio] Error registering class:", cls, e)
+            print("[GitBlocks] Error registering class:", cls, e)
 
     for module in modules:
         if module.__name__ == __name__:
@@ -78,7 +78,7 @@ def unregister():
                 continue
             bpy.utils.unregister_class(existing_cls)
         except Exception as e:
-            print("[CozyStudio] Error unregistering class:", cls, e)
+            print("[GitBlocks] Error unregistering class:", cls, e)
     registered_classes = []
 
     for module in modules:
@@ -107,7 +107,7 @@ def iter_submodules(path, package_name):
         try:
             yield importlib.import_module("." + name, package_name)
         except Exception as e:
-            print(f"[CozyStudio] Skipping module {package_name}.{name}: {e}")
+            print(f"[GitBlocks] Skipping module {package_name}.{name}: {e}")
 
 
 def iter_submodule_names(path, root=""):

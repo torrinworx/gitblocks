@@ -18,9 +18,6 @@ from .paths import (
     CANONICAL_BLOCKS_PREFIX,
     CANONICAL_MANIFEST_REL,
     CANONICAL_NAMESPACE,
-    LEGACY_BLOCKS_PREFIX,
-    LEGACY_MANIFEST_REL,
-    LEGACY_NAMESPACE,
 )
 
 
@@ -31,7 +28,7 @@ class MergeMixin:
         if self._managed_carryover():
             return {
                 "ok": False,
-                "errors": ["Parked Cozy changes already exist. Restore them before continuing."],
+                "errors": ["Parked GitBlocks changes already exist. Restore them before continuing."],
                 "conflicts": [],
             }
         ours_ref = self.repo.head.commit.hexsha
@@ -54,7 +51,7 @@ class MergeMixin:
         if self._managed_carryover():
             return {
                 "ok": False,
-                "errors": ["Parked Cozy changes already exist. Restore them before continuing."],
+                "errors": ["Parked GitBlocks changes already exist. Restore them before continuing."],
                 "conflicts": [],
             }
         head_ref = self.repo.head.commit.hexsha
@@ -204,16 +201,11 @@ class MergeMixin:
         staged_paths = []
         try:
             for path in self.repo.untracked_files:
-                if path.startswith(f"{CANONICAL_NAMESPACE}/") or path.startswith(
-                    f"{LEGACY_NAMESPACE}/"
-                ):
+                if path.startswith(f"{CANONICAL_NAMESPACE}/"):
                     staged_paths.append(path)
             for diff in self.repo.index.diff(None):
                 path = diff.b_path or diff.a_path
-                if path and (
-                    path.startswith(f"{CANONICAL_NAMESPACE}/")
-                    or path.startswith(f"{LEGACY_NAMESPACE}/")
-                ):
+                if path and path.startswith(f"{CANONICAL_NAMESPACE}/"):
                     staged_paths.append(path)
             if staged_paths:
                 self.repo.index.add(sorted(set(staged_paths)))
@@ -416,27 +408,25 @@ class MergeMixin:
             dirty.add(path)
         return {p for p in dirty if p}
 
-    def _cozy_dirty_paths(self, dirty_paths):
-        cozy_paths = set()
+    def _gitblocks_dirty_paths(self, dirty_paths):
+        gitblocks_paths = set()
         for path in dirty_paths or set():
             if path in {
                 CANONICAL_MANIFEST_REL,
-                LEGACY_MANIFEST_REL,
                 CANONICAL_MANIFEST_REL.removesuffix(".json"),
-                LEGACY_MANIFEST_REL.removesuffix(".json"),
             }:
-                cozy_paths.add(path)
+                gitblocks_paths.add(path)
                 continue
-            if path.startswith(CANONICAL_BLOCKS_PREFIX) or path.startswith(LEGACY_BLOCKS_PREFIX):
-                cozy_paths.add(path)
-        return cozy_paths
+            if path.startswith(CANONICAL_BLOCKS_PREFIX):
+                gitblocks_paths.add(path)
+        return gitblocks_paths
 
     def _blocking_dirty_paths(self, dirty_paths):
         allowed_patterns = ["*.blend", "*.blend1"]
-        cozy_paths = self._cozy_dirty_paths(dirty_paths)
+        gitblocks_paths = self._gitblocks_dirty_paths(dirty_paths)
         blocking = set()
         for path in dirty_paths or set():
-            if path in cozy_paths:
+            if path in gitblocks_paths:
                 continue
             if any(fnmatch(path, pattern) for pattern in allowed_patterns):
                 continue

@@ -22,7 +22,7 @@ class CheckoutMixin:
             raise RuntimeError("Repository not initialized.")
 
         short_name = local_name or remote_ref_name.split("/", 1)[-1]
-        parked = self._park_cozy_changes("checkout_branch", remote_ref_name)
+        parked = self._park_gitblocks_changes("checkout_branch", remote_ref_name)
         if not parked.get("ok"):
             raise RuntimeError(parked["error"])
 
@@ -68,7 +68,7 @@ class CheckoutMixin:
         if not self.repo or not self.initiated:
             raise RuntimeError("Repository not initialized.")
         target_ref = ref or "HEAD"
-        parked = self._park_cozy_changes("create_branch", target_ref)
+        parked = self._park_gitblocks_changes("create_branch", target_ref)
         if not parked.get("ok"):
             raise RuntimeError(parked["error"])
 
@@ -141,7 +141,7 @@ class CheckoutMixin:
             return None
         return entries[0]
 
-    def _park_cozy_changes(self, operation, target_ref):
+    def _park_gitblocks_changes(self, operation, target_ref):
         if not self.repo or not self.initiated:
             return {"ok": True, "stashed": False}
 
@@ -149,7 +149,7 @@ class CheckoutMixin:
         if parked:
             return {
                 "ok": False,
-                "error": "Parked Cozy changes already exist. Restore them before continuing.",
+                "error": "Parked GitBlocks changes already exist. Restore them before continuing.",
             }
 
         dirty_paths = self._dirty_paths()
@@ -157,11 +157,11 @@ class CheckoutMixin:
         if blocking_paths:
             return {
                 "ok": False,
-                "error": "Working tree has non-Cozy changes. Commit or stash them first.",
+                "error": "Working tree has non-GitBlocks changes. Commit or stash them first.",
             }
 
-        cozy_paths = sorted(self._cozy_dirty_paths(dirty_paths))
-        if not cozy_paths:
+        gitblocks_paths = sorted(self._gitblocks_dirty_paths(dirty_paths))
+        if not gitblocks_paths:
             return {"ok": True, "stashed": False}
 
         source_ref = self._current_ref_label() or "unknown"
@@ -177,7 +177,7 @@ class CheckoutMixin:
             "-m",
             message,
             "--",
-            *cozy_paths,
+            *gitblocks_paths,
         )
         after_entries = self._managed_carryover_entries()
         for entry in after_entries:
@@ -190,16 +190,16 @@ class CheckoutMixin:
     def reapply_parked_changes(self):
         parked = self._managed_carryover()
         if not parked:
-                return {"ok": False, "error": "No parked Cozy changes were found."}
+                return {"ok": False, "error": "No parked GitBlocks changes were found."}
         if self._blocking_dirty_paths(self._dirty_paths()):
             return {
                 "ok": False,
-                "error": "Working tree has non-Cozy changes. Commit or stash them first.",
+                "error": "Working tree has non-GitBlocks changes. Commit or stash them first.",
             }
         if isinstance(self.manifest, dict) and self.manifest.get("conflicts"):
             return {
                 "ok": False,
-                "error": "Resolve conflicts before restoring parked Cozy changes.",
+                "error": "Resolve conflicts before restoring parked GitBlocks changes.",
             }
 
         try:
@@ -216,20 +216,20 @@ class CheckoutMixin:
                     "--staged",
                     "--worktree",
                     "--",
-                    *cozy_paths,
+                    *gitblocks_paths,
                 )
             except Exception:
                 pass
             self.restore_ref()
             return {
                 "ok": False,
-                "error": f"Parked Cozy changes are still safe in {parked['stash_ref']}: {e}",
+                "error": f"Parked GitBlocks changes are still safe in {parked['stash_ref']}: {e}",
             }
 
     def restore_ref(self, ref=None, detach=False, operation=None, park_changes=True):
         parked = None
         if ref and park_changes:
-            parked = self._park_cozy_changes(
+            parked = self._park_gitblocks_changes(
                 operation or ("checkout_commit" if detach else "checkout_branch"),
                 ref,
             )

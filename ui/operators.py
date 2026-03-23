@@ -9,7 +9,7 @@ from ..bl_git.paths import block_relpath, extract_block_uuid
 from . import state
 
 
-class _CozyOperatorMixin:
+class _GitBlocksOperatorMixin:
     @staticmethod
     def _sanitize_branch_name(name):
         sanitized = re.sub(r"\s+", "-", (name or "").strip())
@@ -84,8 +84,8 @@ class _CozyOperatorMixin:
         if getattr(state.git_instance, "manifest", None) and state.git_instance.manifest.get("conflicts"):
             return "Resolve conflicts before merging or rebasing."
         dirty_paths = state.git_instance._dirty_paths()
-        cozy_dirty = state.git_instance._cozy_dirty_paths(dirty_paths)
-        if cozy_dirty:
+        gitblocks_dirty = state.git_instance._gitblocks_dirty_paths(dirty_paths)
+        if gitblocks_dirty:
             return f"Working tree has {BRAND_NAME} changes. Commit or discard them before merging or rebasing."
         return None
 
@@ -98,7 +98,7 @@ class _CozyOperatorMixin:
         return ref_type, name
 
 
-class GITBLOCKS_OT_SetupProject(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_SetupProject(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.setup_project"
     bl_label = "Setup Project"
     bl_description = f"Initialize {BRAND_NAME} tracking for this Blender project"
@@ -131,7 +131,7 @@ class GITBLOCKS_OT_SetupProject(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_Commit(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.commit"
     bl_label = "Commit"
     bl_description = f"Commit staged {BRAND_NAME} changes"
@@ -179,7 +179,7 @@ class GITBLOCKS_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_RunDiagnostics(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_RunDiagnostics(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.run_diagnostics"
     bl_label = "Run Diagnostics"
     bl_description = f"Refresh {BRAND_NAME} state and validate manifest integrity"
@@ -201,7 +201,7 @@ class GITBLOCKS_OT_RunDiagnostics(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_ManualRefresh(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_ManualRefresh(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.manual_refresh"
     bl_label = "Refresh"
     bl_description = f"Refresh {BRAND_NAME} Git state and UI"
@@ -213,7 +213,7 @@ class GITBLOCKS_OT_ManualRefresh(_CozyOperatorMixin, bpy.types.Operator):
         return {"CANCELLED"}
 
 
-class GITBLOCKS_OT_AddFile(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_AddFile(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.add_file"
     bl_label = "Add file to stage"
     bl_description = "Stage a file for commit"
@@ -229,7 +229,7 @@ class GITBLOCKS_OT_AddFile(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_UnstageFile(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_UnstageFile(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.unstage_file"
     bl_label = "Unstage file"
     bl_description = "Remove a file from the staging area"
@@ -245,7 +245,7 @@ class GITBLOCKS_OT_UnstageFile(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_AddGroup(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_AddGroup(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.add_group"
     bl_label = "Add group to stage"
     bl_description = "Stage all files in this group"
@@ -264,7 +264,7 @@ class GITBLOCKS_OT_AddGroup(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_UnstageGroup(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_UnstageGroup(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.unstage_group"
     bl_label = "Unstage group"
     bl_description = "Unstage all files in this group"
@@ -283,7 +283,7 @@ class GITBLOCKS_OT_UnstageGroup(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_RevertChange(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_RevertChange(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.revert_change"
     bl_label = "Revert Change"
     bl_description = "Revert a staged or unstaged change"
@@ -353,7 +353,7 @@ class GITBLOCKS_OT_ToggleGroupExpanded(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_CheckoutCommit(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_CheckoutCommit(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.checkout_commit"
     bl_label = "Checkout Commit"
     bl_description = f"Checkout a commit using {BRAND_NAME} reconstruction"
@@ -392,7 +392,7 @@ class GITBLOCKS_OT_CheckoutCommit(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class GITBLOCKS_OT_FetchBranches(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_FetchBranches(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.fetch_branches"
     bl_label = "Fetch Branches"
     bl_description = "Fetch remote branches and refresh branch data"
@@ -418,7 +418,7 @@ class GITBLOCKS_OT_FetchBranches(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class GITBLOCKS_OT_CheckoutSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_CheckoutSelectedRef(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.checkout_selected_ref"
     bl_label = "Switch Ref"
     bl_description = "Switch to the selected branch or remote tracking branch"
@@ -464,7 +464,7 @@ class GITBLOCKS_OT_CheckoutSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class GITBLOCKS_OT_ReapplyParkedChanges(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_ReapplyParkedChanges(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.reapply_parked_changes"
     bl_label = "Restore Parked Changes"
     bl_description = f"Restore {BRAND_NAME} changes that were parked during checkout, merge, or rebase"
@@ -484,7 +484,7 @@ class GITBLOCKS_OT_ReapplyParkedChanges(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_CheckoutBranch(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_CheckoutBranch(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.checkout_branch"
     bl_label = "Checkout Branch"
     bl_description = f"Checkout a branch using {BRAND_NAME} reconstruction"
@@ -526,7 +526,7 @@ class GITBLOCKS_OT_CheckoutBranch(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class GITBLOCKS_OT_CreateBranch(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_CreateBranch(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.create_branch"
     bl_label = "Create Branch"
     bl_description = "Create and checkout a new branch"
@@ -589,7 +589,7 @@ class GITBLOCKS_OT_CreateBranch(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class GITBLOCKS_OT_Merge(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_Merge(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.merge"
     bl_label = "Merge"
     bl_description = "Merge another branch or ref into the current branch"
@@ -645,7 +645,7 @@ class GITBLOCKS_OT_Merge(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_Rebase(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_Rebase(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.rebase"
     bl_label = "Rebase"
     bl_description = "Rebase the current branch onto another branch or ref"
@@ -701,7 +701,7 @@ class GITBLOCKS_OT_Rebase(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_IntegrateSelectedRef(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.integrate_selected_ref"
     bl_label = "Integrate Selected Ref"
     bl_description = "Merge or rebase the current branch with the selected target"
@@ -762,7 +762,7 @@ class GITBLOCKS_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
         return {"CANCELLED"}
 
 
-class GITBLOCKS_OT_ResolveConflict(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_ResolveConflict(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.resolve_conflict"
     bl_label = "Resolve Conflict"
     bl_description = f"Mark a {BRAND_NAME} conflict as resolved after you have fixed the scene"
@@ -804,7 +804,7 @@ class GITBLOCKS_OT_ResolveConflict(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_ResolveConflictVersion(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_ResolveConflictVersion(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.resolve_conflict_version"
     bl_label = "Apply Conflict Version"
     bl_description = f"Resolve a {BRAND_NAME} conflict by checking out your side or the incoming side"
@@ -844,7 +844,7 @@ class GITBLOCKS_OT_ResolveConflictVersion(_CozyOperatorMixin, bpy.types.Operator
         return {"FINISHED"}
 
 
-class GITBLOCKS_OT_SelectBlock(_CozyOperatorMixin, bpy.types.Operator):
+class GITBLOCKS_OT_SelectBlock(_GitBlocksOperatorMixin, bpy.types.Operator):
     bl_idname = "gitblocks.select_block"
     bl_label = "Select datablock"
     bl_description = "Select the Blender datablock tied to this entry"

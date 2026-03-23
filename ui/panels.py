@@ -353,14 +353,14 @@ class GITBLOCKS_PT_BranchesPanel(bpy.types.Panel):
         workflow_box.label(text=workflow_ui.get("summary") or "Workflow", icon="INFO")
         if workflow_ui.get("detail"):
             workflow_box.label(text=workflow_ui["detail"])
-        if workflow_ui.get("dirty_cozy"):
+        if workflow_ui.get("dirty_gitblocks"):
             workflow_box.label(
-                text=f"Local {BRAND_NAME} changes: {workflow_ui['dirty_cozy']}",
+                text=f"Local {BRAND_NAME} changes: {workflow_ui['dirty_gitblocks']}",
                 icon="GREASEPENCIL",
             )
-        if workflow_ui.get("dirty_non_cozy"):
+        if workflow_ui.get("dirty_non_gitblocks"):
             workflow_box.label(
-                text=f"Non-{BRAND_NAME} changes blocking branch actions: {workflow_ui['dirty_non_cozy']}",
+                text=f"Non-{BRAND_NAME} changes blocking branch actions: {workflow_ui['dirty_non_gitblocks']}",
                 icon="ERROR",
             )
         for blocker in workflow_ui.get("blockers", [])[:3]:
