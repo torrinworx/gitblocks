@@ -38,12 +38,12 @@ def _draw_repo_missing(layout):
         box.label(text=f"Save this .blend file to start a {BRAND_NAME} project.", icon="FILE_TICK")
         return
     box.label(text="No project repo found for this file.", icon="INFO")
-    box.operator("cozystudio.setup_project", text="Init Project", icon="ADD")
+    box.operator("gitblocks.setup_project", text="Init Project", icon="ADD")
 
 
-class COZYSTUDIO_PT_MainPanel(bpy.types.Panel):
+class GITBLOCKS_PT_MainPanel(bpy.types.Panel):
     bl_label = BRAND_NAME
-    bl_idname = "COZYSTUDIO_PT_main"
+    bl_idname = "GITBLOCKS_PT_main"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = BRAND_NAME
@@ -74,7 +74,7 @@ def _draw_grouped_changes(layout, groups, staged):
             expanded = group_id in state._group_expanded
             icon = "TRIA_DOWN" if expanded else "TRIA_RIGHT"
             op = header.operator(
-                "cozystudio.toggle_group_expanded",
+                "gitblocks.toggle_group_expanded",
                 text="",
                 icon=icon,
                 emboss=False,
@@ -86,7 +86,7 @@ def _draw_grouped_changes(layout, groups, staged):
         header.label(text=group.get("label", "Group"), icon="FILE_FOLDER")
         if group_id:
             op = header.operator(
-                "cozystudio.unstage_group" if staged else "cozystudio.add_group",
+                "gitblocks.unstage_group" if staged else "gitblocks.add_group",
                 text="",
                 icon="REMOVE" if staged else "ADD",
             )
@@ -100,7 +100,7 @@ def _draw_grouped_changes(layout, groups, staged):
             uuid = diff.get("uuid")
             if uuid:
                 op = row.operator(
-                    "cozystudio.select_block",
+                    "gitblocks.select_block",
                     text=diff.get("display_name") or diff.get("path", "Entry"),
                     icon="FILE",
                     emboss=False,
@@ -111,14 +111,14 @@ def _draw_grouped_changes(layout, groups, staged):
 
             if is_ungrouped:
                 op = row.operator(
-                    "cozystudio.unstage_file" if staged else "cozystudio.add_file",
+                    "gitblocks.unstage_file" if staged else "gitblocks.add_file",
                     text="",
                     icon="REMOVE" if staged else "ADD",
                 )
                 op.file_path = diff["path"]
 
             op = row.operator(
-                "cozystudio.revert_change",
+                "gitblocks.revert_change",
                 text="",
                 icon="TRASH",
             )
@@ -130,9 +130,9 @@ def _draw_grouped_changes(layout, groups, staged):
             row.label(text=_status_abbrev(diff["status"]))
 
 
-class COZYSTUDIO_PT_ChangesPanel(bpy.types.Panel):
+class GITBLOCKS_PT_ChangesPanel(bpy.types.Panel):
     bl_label = "Changes"
-    bl_idname = "COZYSTUDIO_PT_changes"
+    bl_idname = "GITBLOCKS_PT_changes"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = BRAND_NAME
@@ -160,7 +160,7 @@ class COZYSTUDIO_PT_ChangesPanel(bpy.types.Panel):
                 icon="TIME",
             )
             if commit_ui.get("return_branch"):
-                op = row.operator("cozystudio.checkout_branch", text="Return to Branch", icon="LOOP_BACK")
+                op = row.operator("gitblocks.checkout_branch", text="Return to Branch", icon="LOOP_BACK")
                 op.branch_name = commit_ui["return_branch"]
 
         if carryover_ui.get("has_parked"):
@@ -180,16 +180,16 @@ class COZYSTUDIO_PT_ChangesPanel(bpy.types.Panel):
             if carryover_ui.get("error"):
                 box.label(text=carryover_ui["error"], icon="ERROR")
             box.operator(
-                "cozystudio.reapply_parked_changes",
+                "gitblocks.reapply_parked_changes",
                 text="Restore Parked Changes",
                 icon="IMPORT",
             )
 
-        layout.prop(context.window_manager, "cozystudio_commit_message", text="Message")
+        layout.prop(context.window_manager, "gitblocks_commit_message", text="Message")
 
         row = layout.row()
         row.enabled = commit_ui.get("can_commit")
-        row.operator("cozystudio.commit", text="Commit", icon="CHECKMARK")
+        row.operator("gitblocks.commit", text="Commit", icon="CHECKMARK")
 
         if integrity_ui.get("errors"):
             box = layout.box()
@@ -217,9 +217,9 @@ class COZYSTUDIO_PT_ChangesPanel(bpy.types.Panel):
         _draw_grouped_changes(unstaged_box, changes_ui.get("unstaged_groups", []), staged=False)
 
 
-class COZYSTUDIO_PT_HistoryPanel(bpy.types.Panel):
+class GITBLOCKS_PT_HistoryPanel(bpy.types.Panel):
     bl_label = "History"
-    bl_idname = "COZYSTUDIO_PT_history"
+    bl_idname = "GITBLOCKS_PT_history"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = BRAND_NAME
@@ -254,7 +254,7 @@ class COZYSTUDIO_PT_HistoryPanel(bpy.types.Panel):
 
         wm = context.window_manager
         history_items = git_ui.get("history", {}).get("items", [])
-        items = wm.cozystudio_commit_items
+        items = wm.gitblocks_commit_items
         items.clear()
         for commit in history_items:
             item = items.add()
@@ -267,7 +267,7 @@ class COZYSTUDIO_PT_HistoryPanel(bpy.types.Panel):
             box = layout.box()
             box.label(text=f"Parked {BRAND_NAME} changes block further checkout operations.", icon="INFO")
             box.operator(
-                "cozystudio.reapply_parked_changes",
+                "gitblocks.reapply_parked_changes",
                 text="Restore Parked Changes",
                 icon="IMPORT",
             )
@@ -278,7 +278,7 @@ class COZYSTUDIO_PT_HistoryPanel(bpy.types.Panel):
                 icon="TIME",
             )
             if commit_ui.get("return_branch"):
-                op = row.operator("cozystudio.checkout_branch", text="Return to Branch", icon="LOOP_BACK")
+                op = row.operator("gitblocks.checkout_branch", text="Return to Branch", icon="LOOP_BACK")
                 op.branch_name = commit_ui["return_branch"]
 
         if not history_items:
@@ -286,21 +286,21 @@ class COZYSTUDIO_PT_HistoryPanel(bpy.types.Panel):
             return
 
         layout.template_list(
-            "COZYSTUDIO_UL_CommitList",
+            "GITBLOCKS_UL_CommitList",
             "",
             wm,
-            "cozystudio_commit_items",
+            "gitblocks_commit_items",
             wm,
-            "cozystudio_commit_index",
+            "gitblocks_commit_index",
             rows=6,
         )
 
 
 
 
-class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
+class GITBLOCKS_PT_BranchesPanel(bpy.types.Panel):
     bl_label = "Branches"
-    bl_idname = "COZYSTUDIO_PT_branches"
+    bl_idname = "GITBLOCKS_PT_branches"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = BRAND_NAME
@@ -379,7 +379,7 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
                     )
                 )
             box.operator(
-                "cozystudio.reapply_parked_changes",
+                "gitblocks.reapply_parked_changes",
                 text="Restore Parked Changes",
                 icon="IMPORT",
             )
@@ -388,14 +388,14 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
         selected_commit = None
         if history_items:
             try:
-                selected_commit = history_items[wm.cozystudio_commit_index]
+                selected_commit = history_items[wm.gitblocks_commit_index]
             except Exception:
                 selected_commit = None
 
         switch_box = layout.box()
         switch_box.label(text="Switch Branch", icon="FILE_PARENT")
-        switch_box.prop(wm, "cozystudio_branch_target", text="Target")
-        selected_ref = _find_ref_row(branch_ui, getattr(wm, "cozystudio_branch_target", ""))
+        switch_box.prop(wm, "gitblocks_branch_target", text="Target")
+        selected_ref = _find_ref_row(branch_ui, getattr(wm, "gitblocks_branch_target", ""))
         if selected_ref:
             switch_box.label(
                 text=selected_ref.get("description") or selected_ref.get("label") or selected_ref.get("name"),
@@ -407,7 +407,7 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
         switch_row = switch_box.row(align=True)
         switch_row.enabled = workflow_ui.get("can_switch", True) and bool(selected_ref)
         switch_op = switch_row.operator(
-            "cozystudio.checkout_selected_ref",
+            "gitblocks.checkout_selected_ref",
             text=(
                 "Checkout Tracking Branch"
                 if selected_ref and selected_ref.get("type") == "remote"
@@ -415,23 +415,23 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
             ),
             icon="LOOP_BACK",
         )
-        switch_op.ref_token = getattr(wm, "cozystudio_branch_target", "")
+        switch_op.ref_token = getattr(wm, "gitblocks_branch_target", "")
         fetch_row = switch_box.row(align=True)
         fetch_row.enabled = workflow_ui.get("can_fetch", True)
-        fetch_row.operator("cozystudio.fetch_branches", text="Fetch / Refresh", icon="FILE_REFRESH")
+        fetch_row.operator("gitblocks.fetch_branches", text="Fetch / Refresh", icon="FILE_REFRESH")
 
         if branch_ui.get("detached") and commit_ui.get("return_branch"):
             return_row = switch_box.row(align=True)
             return_row.enabled = workflow_ui.get("can_switch", True)
-            op = return_row.operator("cozystudio.checkout_branch", text="Return to Branch", icon="LOOP_BACK")
+            op = return_row.operator("gitblocks.checkout_branch", text="Return to Branch", icon="LOOP_BACK")
             op.branch_name = commit_ui["return_branch"]
 
         create_box = layout.box()
         create_box.label(text="Create Branch", icon="ADD")
-        create_box.prop(wm, "cozystudio_branch_name", text="Name")
-        create_box.prop(wm, "cozystudio_branch_source", text="From")
+        create_box.prop(wm, "gitblocks_branch_name", text="Name")
+        create_box.prop(wm, "gitblocks_branch_source", text="From")
 
-        source = getattr(wm, "cozystudio_branch_source", "HEAD")
+        source = getattr(wm, "gitblocks_branch_source", "HEAD")
         if source == "SELECTED":
             if selected_commit:
                 create_box.label(
@@ -469,28 +469,28 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
             )
 
         create_row = create_box.row()
-        branch_name = (getattr(wm, "cozystudio_branch_name", "") or "").strip()
+        branch_name = (getattr(wm, "gitblocks_branch_name", "") or "").strip()
         can_create = (
             workflow_ui.get("can_create", True)
             and bool(branch_name)
             and (source != "SELECTED" or selected_commit)
         )
         create_row.enabled = can_create
-        op = create_row.operator("cozystudio.create_branch", text="Create Branch", icon="ADD")
+        op = create_row.operator("gitblocks.create_branch", text="Create Branch", icon="ADD")
         op.branch_name = branch_name
         op.ref = selected_commit.get("commit_hash", "") if selected_commit and source == "SELECTED" else ""
 
         integrate_box = layout.box()
         integrate_box.label(text="Integrate Into Current Branch", icon="SORTTIME")
-        integrate_box.prop(wm, "cozystudio_integration_mode", text="Mode")
-        integrate_box.prop(wm, "cozystudio_integration_target", text="Target")
-        integrate_box.prop(wm, "cozystudio_conflict_strategy", text="Conflicts")
+        integrate_box.prop(wm, "gitblocks_integration_mode", text="Mode")
+        integrate_box.prop(wm, "gitblocks_integration_target", text="Target")
+        integrate_box.prop(wm, "gitblocks_conflict_strategy", text="Conflicts")
 
-        selected_target = _find_ref_row(branch_ui, getattr(wm, "cozystudio_integration_target", ""))
+        selected_target = _find_ref_row(branch_ui, getattr(wm, "gitblocks_integration_target", ""))
         if selected_target:
-            mode_label = "Merge" if wm.cozystudio_integration_mode == "MERGE" else "Rebase"
+            mode_label = "Merge" if wm.gitblocks_integration_mode == "MERGE" else "Rebase"
             current_name = branch_ui.get("current") or "current branch"
-            if wm.cozystudio_integration_mode == "MERGE":
+            if wm.gitblocks_integration_mode == "MERGE":
                 summary = f"{mode_label} {selected_target.get('name')} into {current_name}"
             else:
                 summary = f"{mode_label} {current_name} onto {selected_target.get('name')}"
@@ -505,19 +505,19 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
 
         integrate_row = integrate_box.row()
         can_integrate = bool(selected_target)
-        if wm.cozystudio_integration_mode == "MERGE":
+        if wm.gitblocks_integration_mode == "MERGE":
             can_integrate = can_integrate and workflow_ui.get("can_merge", True)
         else:
             can_integrate = can_integrate and workflow_ui.get("can_rebase", True)
         integrate_row.enabled = can_integrate
         op = integrate_row.operator(
-            "cozystudio.integrate_selected_ref",
+            "gitblocks.integrate_selected_ref",
             text="Start Integration",
-            icon="IMPORT" if wm.cozystudio_integration_mode == "MERGE" else "TRIA_RIGHT_BAR",
+            icon="IMPORT" if wm.gitblocks_integration_mode == "MERGE" else "TRIA_RIGHT_BAR",
         )
-        op.ref_token = getattr(wm, "cozystudio_integration_target", "")
-        op.mode = wm.cozystudio_integration_mode
-        op.strategy = wm.cozystudio_conflict_strategy
+        op.ref_token = getattr(wm, "gitblocks_integration_target", "")
+        op.mode = wm.gitblocks_integration_mode
+        op.strategy = wm.gitblocks_conflict_strategy
 
         if branch_ui.get("recent"):
             recent_box = layout.box()
@@ -526,9 +526,9 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
                 recent_box.label(text=branch.get("name", "branch"), icon="FILE_PARENT")
 
 
-class COZYSTUDIO_PT_ConflictsPanel(bpy.types.Panel):
+class GITBLOCKS_PT_ConflictsPanel(bpy.types.Panel):
     bl_label = "Conflicts"
-    bl_idname = "COZYSTUDIO_PT_conflicts"
+    bl_idname = "GITBLOCKS_PT_conflicts"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
     bl_category = BRAND_NAME
@@ -556,24 +556,24 @@ class COZYSTUDIO_PT_ConflictsPanel(bpy.types.Panel):
             if item.get("uuid"):
                 row = box.row(align=True)
                 op = row.operator(
-                    "cozystudio.resolve_conflict_version",
+                    "gitblocks.resolve_conflict_version",
                     text="Checkout Mine",
                     icon="LOOP_BACK",
                 )
                 op.conflict_uuid = item["uuid"]
                 op.resolution = "ours"
                 op = row.operator(
-                    "cozystudio.resolve_conflict_version",
+                    "gitblocks.resolve_conflict_version",
                     text="Checkout Theirs",
                     icon="IMPORT",
                 )
                 op.conflict_uuid = item["uuid"]
                 op.resolution = "theirs"
                 row = box.row(align=True)
-                op = row.operator("cozystudio.select_block", text="Select Block", icon="RESTRICT_SELECT_OFF")
+                op = row.operator("gitblocks.select_block", text="Select Block", icon="RESTRICT_SELECT_OFF")
                 op.uuid = item["uuid"]
                 op = row.operator(
-                    "cozystudio.resolve_conflict",
+                    "gitblocks.resolve_conflict",
                     text="Mark Manually Resolved",
                     icon="CHECKMARK",
                 )

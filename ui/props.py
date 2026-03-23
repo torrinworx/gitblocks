@@ -64,7 +64,7 @@ def integration_ref_items(_self, _context):
     return _INTEGRATION_ITEMS_CACHE
 
 
-class COZYSTUDIO_CommitItem(bpy.types.PropertyGroup):
+class GITBLOCKS_CommitItem(bpy.types.PropertyGroup):
     commit_hash: bpy.props.StringProperty()
     short_hash: bpy.props.StringProperty()
     summary: bpy.props.StringProperty()
@@ -72,21 +72,21 @@ class COZYSTUDIO_CommitItem(bpy.types.PropertyGroup):
 
 
 def register_props():
-    bpy.types.WindowManager.cozystudio_commit_items = bpy.props.CollectionProperty(
-        type=COZYSTUDIO_CommitItem
+    bpy.types.WindowManager.gitblocks_commit_items = bpy.props.CollectionProperty(
+        type=GITBLOCKS_CommitItem
     )
-    bpy.types.WindowManager.cozystudio_commit_index = bpy.props.IntProperty(default=0)
-    bpy.types.WindowManager.cozystudio_commit_message = bpy.props.StringProperty(
+    bpy.types.WindowManager.gitblocks_commit_index = bpy.props.IntProperty(default=0)
+    bpy.types.WindowManager.gitblocks_commit_message = bpy.props.StringProperty(
         name="Commit Message",
         description=f"Message for this {BRAND_NAME} commit",
         default="",
     )
-    bpy.types.WindowManager.cozystudio_branch_name = bpy.props.StringProperty(
+    bpy.types.WindowManager.gitblocks_branch_name = bpy.props.StringProperty(
         name="Branch Name",
         description="Name for the new branch",
         default="",
     )
-    bpy.types.WindowManager.cozystudio_branch_source = bpy.props.EnumProperty(
+    bpy.types.WindowManager.gitblocks_branch_source = bpy.props.EnumProperty(
         name="Branch Source",
         description="Source for the new branch",
         items=[
@@ -95,12 +95,12 @@ def register_props():
         ],
         default="HEAD",
     )
-    bpy.types.WindowManager.cozystudio_branch_target = bpy.props.EnumProperty(
+    bpy.types.WindowManager.gitblocks_branch_target = bpy.props.EnumProperty(
         name="Branch Target",
         description="Branch or remote ref to switch to",
         items=branch_ref_items,
     )
-    bpy.types.WindowManager.cozystudio_integration_mode = bpy.props.EnumProperty(
+    bpy.types.WindowManager.gitblocks_integration_mode = bpy.props.EnumProperty(
         name="Integrate",
         description="Integrate another branch into the current branch",
         items=[
@@ -109,12 +109,12 @@ def register_props():
         ],
         default="MERGE",
     )
-    bpy.types.WindowManager.cozystudio_integration_target = bpy.props.EnumProperty(
+    bpy.types.WindowManager.gitblocks_integration_target = bpy.props.EnumProperty(
         name="Integration Target",
         description="Branch or remote ref to merge or rebase with",
         items=integration_ref_items,
     )
-    bpy.types.WindowManager.cozystudio_conflict_strategy = bpy.props.EnumProperty(
+    bpy.types.WindowManager.gitblocks_conflict_strategy = bpy.props.EnumProperty(
         name="Conflict Strategy",
         description=f"How {BRAND_NAME} should handle conflicting block changes",
         items=[
@@ -127,21 +127,21 @@ def register_props():
 
 
 def unregister_props():
-    if hasattr(bpy.types.WindowManager, "cozystudio_commit_items"):
-        del bpy.types.WindowManager.cozystudio_commit_items
-    if hasattr(bpy.types.WindowManager, "cozystudio_commit_index"):
-        del bpy.types.WindowManager.cozystudio_commit_index
-    if hasattr(bpy.types.WindowManager, "cozystudio_commit_message"):
-        del bpy.types.WindowManager.cozystudio_commit_message
-    if hasattr(bpy.types.WindowManager, "cozystudio_branch_name"):
-        del bpy.types.WindowManager.cozystudio_branch_name
-    if hasattr(bpy.types.WindowManager, "cozystudio_branch_source"):
-        del bpy.types.WindowManager.cozystudio_branch_source
-    if hasattr(bpy.types.WindowManager, "cozystudio_branch_target"):
-        del bpy.types.WindowManager.cozystudio_branch_target
-    if hasattr(bpy.types.WindowManager, "cozystudio_integration_mode"):
-        del bpy.types.WindowManager.cozystudio_integration_mode
-    if hasattr(bpy.types.WindowManager, "cozystudio_integration_target"):
-        del bpy.types.WindowManager.cozystudio_integration_target
-    if hasattr(bpy.types.WindowManager, "cozystudio_conflict_strategy"):
-        del bpy.types.WindowManager.cozystudio_conflict_strategy
+    if hasattr(bpy.types.WindowManager, "gitblocks_commit_items"):
+        del bpy.types.WindowManager.gitblocks_commit_items
+    if hasattr(bpy.types.WindowManager, "gitblocks_commit_index"):
+        del bpy.types.WindowManager.gitblocks_commit_index
+    if hasattr(bpy.types.WindowManager, "gitblocks_commit_message"):
+        del bpy.types.WindowManager.gitblocks_commit_message
+    if hasattr(bpy.types.WindowManager, "gitblocks_branch_name"):
+        del bpy.types.WindowManager.gitblocks_branch_name
+    if hasattr(bpy.types.WindowManager, "gitblocks_branch_source"):
+        del bpy.types.WindowManager.gitblocks_branch_source
+    if hasattr(bpy.types.WindowManager, "gitblocks_branch_target"):
+        del bpy.types.WindowManager.gitblocks_branch_target
+    if hasattr(bpy.types.WindowManager, "gitblocks_integration_mode"):
+        del bpy.types.WindowManager.gitblocks_integration_mode
+    if hasattr(bpy.types.WindowManager, "gitblocks_integration_target"):
+        del bpy.types.WindowManager.gitblocks_integration_target
+    if hasattr(bpy.types.WindowManager, "gitblocks_conflict_strategy"):
+        del bpy.types.WindowManager.gitblocks_conflict_strategy
