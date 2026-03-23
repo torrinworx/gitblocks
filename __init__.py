@@ -9,12 +9,52 @@ bl_info = {
     "category": "Generic",
 }
 
-import bpy
 import os
 import sys
 import importlib
 import subprocess
 import threading
+import types
+
+try:
+    import bpy  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - allows unit-test imports outside Blender
+    bpy = types.ModuleType("bpy")
+    bpy.types = types.SimpleNamespace(Operator=object, AddonPreferences=object)
+    bpy.ops = types.SimpleNamespace(
+        preferences=types.SimpleNamespace(
+            addon_enable=lambda *args, **kwargs: {"CANCELLED"},
+            addon_disable=lambda *args, **kwargs: {"CANCELLED"},
+        ),
+        wm=types.SimpleNamespace(),
+        gitblocks=types.SimpleNamespace(),
+    )
+    bpy.utils = types.SimpleNamespace(
+        register_class=lambda *args, **kwargs: None,
+        unregister_class=lambda *args, **kwargs: None,
+        user_resource=lambda *args, **kwargs: "/tmp",
+    )
+    bpy.app = types.SimpleNamespace(
+        background=True,
+        timers=types.SimpleNamespace(
+            register=lambda *args, **kwargs: None,
+            unregister=lambda *args, **kwargs: None,
+            is_registered=lambda *args, **kwargs: False,
+        ),
+    )
+    bpy.context = types.SimpleNamespace(
+        window=None,
+        window_manager=types.SimpleNamespace(
+            modal_handler_add=lambda *args, **kwargs: None,
+            event_timer_add=lambda *args, **kwargs: None,
+            event_timer_remove=lambda *args, **kwargs: None,
+        ),
+        preferences=types.SimpleNamespace(addons={}),
+        scene=types.SimpleNamespace(collection=types.SimpleNamespace(objects=types.SimpleNamespace(link=lambda *args, **kwargs: None))),
+        view_layer=None,
+    )
+    bpy.data = types.SimpleNamespace(filepath="", meshes=types.SimpleNamespace(new=lambda *args, **kwargs: None), objects=types.SimpleNamespace(new=lambda *args, **kwargs: None))
+    sys.modules["bpy"] = bpy
 
 from .utils.timers import timers
 from .branding import ADDON_DESCRIPTION, ADDON_NAME, UI_LOG_PREFIX

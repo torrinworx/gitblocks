@@ -3,7 +3,15 @@ import time
 import shutil
 from pathlib import Path
 
-import bpy
+try:
+    import bpy  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - Blender-only dependency
+    bpy = None
+
+
+def _require_bpy():
+    if bpy is None:
+        raise RuntimeError("The bpy module is only available inside Blender")
 
 
 def parse_requirements(path: Path):
@@ -18,6 +26,7 @@ def parse_requirements(path: Path):
 
 
 def create_fresh_test_blend(target_dir: Path, filename: str = "test.blend"):
+    _require_bpy()
     target_dir.mkdir(parents=True, exist_ok=True)
     blend_path = target_dir / filename
     bpy.ops.wm.read_factory_settings(use_empty=False)
@@ -27,6 +36,7 @@ def create_fresh_test_blend(target_dir: Path, filename: str = "test.blend"):
 
 
 def wait_for_git_instance(ui_mod, timeout=3.0):
+    _require_bpy()
     start = time.time()
     while time.time() - start < timeout:
         git_inst = getattr(ui_mod, "git_instance", None)
@@ -38,6 +48,7 @@ def wait_for_git_instance(ui_mod, timeout=3.0):
 
 
 def wait_for_install_finished(gitblocks_mod, timeout=120.0):
+    _require_bpy()
     start = time.time()
     while time.time() - start < timeout:
         thread = getattr(gitblocks_mod, "_install_thread", None)
@@ -80,17 +91,20 @@ def assert_no_parked_changes(git_inst):
 
 
 def enable_addon(addon_name: str):
+    _require_bpy()
     result = bpy.ops.preferences.addon_enable(module=addon_name)
     if "FINISHED" not in result and "CANCELLED" not in result:
         raise RuntimeError(f"addon_enable returned {result}")
 
 
 def disable_addon(addon_name: str):
+    _require_bpy()
     if addon_name in bpy.context.preferences.addons:
         bpy.ops.preferences.addon_disable(module=addon_name)
 
 
 def install_addon_to_extensions(addon_src: Path, addon_name: str):
+    _require_bpy()
     ext_root = Path(bpy.utils.user_resource("EXTENSIONS"))
     user_repo = ext_root / "user_default"
     user_repo.mkdir(parents=True, exist_ok=True)
@@ -104,6 +118,7 @@ def install_addon_to_extensions(addon_src: Path, addon_name: str):
 
 
 def ensure_install_operator(gitblocks_mod):
+    _require_bpy()
     if hasattr(bpy.ops.gitblocks, "install_deps"):
         return
     try:
@@ -125,6 +140,7 @@ def ensure_install_operator(gitblocks_mod):
 
 
 def init_git_repo_for_test(ui_mod, timeout=5.0):
+    _require_bpy()
     git_inst = wait_for_git_instance(ui_mod, timeout=timeout)
     if git_inst is None:
         ui_mod.check_and_init_git()
@@ -175,6 +191,7 @@ def init_git_repo_for_test(ui_mod, timeout=5.0):
 
 
 def create_test_object(name="GitBlocksTestObject"):
+    _require_bpy()
     mesh = bpy.data.meshes.new(name + "Mesh")
     obj = bpy.data.objects.new(name, mesh)
     bpy.context.scene.collection.objects.link(obj)
@@ -182,12 +199,14 @@ def create_test_object(name="GitBlocksTestObject"):
 
 
 def ensure_tracking_assignments(git_inst):
+    _require_bpy()
     from gitblocks_addon.bl_git.tracking import Track
 
     Track(git_inst.bpy_protocol)._run_assign_loop()
 
 
 def wait_for_uuid(obj, timeout=3.0):
+    _require_bpy()
     start = time.time()
     while time.time() - start < timeout:
         uuid = getattr(obj, "gitblocks_uuid", None)
@@ -199,6 +218,7 @@ def wait_for_uuid(obj, timeout=3.0):
 
 
 def wait_for_block_file(git_inst, uuid, timeout=3.0):
+    _require_bpy()
     start = time.time()
     while time.time() - start < timeout:
         block_path = git_inst.blockspath / f"{uuid}.json"
@@ -209,6 +229,7 @@ def wait_for_block_file(git_inst, uuid, timeout=3.0):
 
 
 def wait_for_object_prefix(prefix, timeout=3.0):
+    _require_bpy()
     start = time.time()
     while time.time() - start < timeout:
         if bpy.context.view_layer:

@@ -2,9 +2,12 @@ import importlib
 from pathlib import Path
 
 import pytest
-import bpy
-
 from .helpers import enable_addon, init_git_repo_for_test
+
+try:
+    import bpy  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover - Blender-only dependency
+    bpy = None
 
 
 ADDON_MODULE = "gitblocks_addon"
@@ -12,6 +15,8 @@ ADDON_MODULE = "gitblocks_addon"
 
 @pytest.fixture(scope="session")
 def addon_enabled():
+    if bpy is None:
+        pytest.skip("Blender bpy module is not available")
     enable_addon(ADDON_MODULE)
     return importlib.import_module(ADDON_MODULE)
 
