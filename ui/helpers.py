@@ -1,6 +1,6 @@
-from pathlib import Path
-
 import bpy
+
+from ..bl_git.paths import extract_block_uuid
 
 
 def _status_abbrev(status: str) -> str:
@@ -19,14 +19,7 @@ def _status_abbrev(status: str) -> str:
 
 
 def _extract_block_uuid(path: str) -> str | None:
-    if not path:
-        return None
-    if not path.startswith(".cozystudio/blocks/") or not path.endswith(".json"):
-        return None
-    try:
-        return Path(path).stem
-    except Exception:
-        return None
+    return extract_block_uuid(path)
 
 
 def _build_name_cache(git_instance, entries):

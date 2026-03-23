@@ -9,6 +9,7 @@ import bpy
 from git import InvalidGitRepositoryError, NoSuchPathError, Repo
 
 from .. import bl_types
+from .paths import namespace_roots
 from ..utils.timers import timers
 from ..utils.write import WriteDict
 from .bootstrap import BootstrapMixin
@@ -51,9 +52,11 @@ class BpyGit(
         Track(self.bpy_protocol).start()
 
         self.path = Path(bpy.path.abspath("//")).resolve()
-        self.cozystudio_path = self.path / ".cozystudio"
-        self.blockspath = self.cozystudio_path / "blocks"
-        self.manifestpath = self.cozystudio_path / "manifest.json"
+        self.gitblocks_path, self.cozystudio_path = namespace_roots(self.path)
+        self.blockspath = self.gitblocks_path / "blocks"
+        self.manifestpath = self.gitblocks_path / "manifest.json"
+        self.legacy_blockspath = self.cozystudio_path / "blocks"
+        self.legacy_manifestpath = self.cozystudio_path / "manifest.json"
 
         self.repo = None
         self.manifest = None
@@ -103,7 +106,7 @@ class BpyGit(
             return
 
         try:
-            if self.manifestpath.exists():
+            if self.manifestpath.exists() or self.legacy_manifestpath.exists():
                 self.initiated = True
                 self.restore_ref()
                 self._ensure_bootstrap_file()

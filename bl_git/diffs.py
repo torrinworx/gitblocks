@@ -1,6 +1,8 @@
 from fnmatch import fnmatch
 
+from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID
 from ..utils.redraw import redraw
+from .paths import CANONICAL_MANIFEST_REL, LEGACY_MANIFEST_REL
 
 
 class DiffsMixin:
@@ -8,8 +10,8 @@ class DiffsMixin:
         IGNORE_PATTERNS = [
             "*.blend",
             "*.blend1",
-            ".cozystudio/manifest",
-            ".cozystudio/manifest.json",
+            CANONICAL_MANIFEST_REL,
+            LEGACY_MANIFEST_REL,
         ]
 
         if not changes:
@@ -93,7 +95,7 @@ class DiffsMixin:
 
         if self.diffs != final_diffs:
             self.diffs = final_diffs
-            redraw("COZYSTUDIO_PT_changes")
-            redraw("COZYSTUDIO_PT_branches")
+            redraw(CHANGES_PANEL_ID)
+            redraw(BRANCHES_PANEL_ID)
 
         self.refresh_ui_state()

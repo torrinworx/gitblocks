@@ -6,6 +6,7 @@ import bpy
 from deepdiff import DeepHash
 
 from .constants import MANIFEST_BLOCKS_KEY, MANIFEST_GROUP_KEY, MANIFEST_GROUPS_KEY
+from .paths import extract_block_uuid, manifest_relpath
 from .json_io import serialize_json_data
 
 
@@ -281,11 +282,11 @@ class StateMixin:
         if source == "WORKTREE":
             return self._load_manifest_working()
         if source == "INDEX":
-            manifest = self._load_json_for_source(
-                self.manifestpath.relative_to(self.path).as_posix(),
-                "INDEX",
-            )
-            return manifest if isinstance(manifest, dict) else self._empty_manifest()
+            for candidate in (manifest_relpath(), manifest_relpath(namespace=".cozystudio")):
+                manifest = self._load_json_for_source(candidate, "INDEX")
+                if isinstance(manifest, dict):
+                    return manifest
+            return self._empty_manifest()
         if source == "HEAD":
             if self.repo is None or not self.repo.head.is_valid():
                 return self._empty_manifest()
@@ -387,12 +388,7 @@ class StateMixin:
 
     def _build_ui_diff_row(self, diff, manifests, entries, groups, name_cache):
         path = diff.get("path", "")
-        uuid = None
-        if path.startswith(".cozystudio/blocks/") and path.endswith(".json"):
-            try:
-                uuid = Path(path).stem
-            except Exception:
-                uuid = None
+        uuid = extract_block_uuid(path)
 
         before_source, after_source = self._diff_sources_for_status(diff.get("status", ""))
         before_block = self._load_json_for_source(path, before_source) if uuid else None

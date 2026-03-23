@@ -3,6 +3,7 @@ import traceback
 
 from git import Repo
 
+from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID, HISTORY_PANEL_ID
 from ..utils.redraw import redraw
 from ..utils.timers import timers
 from ..utils.write import WriteDict
@@ -14,6 +15,7 @@ from .constants import (
     MANIFEST_VERSION,
     MANIFEST_VERSION_KEY,
 )
+from .paths import CANONICAL_BLOCKS_PREFIX, LEGACY_BLOCKS_PREFIX, block_relpath
 
 
 class OpsMixin:
@@ -84,7 +86,7 @@ class OpsMixin:
 
     def init(self):
         if not self.initiated:
-            self.cozystudio_path.mkdir(exist_ok=True)
+            self.gitblocks_path.mkdir(exist_ok=True)
             self.blockspath.mkdir(exist_ok=True)
             bootstrap_name = self._bootstrap_name()
             self.manifest = WriteDict(
@@ -195,7 +197,7 @@ class OpsMixin:
             blocks = (self.state or {}).get("blocks", {})
             block_paths = []
             for uuid in entries:
-                block_paths.append(f".cozystudio/blocks/{uuid}.json")
+                block_paths.append(block_relpath(uuid))
                 block_file = self.blockspath / f"{uuid}.json"
                 if not block_file.exists():
                     data = blocks.get(uuid)
@@ -216,8 +218,8 @@ class OpsMixin:
             self._update_diffs()
             self.repo.index.commit(message)
             self._update_diffs()
-            redraw("COZYSTUDIO_PT_history")
-            redraw("COZYSTUDIO_PT_branches")
+            redraw(HISTORY_PANEL_ID)
+            redraw(BRANCHES_PANEL_ID)
             return {
                 "ok": True,
                 "errors": [],
@@ -271,16 +273,16 @@ class OpsMixin:
             return
         self._check(interactive=True)
         self._update_diffs()
-        redraw("COZYSTUDIO_PT_changes")
-        redraw("COZYSTUDIO_PT_history")
-        redraw("COZYSTUDIO_PT_branches")
+        redraw(CHANGES_PANEL_ID)
+        redraw(HISTORY_PANEL_ID)
+        redraw(BRANCHES_PANEL_ID)
 
     @staticmethod
     def _group_stage_paths(staged_paths, entries, groups):
         staged_block_paths = {
             path
             for path in staged_paths
-            if path.startswith(".cozystudio/blocks/") and path.endswith(".json")
+            if path.startswith(CANONICAL_BLOCKS_PREFIX) or path.startswith(LEGACY_BLOCKS_PREFIX)
         }
         staged_uuids = {Path(path).stem for path in staged_block_paths}
         staged_group_ids = set()
@@ -296,7 +298,7 @@ class OpsMixin:
             if not members:
                 members = [group_id]
             for member_uuid in members:
-                path = f".cozystudio/blocks/{member_uuid}.json"
+                path = block_relpath(member_uuid)
                 group_stage_paths.add(path)
 
         return sorted(group_stage_paths)

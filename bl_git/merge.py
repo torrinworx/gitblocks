@@ -2,6 +2,7 @@ from fnmatch import fnmatch
 
 from deepdiff import DeepHash
 
+from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID, HISTORY_PANEL_ID
 from ..utils.redraw import redraw
 from ..utils.write import WriteDict
 from .constants import (
@@ -13,6 +14,14 @@ from .constants import (
     MANIFEST_VERSION_KEY,
 )
 from .json_io import normalize_json_data, serialize_json_data
+from .paths import (
+    CANONICAL_BLOCKS_PREFIX,
+    CANONICAL_MANIFEST_REL,
+    CANONICAL_NAMESPACE,
+    LEGACY_BLOCKS_PREFIX,
+    LEGACY_MANIFEST_REL,
+    LEGACY_NAMESPACE,
+)
 
 
 class MergeMixin:
@@ -150,9 +159,9 @@ class MergeMixin:
             if ours_ref == "WORKING_TREE":
                 self.restore_ref()
             self._update_diffs()
-            redraw("COZYSTUDIO_PT_changes")
-            redraw("COZYSTUDIO_PT_history")
-            redraw("COZYSTUDIO_PT_branches")
+            redraw(CHANGES_PANEL_ID)
+            redraw(HISTORY_PANEL_ID)
+            redraw(BRANCHES_PANEL_ID)
         except Exception as e:
             errors.append(str(e))
         finally:
@@ -197,11 +206,16 @@ class MergeMixin:
         staged_paths = []
         try:
             for path in self.repo.untracked_files:
-                if path.startswith(".cozystudio/"):
+                if path.startswith(f"{CANONICAL_NAMESPACE}/") or path.startswith(
+                    f"{LEGACY_NAMESPACE}/"
+                ):
                     staged_paths.append(path)
             for diff in self.repo.index.diff(None):
                 path = diff.b_path or diff.a_path
-                if path and path.startswith(".cozystudio/"):
+                if path and (
+                    path.startswith(f"{CANONICAL_NAMESPACE}/")
+                    or path.startswith(f"{LEGACY_NAMESPACE}/")
+                ):
                     staged_paths.append(path)
             if staged_paths:
                 self.repo.index.add(sorted(set(staged_paths)))
@@ -407,10 +421,15 @@ class MergeMixin:
     def _cozy_dirty_paths(self, dirty_paths):
         cozy_paths = set()
         for path in dirty_paths or set():
-            if path in {".cozystudio/manifest", ".cozystudio/manifest.json"}:
+            if path in {
+                CANONICAL_MANIFEST_REL,
+                LEGACY_MANIFEST_REL,
+                CANONICAL_MANIFEST_REL.removesuffix(".json"),
+                LEGACY_MANIFEST_REL.removesuffix(".json"),
+            }:
                 cozy_paths.add(path)
                 continue
-            if path.startswith(".cozystudio/blocks/"):
+            if path.startswith(CANONICAL_BLOCKS_PREFIX) or path.startswith(LEGACY_BLOCKS_PREFIX):
                 cozy_paths.add(path)
         return cozy_paths
 

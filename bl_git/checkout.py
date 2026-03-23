@@ -1,10 +1,13 @@
 from collections import defaultdict, deque
+import json
 
 import bpy
 
+from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID, HISTORY_PANEL_ID
 from ..utils.redraw import redraw
 from ..utils.write import WriteDict
 from .constants import MANIFEST_BLOCKS_KEY
+from .paths import manifest_relpath
 
 
 class CheckoutMixin:
@@ -38,9 +41,9 @@ class CheckoutMixin:
             self.last_integrity_report = integrity
             self._update_diffs()
 
-            redraw("COZYSTUDIO_PT_changes")
-            redraw("COZYSTUDIO_PT_history")
-            redraw("COZYSTUDIO_PT_branches")
+            redraw(CHANGES_PANEL_ID)
+            redraw(HISTORY_PANEL_ID)
+            redraw(BRANCHES_PANEL_ID)
         finally:
             self.suspend_checks = False
 
@@ -60,8 +63,8 @@ class CheckoutMixin:
             fetched.append(remote.name)
 
         self.refresh_ui_state()
-        redraw("COZYSTUDIO_PT_history")
-        redraw("COZYSTUDIO_PT_branches")
+        redraw(HISTORY_PANEL_ID)
+        redraw(BRANCHES_PANEL_ID)
         return fetched
 
     def create_branch(self, branch_name, ref=None):
@@ -91,9 +94,9 @@ class CheckoutMixin:
 
             self._update_diffs()
 
-            redraw("COZYSTUDIO_PT_changes")
-            redraw("COZYSTUDIO_PT_history")
-            redraw("COZYSTUDIO_PT_branches")
+            redraw(CHANGES_PANEL_ID)
+            redraw(HISTORY_PANEL_ID)
+            redraw(BRANCHES_PANEL_ID)
         finally:
             self.suspend_checks = False
 
@@ -179,7 +182,9 @@ class CheckoutMixin:
             "-m",
             message,
             "--",
-            ".cozystudio/manifest.json",
+            manifest_relpath(namespace=".gitblocks"),
+            manifest_relpath(namespace=".cozystudio"),
+            ".gitblocks/blocks",
             ".cozystudio/blocks",
         )
         after_entries = self._managed_carryover_entries()
@@ -219,7 +224,9 @@ class CheckoutMixin:
                     "--staged",
                     "--worktree",
                     "--",
-                    ".cozystudio/manifest.json",
+                    manifest_relpath(namespace=".gitblocks"),
+                    manifest_relpath(namespace=".cozystudio"),
+                    ".gitblocks/blocks",
                     ".cozystudio/blocks",
                 )
             except Exception:
@@ -268,9 +275,9 @@ class CheckoutMixin:
 
             self._update_diffs()
 
-            redraw("COZYSTUDIO_PT_changes")
-            redraw("COZYSTUDIO_PT_history")
-            redraw("COZYSTUDIO_PT_branches")
+            redraw(CHANGES_PANEL_ID)
+            redraw(HISTORY_PANEL_ID)
+            redraw(BRANCHES_PANEL_ID)
         finally:
             self.suspend_checks = False
 
@@ -278,10 +285,22 @@ class CheckoutMixin:
             self.reapply_parked_changes()
 
     def _load_working_manifest(self):
-        if not self.manifestpath.exists():
+        manifest_path = None
+        if self.manifestpath.exists():
+            manifest_path = self.manifestpath
+        elif self.legacy_manifestpath.exists():
+            manifest_path = self.legacy_manifestpath
+
+        if manifest_path is None:
             self.manifest = None
             return
-        self.manifest = WriteDict(self.manifestpath)
+
+        if manifest_path == self.manifestpath:
+            self.manifest = WriteDict(self.manifestpath)
+        else:
+            with open(manifest_path, "r", encoding="utf-8") as handle:
+                data = json.load(handle)
+            self.manifest = WriteDict(self.manifestpath, data=data if isinstance(data, dict) else {})
         self._ensure_manifest_schema()
 
     def _restore_from_manifest(self):

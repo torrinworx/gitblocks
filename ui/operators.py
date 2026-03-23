@@ -5,6 +5,7 @@ from pathlib import Path
 import bpy
 
 from ..branding import BRAND_NAME
+from ..bl_git.paths import block_relpath, extract_block_uuid
 from . import state
 
 
@@ -57,7 +58,7 @@ class _CozyOperatorMixin:
         group = ((state.git_instance.state or {}).get("groups") or {}).get(group_id)
         if not group:
             return None
-        return [f".cozystudio/blocks/{uuid}.json" for uuid in group.get("members", [])]
+        return [block_relpath(uuid) for uuid in group.get("members", [])]
 
     def _refresh_and_validate(self):
         state.git_instance.refresh_all()
@@ -319,10 +320,8 @@ class COZYSTUDIO_OT_RevertChange(_CozyOperatorMixin, bpy.types.Operator):
             traceback.print_exc()
             return {"CANCELLED"}
 
-        if self.file_path.startswith(".cozystudio/blocks/") and self.file_path.endswith(
-            ".json"
-        ):
-            uuid = Path(self.file_path).stem
+        uuid = extract_block_uuid(self.file_path)
+        if uuid:
             if file_abs.exists():
                 try:
                     data = state.git_instance._read(uuid)

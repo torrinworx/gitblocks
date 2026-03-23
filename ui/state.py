@@ -3,6 +3,7 @@ from pathlib import Path
 import bpy
 from bpy.app.handlers import persistent
 
+from ..branding import HISTORY_PANEL_ID
 from ..utils.redraw import redraw
 
 git_instance = None
@@ -51,7 +52,7 @@ def check_and_init_git():
 
     try:
         if git_instance:
-            redraw("COZYSTUDIO_PT_history")
+            redraw(HISTORY_PANEL_ID)
     except Exception:
         pass
     return None

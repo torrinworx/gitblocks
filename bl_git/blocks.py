@@ -3,6 +3,7 @@ import os
 import traceback
 
 from .json_io import default_json_decoder, serialize_json_data
+from .paths import block_relpath
 
 
 class BlocksMixin:
@@ -30,32 +31,36 @@ class BlocksMixin:
             print(block_str)
 
     def _read(self, cozystudio_uuid):
-        block_path = self.blockspath / f"{cozystudio_uuid}.json"
-        if not block_path.exists():
-            raise FileNotFoundError(f"Data file not found: {block_path}")
-
-        with open(block_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            data = default_json_decoder(data)
-        return data
+        for block_path in (
+            self.blockspath / f"{cozystudio_uuid}.json",
+            self.legacy_blockspath / f"{cozystudio_uuid}.json",
+        ):
+            if block_path.exists():
+                with open(block_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    data = default_json_decoder(data)
+                return data
+        raise FileNotFoundError(f"Data file not found: {self.blockspath / f'{cozystudio_uuid}.json'}")
 
     def _load_block_data(self, ref, uuid):
         if ref == "WORKING_TREE":
-            block_path = self.blockspath / f"{uuid}.json"
-            if not block_path.exists():
-                return None
-            with open(block_path, "r", encoding="utf-8") as handle:
-                return default_json_decoder(json.load(handle))
+            for block_dir in (self.blockspath, self.legacy_blockspath):
+                block_path = block_dir / f"{uuid}.json"
+                if block_path.exists():
+                    with open(block_path, "r", encoding="utf-8") as handle:
+                        return default_json_decoder(json.load(handle))
+            return None
 
         if not ref:
             return None
 
-        block_rel = os.path.join(".cozystudio", "blocks", f"{uuid}.json")
-        try:
-            raw = self.repo.git.show(f"{ref}:{block_rel}")
-            return default_json_decoder(json.loads(raw))
-        except Exception:
-            return None
+        for block_rel in (block_relpath(uuid), block_relpath(uuid, namespace=".cozystudio")):
+            try:
+                raw = self.repo.git.show(f"{ref}:{block_rel}")
+                return default_json_decoder(json.loads(raw))
+            except Exception:
+                continue
+        return None
 
     def _write_merged_blocks(self, merged_blocks):
         existing = {

@@ -21,3 +21,12 @@ LEGACY_ADDON_SLUG = LEGACY_BRAND_SLUG
 UI_BRAND_NAME = BRAND_NAME
 UI_CATEGORY = BRAND_NAME
 UI_LOG_PREFIX = BRAND_NAME
+
+# Compatibility panel ids remain centralized here so backend redraw hooks can
+# swap namespaces without touching call sites.
+LEGACY_PANEL_PREFIX = f"{LEGACY_BRAND_SLUG.upper()}_PT"
+MAIN_PANEL_ID = f"{LEGACY_PANEL_PREFIX}_main"
+CHANGES_PANEL_ID = f"{LEGACY_PANEL_PREFIX}_changes"
+HISTORY_PANEL_ID = f"{LEGACY_PANEL_PREFIX}_history"
+BRANCHES_PANEL_ID = f"{LEGACY_PANEL_PREFIX}_branches"
+CONFLICTS_PANEL_ID = f"{LEGACY_PANEL_PREFIX}_conflicts"

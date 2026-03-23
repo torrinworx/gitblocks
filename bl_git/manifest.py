@@ -11,6 +11,7 @@ from .constants import (
     MANIFEST_VERSION,
     MANIFEST_VERSION_KEY,
 )
+from .paths import extract_block_uuid, manifest_relpath
 
 
 class ManifestMixin:
@@ -62,7 +63,7 @@ class ManifestMixin:
             del self.manifest["conflicts"]
 
     def _manifest(self, changes: list[str]):
-        changes = [c for c in changes if c.startswith(".cozystudio/blocks/")]
+        changes = [c for c in changes if extract_block_uuid(c)]
         if not changes:
             return
 
@@ -211,27 +212,30 @@ class ManifestMixin:
         if not ref:
             return self._empty_manifest()
 
-        manifest_rel = os.path.relpath(self.manifestpath, self.path)
-        try:
-            raw = self.repo.git.show(f"{ref}:{manifest_rel}")
-            data = json.loads(raw)
-            if not isinstance(data, dict):
-                return self._empty_manifest()
-            return data
-        except Exception:
-            return self._empty_manifest()
+        for manifest_rel in (manifest_relpath(), manifest_relpath(namespace=".cozystudio")):
+            try:
+                raw = self.repo.git.show(f"{ref}:{manifest_rel}")
+                data = json.loads(raw)
+                if not isinstance(data, dict):
+                    continue
+                return data
+            except Exception:
+                continue
+        return self._empty_manifest()
 
     def _load_manifest_working(self):
-        if not self.manifestpath.exists():
-            return self._empty_manifest()
-        try:
-            with open(self.manifestpath, "r", encoding="utf-8") as handle:
-                data = json.load(handle)
-            if not isinstance(data, dict):
-                return self._empty_manifest()
-            return data
-        except Exception:
-            return self._empty_manifest()
+        for manifest_file in (self.manifestpath, self.legacy_manifestpath):
+            if not manifest_file.exists():
+                continue
+            try:
+                with open(manifest_file, "r", encoding="utf-8") as handle:
+                    data = json.load(handle)
+                if not isinstance(data, dict):
+                    continue
+                return data
+            except Exception:
+                continue
+        return self._empty_manifest()
 
     def _empty_manifest(self):
         return {
