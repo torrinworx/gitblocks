@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import test as harness
+from tests import harness
 
 
 def test_cli_version_wins_over_env_version(tmp_path, monkeypatch):
