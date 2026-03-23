@@ -1,7 +1,7 @@
 bl_info = {
-    "name": "Cozy Studio",
+    "name": "GitBlocks",
     "author": "Torrin Leonard",
-    "description": "",
+    "description": "Git-backed datablock version control for GitBlocks",
     "blender": (4, 5, 3),
     "version": (0, 0, 1),
     "location": "",
@@ -17,6 +17,10 @@ import subprocess
 import threading
 
 from .utils.timers import timers
+from .branding import ADDON_DESCRIPTION, ADDON_NAME, UI_LOG_PREFIX
+
+bl_info["name"] = ADDON_NAME
+bl_info["description"] = ADDON_DESCRIPTION
 
 IMPORT_NAME_MAP = {"GitPython": "git"}
 
@@ -176,7 +180,7 @@ class CozyStudioPreferences(bpy.types.AddonPreferences):
         layout = self.layout
 
         if INSTALL_IN_PROGRESS:
-            layout.label(text="Installing dependencies...", icon="FILE_REFRESH")
+            layout.label(text=f"Installing {ADDON_NAME} dependencies...", icon="FILE_REFRESH")
         elif DEPENDENCIES_INSTALLED:
             layout.label(text="All dependencies are installed.", icon="CHECKMARK")
         else:
@@ -217,7 +221,7 @@ def register():
             bpy.utils.register_class(CozyStudioPreferences)
         _core_classes_registered = True
     except Exception as e:
-        print("[CozyStudio] Error registering core classes:", e)
+        print(f"[{UI_LOG_PREFIX}] Error registering core classes:", e)
 
     if DEPENDENCIES_INSTALLED:
         try:
@@ -229,7 +233,7 @@ def register():
         except ImportError:
             pass  # auto_load not found, skipping registration.
         except Exception as e:
-            print("[CozyStudio] Error in auto_load.register:", e)
+            print(f"[{UI_LOG_PREFIX}] Error in auto_load.register:", e)
 
 
 def unregister():
@@ -241,7 +245,7 @@ def unregister():
             auto_load.unregister()
             timers.unregister_all()
         except Exception as e:
-            print("[CozyStudio] Error in auto_load.unregister:", e)
+            print(f"[{UI_LOG_PREFIX}] Error in auto_load.unregister:", e)
 
     global _core_classes_registered
     if _core_classes_registered:
@@ -250,11 +254,11 @@ def unregister():
             if existing_prefs is not None and getattr(existing_prefs, "bl_rna", None) is not None:
                 bpy.utils.unregister_class(existing_prefs)
         except Exception as e:
-            print("[CozyStudio] Error unregistering preferences:", e)
+            print(f"[{UI_LOG_PREFIX}] Error unregistering preferences:", e)
         try:
             existing_install = getattr(bpy.types, COZYSTUDIO_OT_install_deps.__name__, None)
             if existing_install is not None and getattr(existing_install, "bl_rna", None) is not None:
                 bpy.utils.unregister_class(existing_install)
         except Exception as e:
-            print("[CozyStudio] Error unregistering install operator:", e)
+            print(f"[{UI_LOG_PREFIX}] Error unregistering install operator:", e)
     _core_classes_registered = False
