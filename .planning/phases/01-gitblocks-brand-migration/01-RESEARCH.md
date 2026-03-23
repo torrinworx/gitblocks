@@ -79,6 +79,19 @@ The following names stay frozen for this phase and should be treated as compatib
 | `cozystudio_uuid` metadata | Freeze | Must remain loadable for existing datablocks |
 | `COZYSTUDIO_*` redraw hooks | Freeze | Keep aligned with registered class IDs |
 
+## Exhaustiveness Check
+
+Every major legacy surface has an explicit owner or compatibility decision:
+
+- **UI copy:** rename to GitBlocks now.
+- **Backend paths:** `.cozystudio/` becomes a compatibility alias, with `.gitblocks/` as the canonical target.
+- **Redraw / registration IDs:** freeze `COZYSTUDIO_*` and `bpy.ops.cozystudio.*` for compatibility.
+- **Docs:** rewrite public branding to GitBlocks, keeping only compatibility notes where required.
+- **Harness scripts:** leave `COZYSTUDIO_*` env names frozen until a separate tooling migration plan.
+- **Tests:** update later implementation phases so assertions follow the new brand contract instead of leaking Cozy Studio prose.
+
+Any remaining Cozy reference should be treated as intentional compatibility aliasing, not an accidental omission.
+
 ## Repository Notes
 
 - The current codebase is a mixed brand state: public copy says Cozy Studio, while the implementation already assumes a `cozystudio` persistence namespace.
