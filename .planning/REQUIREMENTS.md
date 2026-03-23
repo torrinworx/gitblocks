@@ -22,6 +22,13 @@ Planned for the GitBlocks brand cleanup phase.
 - [x] **BRAND-06**: Remove compatibility aliases once all consumers have moved to GitBlocks.
 - [x] **BRAND-07**: Rename remaining internal identifiers if and only if the compatibility layer is retired.
 
+### Multi-version Blender Test Harness
+
+- [x] **TEST-01**: Define a version manifest, cache layout, and official Blender release URL rules for local test installs.
+- [x] **TEST-02**: Download Blender releases from the official archive, verify checksums, and reuse cached installs instead of redownloading.
+- [x] **TEST-03**: Select a Blender version from CLI or environment without breaking the current single-binary fallback.
+- [x] **TEST-04**: List installed Blender versions and run the harness across a version matrix with clear per-version results.
+
 ## Out of Scope
 
 | Feature | Reason |
@@ -40,10 +47,14 @@ Planned for the GitBlocks brand cleanup phase.
 | BRAND-05 | Phase 05 | Complete |
 | BRAND-06 | Phase 02 | Complete |
 | BRAND-07 | Phase 02 | Complete |
+| TEST-01 | Phase 03 | Complete |
+| TEST-02 | Phase 03 | Complete |
+| TEST-03 | Phase 03 | Complete |
+| TEST-04 | Phase 03 | Complete |
 
 **Coverage:**
-- v1 requirements: 5 total
-- Mapped to phases: 5
+- v1 requirements: 9 total
+- Mapped to phases: 9
 - Unmapped: 0 ✓
 
 ---

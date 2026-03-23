@@ -24,3 +24,13 @@ Plans:
 - [x] 02-gitblocks-brand-cleanup-02-PLAN.md — remove legacy storage namespace and internal identifier fallbacks
 - [x] 02-gitblocks-brand-cleanup-03-PLAN.md — update tests and harnesses to the renamed identifiers
 - [x] 02-gitblocks-brand-cleanup-04-PLAN.md — finish docs, metadata, and the final zero-legacy sweep
+
+## Phase 03: Multi-version Blender test harness
+
+Goal: Download, cache, and select multiple official Blender versions for automated test runs while preserving the current single-binary fallback.
+
+**Requirements:** [TEST-01, TEST-02, TEST-03, TEST-04]
+
+Plans:
+- [x] 03-multi-version-blender-test-harness-01-PLAN.md — define the Blender version registry, cache layout, and download/checksum contract
+- [x] 03-multi-version-blender-test-harness-02-PLAN.md — wire version selection into the test runner, docs, and verification workflow
