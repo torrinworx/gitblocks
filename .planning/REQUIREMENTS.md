@@ -29,6 +29,10 @@ Planned for the GitBlocks brand cleanup phase.
 - [x] **TEST-03**: Select a Blender version from CLI or environment without breaking the current single-binary fallback.
 - [x] **TEST-04**: List installed Blender versions and run the harness across a version matrix with clear per-version results.
 
+### Blender Matrix Import Path Repair
+
+- [x] **TEST-05**: Make the Blender test harness importable through a package-safe path inside Blender's embedded pytest environment, so `tests/integration/test_blender_matrix.py` collects without `ModuleNotFoundError: No module named 'test'`.
+
 ## Out of Scope
 
 | Feature | Reason |
@@ -51,10 +55,11 @@ Planned for the GitBlocks brand cleanup phase.
 | TEST-02 | Phase 03 | Complete |
 | TEST-03 | Phase 03 | Complete |
 | TEST-04 | Phase 03 | Complete |
+| TEST-05 | Phase 04 | Planned |
 
 **Coverage:**
-- v1 requirements: 9 total
-- Mapped to phases: 9
+- Requirements: 10 total
+- Mapped to phases: 10
 - Unmapped: 0 ✓
 
 ---

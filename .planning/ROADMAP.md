@@ -34,3 +34,12 @@ Goal: Download, cache, and select multiple official Blender versions for automat
 Plans:
 - [x] 03-multi-version-blender-test-harness-01-PLAN.md — define the Blender version registry, cache layout, and download/checksum contract
 - [x] 03-multi-version-blender-test-harness-02-PLAN.md — wire version selection into the test runner, docs, and verification workflow
+
+## Phase 04: Blender test harness import-path repair
+
+Goal: Make the Blender embedded pytest run collect `tests/integration/test_blender_matrix.py` without `ModuleNotFoundError: No module named 'test'` by exposing the root harness through a package-safe import path.
+
+**Requirements:** [TEST-05]
+
+Plans:
+- [x] 04-blender-test-harness-import-path-repair-01-PLAN.md — expose the harness through the tests package and switch matrix coverage to the package-safe import path

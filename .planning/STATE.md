@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: complete
-stopped_at: Completed 03-multi-version-blender-test-harness plans
-last_updated: "2026-03-23T22:55:53.183Z"
+status: completed
+stopped_at: Completed 04-blender-test-harness-import-path-repair-PLAN.md
+last_updated: "2026-03-23T23:18:23.572Z"
 last_activity: 2026-03-23
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 11
-  completed_plans: 12
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 12
+  completed_plans: 13
   percent: 100
 ---
 
@@ -60,6 +60,7 @@ Progress: [██████████] 100%
 | Phase 03-multi-version-blender-test-harness P01 | 45m | 2 tasks | 5 files |
 | Phase 03-multi-version-blender-test-harness P02 | 1h 10m | 3 tasks | 5 files |
 | Phase 03-multi-version-blender-test-harness P02 | 1h 10m | 3 tasks | 5 files |
+| Phase 04-blender-test-harness-import-path-repair P01 | 20min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Recent decisions affecting current work:
 - [Phase 02-gitblocks-brand-cleanup]: Any hidden Cozy or legacy namespace references discovered during the final sweep must be removed before completion.
 - [Phase 03-multi-version-blender-test-harness]: Resolve Blender release URLs from explicit version strings and cache installs under ~/.cache/gitblocks/blender by default.
 - [Phase 03-multi-version-blender-test-harness]: Expand version matrices in the outer harness, then pass one selected version into each Blender run so cache paths stay isolated.
+- [Phase 04-blender-test-harness-import-path-repair]: Load the root test.py harness through importlib so Blender's embedded pytest can resolve the package-safe tests.harness import without changing CLI behavior.
+- [Phase 04-blender-test-harness-import-path-repair]: Keep the matrix test assertions unchanged and limit the phase to the import-path repair only.
 
 ### Pending Todos
 
@@ -103,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-23T22:55:49.291Z
-Stopped at: Completed 03-multi-version-blender-test-harness plans
+Last session: 2026-03-23T23:18:23.570Z
+Stopped at: Completed 04-blender-test-harness-import-path-repair-PLAN.md
 Resume file: None
