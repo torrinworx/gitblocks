@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import test as harness
+from tests import harness
 
 
 def test_help_includes_blender_version_flags():
