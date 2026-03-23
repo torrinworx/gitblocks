@@ -56,14 +56,14 @@ def _ensure_base_branch(git_inst):
     return "main"
 
 
-def _assert_only_cozy_dirty(git_inst):
+def _assert_only_gitblocks_dirty(git_inst):
     working_paths = get_working_paths(git_inst)
-    non_cozy = {
+    non_gitblocks = {
         path
         for path in working_paths
-        if not path.startswith(".cozystudio/") and not path.endswith(".blend")
+        if not path.startswith(".gitblocks/") and not path.endswith(".blend")
     }
-    assert not non_cozy, f"Unexpected non-Cozy dirty paths: {sorted(non_cozy)}"
+    assert not non_gitblocks, f"Unexpected non-GitBlocks dirty paths: {sorted(non_gitblocks)}"
 
 
 def _reapply_parked_if_needed(git_inst):
@@ -76,10 +76,10 @@ def _reapply_parked_if_needed(git_inst):
 @pytest.mark.order(100)
 @pytest.mark.flow
 def test_flow_happy_path_merge():
-    git_inst = _setup_flow_repo("cozy_flow_happy_")
+    git_inst = _setup_flow_repo("gitblocks_flow_happy_")
     base_branch = _ensure_base_branch(git_inst)
 
-    obj = create_test_object(name="CozyFlowHappyObject")
+    obj = create_test_object(name="GitBlocksFlowHappyObject")
     obj.location.x = 1.0
     ensure_tracking_assignments(git_inst)
 
@@ -117,7 +117,7 @@ def test_flow_happy_path_merge():
     assert abs(restored.location.x - 4.0) < 1e-4
 
     assert_manifest_integrity_ok(git_inst)
-    _assert_only_cozy_dirty(git_inst)
+    _assert_only_gitblocks_dirty(git_inst)
     assert_no_parked_changes(git_inst)
 
     git_inst.repo.git.branch("-D", "flow_happy_feature")
@@ -126,10 +126,10 @@ def test_flow_happy_path_merge():
 @pytest.mark.order(110)
 @pytest.mark.flow
 def test_flow_checkout_with_dirty_changes_reapplies():
-    git_inst = _setup_flow_repo("cozy_flow_dirty_")
+    git_inst = _setup_flow_repo("gitblocks_flow_dirty_")
     base_branch = _ensure_base_branch(git_inst)
 
-    obj = create_test_object(name="CozyFlowDirtyObject")
+    obj = create_test_object(name="GitBlocksFlowDirtyObject")
     obj.location.x = 0.0
     ensure_tracking_assignments(git_inst)
     uuid = wait_for_uuid(obj)
@@ -177,7 +177,7 @@ def test_flow_checkout_with_dirty_changes_reapplies():
 @pytest.mark.order(120)
 @pytest.mark.flow
 def test_flow_conflict_resolution_paths():
-    git_inst = _setup_flow_repo("cozy_flow_conflict_")
+    git_inst = _setup_flow_repo("gitblocks_flow_conflict_")
     base_branch = _ensure_base_branch(git_inst)
 
     def make_conflict(branch_name: str, object_name: str):
@@ -223,7 +223,7 @@ def test_flow_conflict_resolution_paths():
         assert "FINISHED" in merge_result
         return uuid
 
-    theirs_uuid = make_conflict("flow_conflict_theirs", "CozyFlowTheirsObject")
+    theirs_uuid = make_conflict("flow_conflict_theirs", "GitBlocksFlowTheirsObject")
     result = bpy.ops.cozystudio.resolve_conflict_version(
         "EXEC_DEFAULT", conflict_uuid=theirs_uuid, resolution="theirs"
     )
@@ -234,7 +234,7 @@ def test_flow_conflict_resolution_paths():
     assert abs(restored.location.x - 1.0) < 1e-4
     git_inst.repo.git.branch("-D", "flow_conflict_theirs")
 
-    ours_uuid = make_conflict("flow_conflict_ours", "CozyFlowOursObject")
+    ours_uuid = make_conflict("flow_conflict_ours", "GitBlocksFlowOursObject")
     result = bpy.ops.cozystudio.resolve_conflict_version(
         "EXEC_DEFAULT", conflict_uuid=ours_uuid, resolution="ours"
     )
@@ -245,7 +245,7 @@ def test_flow_conflict_resolution_paths():
     assert abs(restored.location.x - 2.0) < 1e-4
     git_inst.repo.git.branch("-D", "flow_conflict_ours")
 
-    manual_uuid = make_conflict("flow_conflict_manual", "CozyFlowManualObject")
+    manual_uuid = make_conflict("flow_conflict_manual", "GitBlocksFlowManualObject")
     result = bpy.ops.cozystudio.resolve_conflict(
         "EXEC_DEFAULT", conflict_uuid=manual_uuid
     )
@@ -263,10 +263,10 @@ def test_flow_conflict_resolution_paths():
 @pytest.mark.order(130)
 @pytest.mark.flow
 def test_flow_rebase_chain():
-    git_inst = _setup_flow_repo("cozy_flow_rebase_")
+    git_inst = _setup_flow_repo("gitblocks_flow_rebase_")
     base_branch = _ensure_base_branch(git_inst)
 
-    obj = create_test_object(name="CozyFlowRebaseObject")
+    obj = create_test_object(name="GitBlocksFlowRebaseObject")
     obj.location.x = 0.0
     ensure_tracking_assignments(git_inst)
     uuid = wait_for_uuid(obj)
@@ -314,7 +314,7 @@ def test_flow_rebase_chain():
     assert abs(restored.location.x - 5.0) < 1e-4
 
     assert_manifest_integrity_ok(git_inst)
-    _assert_only_cozy_dirty(git_inst)
+    _assert_only_gitblocks_dirty(git_inst)
     assert_no_parked_changes(git_inst)
 
     git_inst.repo.git.checkout(base_branch)
@@ -325,10 +325,10 @@ def test_flow_rebase_chain():
 @pytest.mark.order(140)
 @pytest.mark.flow
 def test_flow_order_stress_sequence():
-    git_inst = _setup_flow_repo("cozy_flow_order_")
+    git_inst = _setup_flow_repo("gitblocks_flow_order_")
     base_branch = _ensure_base_branch(git_inst)
 
-    obj = create_test_object(name="CozyFlowOrderObject")
+    obj = create_test_object(name="GitBlocksFlowOrderObject")
     obj.location.x = 1.0
     ensure_tracking_assignments(git_inst)
     uuid = wait_for_uuid(obj)
@@ -380,7 +380,7 @@ def test_flow_order_stress_sequence():
     assert "FINISHED" in result
 
     assert_no_parked_changes(git_inst)
-    _assert_only_cozy_dirty(git_inst)
+    _assert_only_gitblocks_dirty(git_inst)
     assert not get_dirty_block_paths(git_inst)
 
     restored = _find_object_by_uuid(uuid)

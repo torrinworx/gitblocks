@@ -44,7 +44,7 @@ def test_git_flow_stage_commit_checkout():
     block_path = wait_for_block_file(git_inst, uuid)
     assert block_path is not None, "Block file was not created"
 
-    rel_path = f".cozystudio/blocks/{uuid}.json"
+    rel_path = f".gitblocks/blocks/{uuid}.json"
 
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
@@ -133,8 +133,8 @@ def test_checkout_does_not_dirty_blocks():
     block_path = wait_for_block_file(git_inst, uuid)
     assert block_path is not None, "Block file was not created"
 
-    rel_path = f".cozystudio/blocks/{uuid}.json"
-    mesh_path = f".cozystudio/blocks/{mesh_uuid}.json"
+    rel_path = f".gitblocks/blocks/{uuid}.json"
+    mesh_path = f".gitblocks/blocks/{mesh_uuid}.json"
 
     group_id = (
         git_inst.state.get("entries", {}).get(uuid, {}).get("group_id") or uuid
@@ -161,7 +161,7 @@ def test_checkout_does_not_dirty_blocks():
     }
     working_paths.update(git_inst.repo.untracked_files)
     dirty_blocks = {
-        path for path in working_paths if path.startswith(".cozystudio/blocks/")
+        path for path in working_paths if path.startswith(".gitblocks/blocks/")
     }
     assert rel_path not in dirty_blocks, (
         f"Unexpected object block diff after checkout: {rel_path}"
@@ -178,7 +178,7 @@ def test_checkout_does_not_dirty_blocks():
     }
     working_paths.update(git_inst.repo.untracked_files)
     dirty_blocks = {
-        path for path in working_paths if path.startswith(".cozystudio/blocks/")
+        path for path in working_paths if path.startswith(".gitblocks/blocks/")
     }
     assert rel_path not in dirty_blocks, (
         f"Unexpected object block diff after checkout: {rel_path}"
@@ -221,8 +221,8 @@ def test_commit_ignores_blend_file():
 
     commit = git_inst.repo.head.commit
     committed_paths = {item.path for item in commit.tree.traverse() if item.type == "blob"}
-    assert ".cozystudio/manifest.json" in committed_paths
-    assert f".cozystudio/blocks/{uuid}.json" in committed_paths
+    assert ".gitblocks/manifest.json" in committed_paths
+    assert f".gitblocks/blocks/{uuid}.json" in committed_paths
     assert not any(path.endswith(".blend") for path in committed_paths), (
         f"Snapshot commit should not include bootstrap blend files: {sorted(committed_paths)}"
     )
@@ -253,7 +253,7 @@ def test_branch_switch_restores_manifest_state():
     assert "FINISHED" in result, f"commit returned {result}"
 
     git_inst.repo.git.checkout("-b", "feature_switch")
-    rel_path = f".cozystudio/blocks/{uuid}.json"
+    rel_path = f".gitblocks/blocks/{uuid}.json"
 
     test_obj.location.x = 4.0
     git_inst._check()
@@ -279,7 +279,7 @@ def test_branch_switch_restores_manifest_state():
     }
     working_paths.update(git_inst.repo.untracked_files)
     dirty_blocks = {
-        path for path in working_paths if path.startswith(".cozystudio/blocks/")
+        path for path in working_paths if path.startswith(".gitblocks/blocks/")
     }
     assert rel_path not in dirty_blocks, (
         f"Unexpected target block diff after branch switch: {dirty_blocks}"
@@ -302,7 +302,7 @@ def test_branch_switch_restores_manifest_state():
     }
     working_paths.update(git_inst.repo.untracked_files)
     dirty_blocks = {
-        path for path in working_paths if path.startswith(".cozystudio/blocks/")
+        path for path in working_paths if path.startswith(".gitblocks/blocks/")
     }
     assert rel_path not in dirty_blocks, (
         f"Unexpected target block diff after branch switch: {dirty_blocks}"
@@ -441,15 +441,15 @@ def test_checkout_branch_auto_stashes_and_reapplies_cozy_changes():
         for diff in git_inst.repo.index.diff(None)
     }
     working_paths.update(git_inst.repo.untracked_files)
-    assert f".cozystudio/blocks/{uuid}.json" in working_paths
+    assert f".gitblocks/blocks/{uuid}.json" in working_paths
 
     git_inst.repo.git.restore(
         "--source=HEAD",
         "--staged",
         "--worktree",
         "--",
-        ".cozystudio/manifest.json",
-        ".cozystudio/blocks",
+        ".gitblocks/manifest.json",
+        ".gitblocks/blocks",
     )
     git_inst.restore_ref()
     git_inst.repo.git.checkout(base_branch)

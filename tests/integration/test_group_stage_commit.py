@@ -27,7 +27,7 @@ def test_group_stage_stages_all_members():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyStageGroupObject")
+    test_obj = create_test_object(name="GitBlocksStageGroupObject")
     ensure_tracking_assignments(git_inst)
 
     obj_uuid = wait_for_uuid(test_obj)
@@ -45,7 +45,7 @@ def test_group_stage_stages_all_members():
     assert "FINISHED" in result, f"add_group returned {result}"
 
     staged = _staged_paths(git_inst)
-    expected = {f".cozystudio/blocks/{uuid}.json" for uuid in group_members}
+    expected = {f".gitblocks/blocks/{uuid}.json" for uuid in group_members}
     assert expected.issubset(staged)
 
 
@@ -54,7 +54,7 @@ def test_commit_autostages_missing_group_members_and_manifest():
     ui_mod = importlib.import_module(f"{ADDON_MODULE}.ui")
     git_inst = init_git_repo_for_test(ui_mod)
 
-    test_obj = create_test_object(name="CozyCommitGroupObject")
+    test_obj = create_test_object(name="GitBlocksCommitGroupObject")
     ensure_tracking_assignments(git_inst)
 
     obj_uuid = wait_for_uuid(test_obj)
@@ -68,18 +68,18 @@ def test_commit_autostages_missing_group_members_and_manifest():
     assert group_members, "Group members were not resolved"
 
     first_member = group_members[0]
-    git_inst.stage(changes=[f".cozystudio/blocks/{first_member}.json"])
+    git_inst.stage(changes=[f".gitblocks/blocks/{first_member}.json"])
 
     result = bpy.ops.cozystudio.commit("EXEC_DEFAULT", message="Group Commit")
     assert "FINISHED" in result, f"commit returned {result}"
 
     commit = git_inst.repo.head.commit
     for member_uuid in group_members:
-        path = f".cozystudio/blocks/{member_uuid}.json"
-        assert commit.tree / ".cozystudio" / "blocks" / f"{member_uuid}.json"
+        path = f".gitblocks/blocks/{member_uuid}.json"
+        assert commit.tree / ".gitblocks" / "blocks" / f"{member_uuid}.json"
 
     manifest_raw = git_inst.repo.git.show(
-        f"{commit.hexsha}:.cozystudio/manifest.json"
+        f"{commit.hexsha}:.gitblocks/manifest.json"
     )
     manifest = json.loads(manifest_raw)
     manifest_groups = manifest.get("groups", {})

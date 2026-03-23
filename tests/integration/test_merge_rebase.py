@@ -340,8 +340,8 @@ def test_merge_parks_cozy_changes_until_restored():
         "--staged",
         "--worktree",
         "--",
-        ".cozystudio/manifest.json",
-        ".cozystudio/blocks",
+        ".gitblocks/manifest.json",
+        ".gitblocks/blocks",
     )
     git_inst.restore_ref()
     git_inst.repo.git.branch("-D", "feature_carryover_merge")
@@ -507,7 +507,7 @@ def test_merge_blocked_when_cozy_worktree_dirty():
         )
         assert "CANCELLED" in blocked
     except RuntimeError as exc:
-        assert "Working tree has Cozy changes" in str(exc)
+        assert "Working tree has GitBlocks changes" in str(exc)
 
     git_inst.repo.git.checkout(base_branch)
     git_inst.repo.git.branch("-D", "feature_dirty_merge")
