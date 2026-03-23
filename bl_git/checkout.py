@@ -337,8 +337,8 @@ class CheckoutMixin:
 
         restored_uuid = data.get("uuid")
         if restored_uuid:
-            if getattr(restored_data, "cozystudio_uuid", None) != restored_uuid:
-                restored_data.cozystudio_uuid = restored_uuid
+            if getattr(restored_data, "gitblocks_uuid", None) != restored_uuid:
+                restored_data.gitblocks_uuid = restored_uuid
             if getattr(restored_data, "uuid", None) != restored_uuid:
                 restored_data.uuid = restored_uuid
 

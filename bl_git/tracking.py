@@ -8,7 +8,7 @@ class Track:
     Handles tracking of data blocks using bl types defined by bl_types by assigning uuids
     to them and subscribing to them if new ones appear so that new ones are assigned.
     
-    BUG: new icosphere added doesn't have cozystudio_uuid for some reason?
+    BUG: new icosphere added doesn't have gitblocks_uuid for some reason?
     """
 
     def __init__(self, bpy_protocol):
@@ -26,17 +26,17 @@ class Track:
             return
 
         for idb in coll:
-            uid = getattr(idb, "cozystudio_uuid", "")
+            uid = getattr(idb, "gitblocks_uuid", "")
             if not uid:
                 uid = str(uuid.uuid4())
-                idb.cozystudio_uuid = uid
+                idb.gitblocks_uuid = uid
                 idb.uuid = uid
 
             uuids_index[uid] = idb
 
     def _property(self):  # Assign property to every bl type.
-        if not hasattr(bpy.types.ID, "cozystudio_uuid"):
-            bpy.types.ID.cozystudio_uuid = bpy.props.StringProperty(
+        if not hasattr(bpy.types.ID, "gitblocks_uuid"):
+            bpy.types.ID.gitblocks_uuid = bpy.props.StringProperty(
                 default="", options={"HIDDEN"}
             )
         if not hasattr(bpy.types.ID, "uuid"):

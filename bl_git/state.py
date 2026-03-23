@@ -282,10 +282,10 @@ class StateMixin:
         if source == "WORKTREE":
             return self._load_manifest_working()
         if source == "INDEX":
-            for candidate in (manifest_relpath(), manifest_relpath(namespace=".cozystudio")):
-                manifest = self._load_json_for_source(candidate, "INDEX")
-                if isinstance(manifest, dict):
-                    return manifest
+            candidate = manifest_relpath()
+            manifest = self._load_json_for_source(candidate, "INDEX")
+            if isinstance(manifest, dict):
+                return manifest
             return self._empty_manifest()
         if source == "HEAD":
             if self.repo is None or not self.repo.head.is_valid():
@@ -302,7 +302,7 @@ class StateMixin:
             if not data_collection:
                 continue
             for datablock in data_collection:
-                uuid = getattr(datablock, "cozystudio_uuid", None)
+                uuid = getattr(datablock, "gitblocks_uuid", None)
                 if not uuid or uuid not in entries or uuid in name_cache:
                     continue
                 name_cache[uuid] = getattr(datablock, "name", None) or uuid
@@ -711,45 +711,45 @@ class StateMixin:
             for db in data_collection:
                 if hasattr(db, "users") and db.users == 0:
                     continue
-                cozystudio_uuid = getattr(db, "cozystudio_uuid", None)
-                if not cozystudio_uuid:
+                gitblocks_uuid = getattr(db, "gitblocks_uuid", None)
+                if not gitblocks_uuid:
                     continue
 
                 captured = self.bpy_protocol.capture(
                     db,
-                    stamp_uuid=cozystudio_uuid,
+                    stamp_uuid=gitblocks_uuid,
                     interactive=interactive,
                 )
                 if captured["status"] != "ok":
                     issue = dict(captured)
-                    issue["uuid"] = cozystudio_uuid
-                    issue["name"] = getattr(db, "name", cozystudio_uuid)
+                    issue["uuid"] = gitblocks_uuid
+                    issue["name"] = getattr(db, "name", gitblocks_uuid)
                     issue["type"] = impl_class.bl_id
                     issues.append(issue)
 
-                    if not interactive and cozystudio_uuid in previous_entries and cozystudio_uuid in previous_blocks:
-                        entries[cozystudio_uuid] = previous_entries[cozystudio_uuid]
-                        blocks[cozystudio_uuid] = previous_blocks[cozystudio_uuid]
-                        db_by_uuid[cozystudio_uuid] = db
+                    if not interactive and gitblocks_uuid in previous_entries and gitblocks_uuid in previous_blocks:
+                        entries[gitblocks_uuid] = previous_entries[gitblocks_uuid]
+                        blocks[gitblocks_uuid] = previous_blocks[gitblocks_uuid]
+                        db_by_uuid[gitblocks_uuid] = db
                     continue
 
                 deps = []
                 for dep in captured["deps"] or []:
                     normalized = self._normalize_dep(dep)
-                    if normalized is None or normalized == cozystudio_uuid or normalized in deps:
+                    if normalized is None or normalized == gitblocks_uuid or normalized in deps:
                         continue
                     deps.append(normalized)
 
                 target = serialize_json_data(captured["data"])
                 hash_value = DeepHash(target)
-                entries[cozystudio_uuid] = {
+                entries[gitblocks_uuid] = {
                     "type": impl_class.bl_id,
                     "deps": deps,
                     "hash": hash_value[target],
                     MANIFEST_GROUP_KEY: None,
                 }
-                blocks[cozystudio_uuid] = target
-                db_by_uuid[cozystudio_uuid] = db
+                blocks[gitblocks_uuid] = target
+                db_by_uuid[gitblocks_uuid] = db
 
         groups, group_ids = self._resolve_groups(entries, db_by_uuid)
         for uuid, group_id in group_ids.items():
@@ -855,8 +855,8 @@ class StateMixin:
     def _normalize_dep(self, dep):
         if isinstance(dep, Path):
             return {"file": self._normalize_path_dep(dep)}
-        if hasattr(dep, "cozystudio_uuid"):
-            dep_uuid = getattr(dep, "cozystudio_uuid", None)
+        if hasattr(dep, "gitblocks_uuid"):
+            dep_uuid = getattr(dep, "gitblocks_uuid", None)
             if dep_uuid:
                 return dep_uuid
         if isinstance(dep, str) and dep:
@@ -887,13 +887,13 @@ class StateMixin:
                 continue
             to_remove = []
             for block in list(data_collection):
-                block_uuid = getattr(block, "cozystudio_uuid", None)
+                block_uuid = getattr(block, "gitblocks_uuid", None)
                 if block_uuid and block_uuid not in valid:
                     to_remove.append(block)
 
             to_remove.sort(
                 key=lambda block: (
-                    getattr(block, "cozystudio_uuid", ""),
+                    getattr(block, "gitblocks_uuid", ""),
                     getattr(block, "name", ""),
                 )
             )

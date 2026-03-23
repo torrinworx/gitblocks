@@ -13,7 +13,7 @@ def get_datablock_from_uuid(uuid, default, ignore=[]):
                 item_uuid = getattr(item, "uuid", None)
                 if item_uuid == uuid:
                     return item
-                if getattr(item, "cozystudio_uuid", None) == uuid:
+                if getattr(item, "gitblocks_uuid", None) == uuid:
                     return item
     return default
 
@@ -23,6 +23,6 @@ def resolve_datablock_from_uuid(uuid, bpy_collection):
         item_uuid = getattr(item, "uuid", None)
         if item_uuid == uuid:
             return item
-        if getattr(item, "cozystudio_uuid", None) == uuid:
+        if getattr(item, "gitblocks_uuid", None) == uuid:
             return item
     return None

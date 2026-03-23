@@ -32,7 +32,7 @@ def _build_name_cache(git_instance, entries):
         if not data_collection:
             continue
         for datablock in data_collection:
-            uuid = getattr(datablock, "cozystudio_uuid", None)
+            uuid = getattr(datablock, "gitblocks_uuid", None)
             if not uuid or uuid not in entries:
                 continue
             if uuid not in name_cache:
