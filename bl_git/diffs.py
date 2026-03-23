@@ -1,7 +1,7 @@
 from fnmatch import fnmatch
 
-from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID
-from ..utils.redraw import redraw
+from ..branding import UI_REFRESH_PANEL_IDS
+from ..utils.redraw import redraw, redraw_many
 from .paths import CANONICAL_MANIFEST_REL, LEGACY_MANIFEST_REL
 
 
@@ -95,7 +95,6 @@ class DiffsMixin:
 
         if self.diffs != final_diffs:
             self.diffs = final_diffs
-            redraw(CHANGES_PANEL_ID)
-            redraw(BRANCHES_PANEL_ID)
+            redraw_many(*UI_REFRESH_PANEL_IDS[:1], UI_REFRESH_PANEL_IDS[2])
 
         self.refresh_ui_state()

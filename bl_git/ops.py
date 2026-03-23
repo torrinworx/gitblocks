@@ -3,8 +3,8 @@ import traceback
 
 from git import Repo
 
-from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID, HISTORY_PANEL_ID
-from ..utils.redraw import redraw
+from ..branding import UI_REFRESH_PANEL_IDS
+from ..utils.redraw import redraw, redraw_many
 from ..utils.timers import timers
 from ..utils.write import WriteDict
 from .constants import (
@@ -218,8 +218,7 @@ class OpsMixin:
             self._update_diffs()
             self.repo.index.commit(message)
             self._update_diffs()
-            redraw(HISTORY_PANEL_ID)
-            redraw(BRANCHES_PANEL_ID)
+            redraw_many(UI_REFRESH_PANEL_IDS[1], UI_REFRESH_PANEL_IDS[2])
             return {
                 "ok": True,
                 "errors": [],
@@ -273,9 +272,7 @@ class OpsMixin:
             return
         self._check(interactive=True)
         self._update_diffs()
-        redraw(CHANGES_PANEL_ID)
-        redraw(HISTORY_PANEL_ID)
-        redraw(BRANCHES_PANEL_ID)
+        redraw_many(*UI_REFRESH_PANEL_IDS)
 
     @staticmethod
     def _group_stage_paths(staged_paths, entries, groups):

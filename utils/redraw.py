@@ -23,3 +23,8 @@ def redraw(bl_idname: str):
                 for region in area.regions:
                     if region_type is None or region.type == region_type:
                         region.tag_redraw()
+
+
+def redraw_many(*bl_idnames: str):
+    for bl_idname in bl_idnames:
+        redraw(bl_idname)

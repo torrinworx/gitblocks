@@ -3,8 +3,8 @@ import json
 
 import bpy
 
-from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID, HISTORY_PANEL_ID
-from ..utils.redraw import redraw
+from ..branding import UI_REFRESH_PANEL_IDS
+from ..utils.redraw import redraw, redraw_many
 from ..utils.write import WriteDict
 from .constants import MANIFEST_BLOCKS_KEY
 from .paths import manifest_relpath
@@ -41,9 +41,7 @@ class CheckoutMixin:
             self.last_integrity_report = integrity
             self._update_diffs()
 
-            redraw(CHANGES_PANEL_ID)
-            redraw(HISTORY_PANEL_ID)
-            redraw(BRANCHES_PANEL_ID)
+            redraw_many(*UI_REFRESH_PANEL_IDS)
         finally:
             self.suspend_checks = False
 
@@ -63,8 +61,7 @@ class CheckoutMixin:
             fetched.append(remote.name)
 
         self.refresh_ui_state()
-        redraw(HISTORY_PANEL_ID)
-        redraw(BRANCHES_PANEL_ID)
+        redraw_many(HISTORY_PANEL_ID, BRANCHES_PANEL_ID)
         return fetched
 
     def create_branch(self, branch_name, ref=None):
@@ -94,9 +91,7 @@ class CheckoutMixin:
 
             self._update_diffs()
 
-            redraw(CHANGES_PANEL_ID)
-            redraw(HISTORY_PANEL_ID)
-            redraw(BRANCHES_PANEL_ID)
+            redraw_many(*UI_REFRESH_PANEL_IDS)
         finally:
             self.suspend_checks = False
 
@@ -275,9 +270,7 @@ class CheckoutMixin:
 
             self._update_diffs()
 
-            redraw(CHANGES_PANEL_ID)
-            redraw(HISTORY_PANEL_ID)
-            redraw(BRANCHES_PANEL_ID)
+            redraw_many(*UI_REFRESH_PANEL_IDS)
         finally:
             self.suspend_checks = False
 

@@ -2,8 +2,8 @@ from fnmatch import fnmatch
 
 from deepdiff import DeepHash
 
-from ..branding import BRANCHES_PANEL_ID, CHANGES_PANEL_ID, HISTORY_PANEL_ID
-from ..utils.redraw import redraw
+from ..branding import UI_REFRESH_PANEL_IDS
+from ..utils.redraw import redraw, redraw_many
 from ..utils.write import WriteDict
 from .constants import (
     MANIFEST_BLOCKS_KEY,
@@ -159,9 +159,7 @@ class MergeMixin:
             if ours_ref == "WORKING_TREE":
                 self.restore_ref()
             self._update_diffs()
-            redraw(CHANGES_PANEL_ID)
-            redraw(HISTORY_PANEL_ID)
-            redraw(BRANCHES_PANEL_ID)
+            redraw_many(*UI_REFRESH_PANEL_IDS)
         except Exception as e:
             errors.append(str(e))
         finally:
