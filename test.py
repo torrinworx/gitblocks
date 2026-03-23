@@ -20,8 +20,8 @@ def load_env(env_path: Path):
             os.environ[key] = value
 
 
-def read_env(primary: str, legacy: str, default: str) -> str:
-    return os.environ.get(primary) or os.environ.get(legacy) or default
+def read_env(primary: str, default: str) -> str:
+    return os.environ.get(primary) or default
 
 
 def main():
@@ -30,19 +30,17 @@ def main():
 
     blender_bin = read_env(
         "GITBLOCKS_BLENDER_BIN",
-        "COZYSTUDIO_BLENDER_BIN",
         "/home/torrin/blender-4.5.3-linux-x64/blender",
     )
     test_dir = read_env(
         "GITBLOCKS_TEST_DIR",
-        "COZYSTUDIO_TEST_DIR",
         "/tmp/gitblocks_addon_tests",
     )
 
     blender_path = Path(blender_bin)
     if not blender_path.exists():
         print(f"GitBlocks Blender binary not found at {blender_path}")
-        print("Set GITBLOCKS_BLENDER_BIN in .env (or COZYSTUDIO_BLENDER_BIN for compatibility)")
+        print("Set GITBLOCKS_BLENDER_BIN in .env")
         sys.exit(1)
 
     runner = addon_root / "tests" / "runner.py"
