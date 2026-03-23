@@ -98,8 +98,8 @@ class _CozyOperatorMixin:
         return ref_type, name
 
 
-class COZYSTUDIO_OT_SetupProject(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.setup_project"
+class GITBLOCKS_OT_SetupProject(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.setup_project"
     bl_label = "Setup Project"
     bl_description = f"Initialize {BRAND_NAME} tracking for this Blender project"
 
@@ -131,8 +131,8 @@ class COZYSTUDIO_OT_SetupProject(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.commit"
+class GITBLOCKS_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.commit"
     bl_label = "Commit"
     bl_description = f"Commit staged {BRAND_NAME} changes"
 
@@ -156,7 +156,7 @@ class COZYSTUDIO_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
 
         message = (self.message or "").strip()
         if not message:
-            message = (context.window_manager.cozystudio_commit_message or "").strip()
+            message = (context.window_manager.gitblocks_commit_message or "").strip()
         if not message:
             self.report({"WARNING"}, "Commit message cannot be empty")
             return {"CANCELLED"}
@@ -173,14 +173,14 @@ class COZYSTUDIO_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
                 self.report({"ERROR"}, "Commit failed")
             return {"CANCELLED"}
 
-        if hasattr(context.window_manager, "cozystudio_commit_message"):
-            context.window_manager.cozystudio_commit_message = ""
+        if hasattr(context.window_manager, "gitblocks_commit_message"):
+            context.window_manager.gitblocks_commit_message = ""
         self.report({"INFO"}, f"Committed: {message}")
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_RunDiagnostics(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.run_diagnostics"
+class GITBLOCKS_OT_RunDiagnostics(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.run_diagnostics"
     bl_label = "Run Diagnostics"
     bl_description = f"Refresh {BRAND_NAME} state and validate manifest integrity"
 
@@ -201,20 +201,20 @@ class COZYSTUDIO_OT_RunDiagnostics(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_ManualRefresh(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.manual_refresh"
+class GITBLOCKS_OT_ManualRefresh(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.manual_refresh"
     bl_label = "Refresh"
     bl_description = f"Refresh {BRAND_NAME} Git state and UI"
 
     def execute(self, context):
-        result = bpy.ops.cozystudio.run_diagnostics("EXEC_DEFAULT")
+        result = bpy.ops.gitblocks.run_diagnostics("EXEC_DEFAULT")
         if "FINISHED" in result:
             return {"FINISHED"}
         return {"CANCELLED"}
 
 
-class COZYSTUDIO_OT_AddFile(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.add_file"
+class GITBLOCKS_OT_AddFile(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.add_file"
     bl_label = "Add file to stage"
     bl_description = "Stage a file for commit"
 
@@ -229,8 +229,8 @@ class COZYSTUDIO_OT_AddFile(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_UnstageFile(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.unstage_file"
+class GITBLOCKS_OT_UnstageFile(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.unstage_file"
     bl_label = "Unstage file"
     bl_description = "Remove a file from the staging area"
 
@@ -245,8 +245,8 @@ class COZYSTUDIO_OT_UnstageFile(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_AddGroup(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.add_group"
+class GITBLOCKS_OT_AddGroup(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.add_group"
     bl_label = "Add group to stage"
     bl_description = "Stage all files in this group"
 
@@ -264,8 +264,8 @@ class COZYSTUDIO_OT_AddGroup(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_UnstageGroup(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.unstage_group"
+class GITBLOCKS_OT_UnstageGroup(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.unstage_group"
     bl_label = "Unstage group"
     bl_description = "Unstage all files in this group"
 
@@ -283,8 +283,8 @@ class COZYSTUDIO_OT_UnstageGroup(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_RevertChange(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.revert_change"
+class GITBLOCKS_OT_RevertChange(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.revert_change"
     bl_label = "Revert Change"
     bl_description = "Revert a staged or unstaged change"
 
@@ -338,8 +338,8 @@ class COZYSTUDIO_OT_RevertChange(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_ToggleGroupExpanded(bpy.types.Operator):
-    bl_idname = "cozystudio.toggle_group_expanded"
+class GITBLOCKS_OT_ToggleGroupExpanded(bpy.types.Operator):
+    bl_idname = "gitblocks.toggle_group_expanded"
     bl_label = "Toggle group"
     bl_description = "Expand or collapse a group"
 
@@ -353,8 +353,8 @@ class COZYSTUDIO_OT_ToggleGroupExpanded(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_CheckoutCommit(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.checkout_commit"
+class GITBLOCKS_OT_CheckoutCommit(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.checkout_commit"
     bl_label = "Checkout Commit"
     bl_description = f"Checkout a commit using {BRAND_NAME} reconstruction"
 
@@ -392,8 +392,8 @@ class COZYSTUDIO_OT_CheckoutCommit(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class COZYSTUDIO_OT_FetchBranches(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.fetch_branches"
+class GITBLOCKS_OT_FetchBranches(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.fetch_branches"
     bl_label = "Fetch Branches"
     bl_description = "Fetch remote branches and refresh branch data"
 
@@ -418,8 +418,8 @@ class COZYSTUDIO_OT_FetchBranches(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class COZYSTUDIO_OT_CheckoutSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.checkout_selected_ref"
+class GITBLOCKS_OT_CheckoutSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.checkout_selected_ref"
     bl_label = "Switch Ref"
     bl_description = "Switch to the selected branch or remote tracking branch"
 
@@ -443,7 +443,7 @@ class COZYSTUDIO_OT_CheckoutSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
             self.report({"ERROR"}, "Resolve conflicts before switching branches")
             return {"CANCELLED"}
 
-        token = self.ref_token or context.window_manager.cozystudio_branch_target
+        token = self.ref_token or context.window_manager.gitblocks_branch_target
         ref_type, ref_name = self._parse_ref_token(token)
         if not ref_name:
             self.report({"WARNING"}, "Choose a branch or remote ref")
@@ -464,8 +464,8 @@ class COZYSTUDIO_OT_CheckoutSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class COZYSTUDIO_OT_ReapplyParkedChanges(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.reapply_parked_changes"
+class GITBLOCKS_OT_ReapplyParkedChanges(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.reapply_parked_changes"
     bl_label = "Restore Parked Changes"
     bl_description = f"Restore {BRAND_NAME} changes that were parked during checkout, merge, or rebase"
 
@@ -484,8 +484,8 @@ class COZYSTUDIO_OT_ReapplyParkedChanges(_CozyOperatorMixin, bpy.types.Operator)
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_CheckoutBranch(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.checkout_branch"
+class GITBLOCKS_OT_CheckoutBranch(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.checkout_branch"
     bl_label = "Checkout Branch"
     bl_description = f"Checkout a branch using {BRAND_NAME} reconstruction"
 
@@ -526,8 +526,8 @@ class COZYSTUDIO_OT_CheckoutBranch(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class COZYSTUDIO_OT_CreateBranch(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.create_branch"
+class GITBLOCKS_OT_CreateBranch(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.create_branch"
     bl_label = "Create Branch"
     bl_description = "Create and checkout a new branch"
 
@@ -556,7 +556,7 @@ class COZYSTUDIO_OT_CreateBranch(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
         repo = state.git_instance.repo
-        requested_name = self.branch_name or context.window_manager.cozystudio_branch_name or ""
+        requested_name = self.branch_name or context.window_manager.gitblocks_branch_name or ""
         branch_name, adjusted_from = self._resolve_branch_name(repo, requested_name)
         if not branch_name:
             self.report({"WARNING"}, "Enter a valid branch name")
@@ -576,8 +576,8 @@ class COZYSTUDIO_OT_CreateBranch(_CozyOperatorMixin, bpy.types.Operator):
 
         try:
             state.git_instance.create_branch(branch_name, ref=ref)
-            if hasattr(context.window_manager, "cozystudio_branch_name"):
-                context.window_manager.cozystudio_branch_name = ""
+            if hasattr(context.window_manager, "gitblocks_branch_name"):
+                context.window_manager.gitblocks_branch_name = ""
             if adjusted_from and adjusted_from != branch_name:
                 self.report({"INFO"}, f"Created branch {branch_name} from '{adjusted_from}'")
                 return {"FINISHED"}
@@ -589,8 +589,8 @@ class COZYSTUDIO_OT_CreateBranch(_CozyOperatorMixin, bpy.types.Operator):
             return {"CANCELLED"}
 
 
-class COZYSTUDIO_OT_Merge(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.merge"
+class GITBLOCKS_OT_Merge(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.merge"
     bl_label = "Merge"
     bl_description = "Merge another branch or ref into the current branch"
 
@@ -645,8 +645,8 @@ class COZYSTUDIO_OT_Merge(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_Rebase(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.rebase"
+class GITBLOCKS_OT_Rebase(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.rebase"
     bl_label = "Rebase"
     bl_description = "Rebase the current branch onto another branch or ref"
 
@@ -701,8 +701,8 @@ class COZYSTUDIO_OT_Rebase(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.integrate_selected_ref"
+class GITBLOCKS_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.integrate_selected_ref"
     bl_label = "Integrate Selected Ref"
     bl_description = "Merge or rebase the current branch with the selected target"
 
@@ -742,9 +742,9 @@ class COZYSTUDIO_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator)
             self.report({"ERROR"}, preflight)
             return {"CANCELLED"}
 
-        token = self.ref_token or context.window_manager.cozystudio_integration_target
-        mode = self.mode or context.window_manager.cozystudio_integration_mode
-        strategy = self.strategy or context.window_manager.cozystudio_conflict_strategy
+        token = self.ref_token or context.window_manager.gitblocks_integration_target
+        mode = self.mode or context.window_manager.gitblocks_integration_mode
+        strategy = self.strategy or context.window_manager.gitblocks_conflict_strategy
         _ref_type, ref_name = self._parse_ref_token(token)
         if not ref_name:
             self.report({"WARNING"}, "Choose a branch or remote ref to integrate")
@@ -755,15 +755,15 @@ class COZYSTUDIO_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator)
             self.report({"WARNING"}, "Choose a different branch than the current branch")
             return {"CANCELLED"}
 
-        op = bpy.ops.cozystudio.merge if mode == "MERGE" else bpy.ops.cozystudio.rebase
+        op = bpy.ops.gitblocks.merge if mode == "MERGE" else bpy.ops.gitblocks.rebase
         result = op("EXEC_DEFAULT", ref_name=ref_name, strategy=strategy)
         if "FINISHED" in result:
             return {"FINISHED"}
         return {"CANCELLED"}
 
 
-class COZYSTUDIO_OT_ResolveConflict(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.resolve_conflict"
+class GITBLOCKS_OT_ResolveConflict(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.resolve_conflict"
     bl_label = "Resolve Conflict"
     bl_description = f"Mark a {BRAND_NAME} conflict as resolved after you have fixed the scene"
 
@@ -804,8 +804,8 @@ class COZYSTUDIO_OT_ResolveConflict(_CozyOperatorMixin, bpy.types.Operator):
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_ResolveConflictVersion(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.resolve_conflict_version"
+class GITBLOCKS_OT_ResolveConflictVersion(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.resolve_conflict_version"
     bl_label = "Apply Conflict Version"
     bl_description = f"Resolve a {BRAND_NAME} conflict by checking out your side or the incoming side"
 
@@ -844,8 +844,8 @@ class COZYSTUDIO_OT_ResolveConflictVersion(_CozyOperatorMixin, bpy.types.Operato
         return {"FINISHED"}
 
 
-class COZYSTUDIO_OT_SelectBlock(_CozyOperatorMixin, bpy.types.Operator):
-    bl_idname = "cozystudio.select_block"
+class GITBLOCKS_OT_SelectBlock(_CozyOperatorMixin, bpy.types.Operator):
+    bl_idname = "gitblocks.select_block"
     bl_label = "Select datablock"
     bl_description = "Select the Blender datablock tied to this entry"
 
@@ -862,7 +862,7 @@ class COZYSTUDIO_OT_SelectBlock(_CozyOperatorMixin, bpy.types.Operator):
             if not data_collection:
                 continue
             for block in data_collection:
-                if getattr(block, "cozystudio_uuid", None) == self.uuid:
+                if getattr(block, "gitblocks_uuid", None) == self.uuid:
                     datablock = block
                     break
             if datablock is not None:
