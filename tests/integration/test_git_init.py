@@ -48,9 +48,9 @@ def test_new_file_save_init_commit_flow():
         assert "FINISHED" in result, f"setup_project returned {result}"
 
         git_inst._check()
-        manifest_path = project_dir / ".cozystudio" / "manifest.json"
+        manifest_path = project_dir / ".gitblocks" / "manifest.json"
         assert manifest_path.exists()
-        blocks_path = project_dir / ".cozystudio" / "blocks"
+        blocks_path = project_dir / ".gitblocks" / "blocks"
         assert blocks_path.exists()
         assert any(blocks_path.iterdir())
 

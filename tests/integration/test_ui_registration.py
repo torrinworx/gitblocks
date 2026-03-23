@@ -34,7 +34,7 @@ expected_panels = [
 
 
 @pytest.mark.order(3)
-def test_all_cozystudio_ui_classes_registered():
+def test_all_gitblocks_ui_classes_registered():
     assert (
         ADDON_MODULE in bpy.context.preferences.addons
     ), f"{ADDON_MODULE} must be enabled before running UI registration tests."

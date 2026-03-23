@@ -60,7 +60,7 @@ def get_working_paths(git_inst):
 
 def get_dirty_block_paths(git_inst):
     return {
-        path for path in get_working_paths(git_inst) if path.startswith(".cozystudio/blocks/")
+        path for path in get_working_paths(git_inst) if path.startswith(".gitblocks/blocks/")
     }
 
 
@@ -76,7 +76,7 @@ def assert_manifest_integrity_ok(git_inst):
 
 def assert_no_parked_changes(git_inst):
     parked = git_inst._managed_carryover_entries()
-    assert not parked, f"Unexpected parked Cozy changes: {parked}"
+    assert not parked, f"Unexpected parked GitBlocks changes: {parked}"
 
 
 def enable_addon(addon_name: str):
@@ -143,11 +143,11 @@ def init_git_repo_for_test(ui_mod, timeout=5.0):
 
     project_dir = Path(os.path.dirname(bpy.data.filepath))
     git_dir = project_dir / ".git"
-    blocks_dir = project_dir / ".cozystudio" / "blocks"
+    blocks_dir = project_dir / ".gitblocks" / "blocks"
     if not git_dir.exists() or not git_dir.is_dir():
         raise RuntimeError(f".git directory not found at {git_dir}")
     if not blocks_dir.exists() or not blocks_dir.is_dir():
-        raise RuntimeError(f".cozystudio/blocks directory not found at {blocks_dir}")
+        raise RuntimeError(f".gitblocks/blocks directory not found at {blocks_dir}")
 
     try:
         is_detached = False
