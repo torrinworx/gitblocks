@@ -4,6 +4,7 @@ from pathlib import Path
 
 import bpy
 
+from ..branding import BRAND_NAME
 from . import state
 
 
@@ -47,9 +48,9 @@ class _CozyOperatorMixin:
 
     def _require_git(self, require_repo=True):
         if not state.git_instance:
-            return "No CozyStudio state is available."
+            return f"No {BRAND_NAME} state is available."
         if require_repo and not getattr(state.git_instance, "initiated", False):
-            return "No CozyStudio project is initialized."
+            return f"No {BRAND_NAME} project is initialized."
         return None
 
     def _stage_group_paths(self, group_id):
@@ -67,10 +68,10 @@ class _CozyOperatorMixin:
 
     def _sync_preflight(self):
         if state.git_instance._managed_carryover():
-            return "Parked Cozy changes already exist. Restore them before continuing."
+            return f"Parked {BRAND_NAME} changes already exist. Restore them before continuing."
         dirty_paths = state.git_instance._dirty_paths()
         if state.git_instance._blocking_dirty_paths(dirty_paths):
-            return "Working tree has non-Cozy changes. Commit or stash them first."
+            return f"Working tree has non-{BRAND_NAME} changes. Commit or stash them first."
         return None
 
     def _integration_preflight(self):
@@ -84,7 +85,7 @@ class _CozyOperatorMixin:
         dirty_paths = state.git_instance._dirty_paths()
         cozy_dirty = state.git_instance._cozy_dirty_paths(dirty_paths)
         if cozy_dirty:
-            return "Working tree has Cozy changes. Commit or discard them before merging or rebasing."
+            return f"Working tree has {BRAND_NAME} changes. Commit or discard them before merging or rebasing."
         return None
 
     @staticmethod
@@ -99,11 +100,11 @@ class _CozyOperatorMixin:
 class COZYSTUDIO_OT_SetupProject(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.setup_project"
     bl_label = "Setup Project"
-    bl_description = "Initialize CozyStudio tracking for this Blender project"
+    bl_description = f"Initialize {BRAND_NAME} tracking for this Blender project"
 
     def execute(self, context):
         if not bpy.data.filepath:
-            self.report({"ERROR"}, "Save this .blend file before setting up CozyStudio")
+            self.report({"ERROR"}, f"Save this .blend file before setting up {BRAND_NAME}")
             return {"CANCELLED"}
         current_path = Path(bpy.path.abspath("//")).resolve()
         local_git_dir = current_path / ".git"
@@ -121,18 +122,18 @@ class COZYSTUDIO_OT_SetupProject(_CozyOperatorMixin, bpy.types.Operator):
         if not state.git_instance:
             state.check_and_init_git()
         if not state.git_instance:
-            self.report({"ERROR"}, "CozyStudio could not initialize for this file")
+            self.report({"ERROR"}, f"{BRAND_NAME} could not initialize for this file")
             return {"CANCELLED"}
         state.git_instance.init()
         state.git_instance.refresh_ui_state()
-        self.report({"INFO"}, "CozyStudio project is ready")
+        self.report({"INFO"}, f"{BRAND_NAME} project is ready")
         return {"FINISHED"}
 
 
 class COZYSTUDIO_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.commit"
     bl_label = "Commit"
-    bl_description = "Commit staged CozyStudio changes"
+    bl_description = f"Commit staged {BRAND_NAME} changes"
 
     message: bpy.props.StringProperty(
         name="Commit Message",
@@ -180,7 +181,7 @@ class COZYSTUDIO_OT_Commit(_CozyOperatorMixin, bpy.types.Operator):
 class COZYSTUDIO_OT_RunDiagnostics(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.run_diagnostics"
     bl_label = "Run Diagnostics"
-    bl_description = "Refresh CozyStudio state and validate manifest integrity"
+    bl_description = f"Refresh {BRAND_NAME} state and validate manifest integrity"
 
     def execute(self, context):
         error = self._require_git()
@@ -202,7 +203,7 @@ class COZYSTUDIO_OT_RunDiagnostics(_CozyOperatorMixin, bpy.types.Operator):
 class COZYSTUDIO_OT_ManualRefresh(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.manual_refresh"
     bl_label = "Refresh"
-    bl_description = "Refresh CozyStudio Git state and UI"
+    bl_description = f"Refresh {BRAND_NAME} Git state and UI"
 
     def execute(self, context):
         result = bpy.ops.cozystudio.run_diagnostics("EXEC_DEFAULT")
@@ -356,7 +357,7 @@ class COZYSTUDIO_OT_ToggleGroupExpanded(bpy.types.Operator):
 class COZYSTUDIO_OT_CheckoutCommit(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.checkout_commit"
     bl_label = "Checkout Commit"
-    bl_description = "Checkout a commit using CozyStudio reconstruction"
+    bl_description = f"Checkout a commit using {BRAND_NAME} reconstruction"
 
     commit_hash: bpy.props.StringProperty(
         name="Commit Hash",
@@ -381,7 +382,7 @@ class COZYSTUDIO_OT_CheckoutCommit(_CozyOperatorMixin, bpy.types.Operator):
             if state.git_instance._managed_carryover():
                 self.report(
                     {"WARNING"},
-                    f"Checked out commit {self.commit_hash[:8]}; local Cozy changes are parked safely.",
+                    f"Checked out commit {self.commit_hash[:8]}; local {BRAND_NAME} changes are parked safely.",
                 )
             else:
                 self.report({"INFO"}, f"Checked out commit {self.commit_hash[:8]}")
@@ -467,7 +468,7 @@ class COZYSTUDIO_OT_CheckoutSelectedRef(_CozyOperatorMixin, bpy.types.Operator):
 class COZYSTUDIO_OT_ReapplyParkedChanges(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.reapply_parked_changes"
     bl_label = "Restore Parked Changes"
-    bl_description = "Restore Cozy changes that were parked during checkout, merge, or rebase"
+    bl_description = f"Restore {BRAND_NAME} changes that were parked during checkout, merge, or rebase"
 
     def execute(self, context):
         error = self._require_git()
@@ -477,17 +478,17 @@ class COZYSTUDIO_OT_ReapplyParkedChanges(_CozyOperatorMixin, bpy.types.Operator)
 
         result = state.git_instance.reapply_parked_changes()
         if not result.get("ok"):
-            self.report({"ERROR"}, result.get("error", "Failed to restore parked Cozy changes"))
+            self.report({"ERROR"}, result.get("error", f"Failed to restore parked {BRAND_NAME} changes"))
             return {"CANCELLED"}
 
-        self.report({"INFO"}, "Restored parked Cozy changes")
+        self.report({"INFO"}, f"Restored parked {BRAND_NAME} changes")
         return {"FINISHED"}
 
 
 class COZYSTUDIO_OT_CheckoutBranch(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.checkout_branch"
     bl_label = "Checkout Branch"
-    bl_description = "Checkout a branch using CozyStudio reconstruction"
+    bl_description = f"Checkout a branch using {BRAND_NAME} reconstruction"
 
     branch_name: bpy.props.StringProperty(
         name="Branch",
@@ -515,7 +516,7 @@ class COZYSTUDIO_OT_CheckoutBranch(_CozyOperatorMixin, bpy.types.Operator):
             if state.git_instance._managed_carryover():
                 self.report(
                     {"WARNING"},
-                    f"Checked out branch {self.branch_name}; local Cozy changes are parked safely.",
+                    f"Checked out branch {self.branch_name}; local {BRAND_NAME} changes are parked safely.",
                 )
             else:
                 self.report({"INFO"}, f"Checked out branch {self.branch_name}")
@@ -633,7 +634,7 @@ class COZYSTUDIO_OT_Merge(_CozyOperatorMixin, bpy.types.Operator):
             if result.get("carryover", {}).get("parked"):
                 self.report(
                     {"WARNING"},
-                    "Merge stopped for conflict resolution; local Cozy changes are parked safely.",
+                    f"Merge stopped for conflict resolution; local {BRAND_NAME} changes are parked safely.",
                 )
             else:
                 self.report({"WARNING"}, "Merge stopped for conflict resolution")
@@ -689,7 +690,7 @@ class COZYSTUDIO_OT_Rebase(_CozyOperatorMixin, bpy.types.Operator):
             if result.get("carryover", {}).get("parked"):
                 self.report(
                     {"WARNING"},
-                    "Rebase stopped for conflict resolution; local Cozy changes are parked safely.",
+                    f"Rebase stopped for conflict resolution; local {BRAND_NAME} changes are parked safely.",
                 )
             else:
                 self.report({"WARNING"}, "Rebase stopped for conflict resolution")
@@ -722,7 +723,7 @@ class COZYSTUDIO_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator)
     )
     strategy: bpy.props.EnumProperty(
         name="Conflict Strategy",
-        description="How Cozy should handle conflicting blocks",
+        description=f"How {BRAND_NAME} should handle conflicting blocks",
         items=[
             ("manual", "Manual", "Stop and let you resolve conflicts"),
             ("ours", "Keep Current", "Prefer the current branch on conflict"),
@@ -765,7 +766,7 @@ class COZYSTUDIO_OT_IntegrateSelectedRef(_CozyOperatorMixin, bpy.types.Operator)
 class COZYSTUDIO_OT_ResolveConflict(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.resolve_conflict"
     bl_label = "Resolve Conflict"
-    bl_description = "Mark a CozyStudio conflict as resolved after you have fixed the scene"
+    bl_description = f"Mark a {BRAND_NAME} conflict as resolved after you have fixed the scene"
 
     conflict_uuid: bpy.props.StringProperty(
         name="Conflict UUID",
@@ -807,7 +808,7 @@ class COZYSTUDIO_OT_ResolveConflict(_CozyOperatorMixin, bpy.types.Operator):
 class COZYSTUDIO_OT_ResolveConflictVersion(_CozyOperatorMixin, bpy.types.Operator):
     bl_idname = "cozystudio.resolve_conflict_version"
     bl_label = "Apply Conflict Version"
-    bl_description = "Resolve a CozyStudio conflict by checking out your side or the incoming side"
+    bl_description = f"Resolve a {BRAND_NAME} conflict by checking out your side or the incoming side"
 
     conflict_uuid: bpy.props.StringProperty(
         name="Conflict UUID",

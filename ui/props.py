@@ -1,5 +1,7 @@
 import bpy
 
+from ..branding import BRAND_NAME
+
 
 _BRANCH_ITEMS_CACHE = []
 _INTEGRATION_ITEMS_CACHE = []
@@ -76,7 +78,7 @@ def register_props():
     bpy.types.WindowManager.cozystudio_commit_index = bpy.props.IntProperty(default=0)
     bpy.types.WindowManager.cozystudio_commit_message = bpy.props.StringProperty(
         name="Commit Message",
-        description="Message for this commit",
+        description=f"Message for this {BRAND_NAME} commit",
         default="",
     )
     bpy.types.WindowManager.cozystudio_branch_name = bpy.props.StringProperty(
@@ -114,7 +116,7 @@ def register_props():
     )
     bpy.types.WindowManager.cozystudio_conflict_strategy = bpy.props.EnumProperty(
         name="Conflict Strategy",
-        description="How Cozy should handle conflicting block changes",
+        description=f"How {BRAND_NAME} should handle conflicting block changes",
         items=[
             ("manual", "Manual", "Stop and let you resolve conflicts"),
             ("ours", "Keep Current", "Prefer the current branch on conflict"),

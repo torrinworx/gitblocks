@@ -1,5 +1,6 @@
 import bpy
 
+from ..branding import BRAND_NAME
 from . import state
 from .helpers import _status_abbrev
 
@@ -32,20 +33,20 @@ def _find_ref_row(branch_ui, token):
 
 def _draw_repo_missing(layout):
     box = layout.box()
-    box.label(text="Welcome to Cozy Studio", icon="INFO")
+    box.label(text=f"Welcome to {BRAND_NAME}", icon="INFO")
     if not bpy.data.filepath:
-        box.label(text="Save this .blend file to start a Cozy project.", icon="FILE_TICK")
+        box.label(text=f"Save this .blend file to start a {BRAND_NAME} project.", icon="FILE_TICK")
         return
     box.label(text="No project repo found for this file.", icon="INFO")
     box.operator("cozystudio.setup_project", text="Init Project", icon="ADD")
 
 
 class COZYSTUDIO_PT_MainPanel(bpy.types.Panel):
-    bl_label = "Cozy Studio"
+    bl_label = BRAND_NAME
     bl_idname = "COZYSTUDIO_PT_main"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Cozy Studio"
+    bl_category = BRAND_NAME
     bl_order = 0
 
     @classmethod
@@ -134,7 +135,7 @@ class COZYSTUDIO_PT_ChangesPanel(bpy.types.Panel):
     bl_idname = "COZYSTUDIO_PT_changes"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Cozy Studio"
+    bl_category = BRAND_NAME
     bl_order = 1
 
     @classmethod
@@ -164,7 +165,7 @@ class COZYSTUDIO_PT_ChangesPanel(bpy.types.Panel):
 
         if carryover_ui.get("has_parked"):
             box = layout.box()
-            box.label(text="Parked Cozy changes", icon="INFO")
+            box.label(text=f"Parked {BRAND_NAME} changes", icon="INFO")
             if carryover_ui.get("source") or carryover_ui.get("target"):
                 box.label(
                     text=(
@@ -221,7 +222,7 @@ class COZYSTUDIO_PT_HistoryPanel(bpy.types.Panel):
     bl_idname = "COZYSTUDIO_PT_history"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Cozy Studio"
+    bl_category = BRAND_NAME
     bl_order = 2
 
     @classmethod
@@ -264,7 +265,7 @@ class COZYSTUDIO_PT_HistoryPanel(bpy.types.Panel):
 
         if carryover_ui.get("has_parked"):
             box = layout.box()
-            box.label(text="Parked Cozy changes block further checkout operations.", icon="INFO")
+            box.label(text=f"Parked {BRAND_NAME} changes block further checkout operations.", icon="INFO")
             box.operator(
                 "cozystudio.reapply_parked_changes",
                 text="Restore Parked Changes",
@@ -302,7 +303,7 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
     bl_idname = "COZYSTUDIO_PT_branches"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Cozy Studio"
+    bl_category = BRAND_NAME
     bl_order = 3
 
     @classmethod
@@ -354,12 +355,12 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
             workflow_box.label(text=workflow_ui["detail"])
         if workflow_ui.get("dirty_cozy"):
             workflow_box.label(
-                text=f"Local Cozy changes: {workflow_ui['dirty_cozy']}",
+                text=f"Local {BRAND_NAME} changes: {workflow_ui['dirty_cozy']}",
                 icon="GREASEPENCIL",
             )
         if workflow_ui.get("dirty_non_cozy"):
             workflow_box.label(
-                text=f"Non-Cozy changes blocking branch actions: {workflow_ui['dirty_non_cozy']}",
+                text=f"Non-{BRAND_NAME} changes blocking branch actions: {workflow_ui['dirty_non_cozy']}",
                 icon="ERROR",
             )
         for blocker in workflow_ui.get("blockers", [])[:3]:
@@ -367,7 +368,7 @@ class COZYSTUDIO_PT_BranchesPanel(bpy.types.Panel):
 
         if carryover_ui.get("has_parked"):
             box = layout.box()
-            box.label(text="Parked Cozy changes", icon="INFO")
+            box.label(text=f"Parked {BRAND_NAME} changes", icon="INFO")
             if carryover_ui.get("operation"):
                 box.label(text=f"Created during {carryover_ui['operation']}")
             if carryover_ui.get("source") or carryover_ui.get("target"):
@@ -530,7 +531,7 @@ class COZYSTUDIO_PT_ConflictsPanel(bpy.types.Panel):
     bl_idname = "COZYSTUDIO_PT_conflicts"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Cozy Studio"
+    bl_category = BRAND_NAME
     bl_order = 4
 
     @classmethod
