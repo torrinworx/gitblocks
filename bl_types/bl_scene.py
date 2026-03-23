@@ -21,6 +21,10 @@ from .bl_datablock import resolve_datablock_from_uuid
 from .bl_file import get_filepath
 from .dump_anything import Dumper, Loader
 
+
+def _get_scene_grease_pencil(datablock: object):
+    return getattr(datablock, 'grease_pencil', None)
+
 RENDER_SETTINGS = [
     'dither_intensity',
     'engine',
@@ -257,6 +261,44 @@ VIEW_SETTINGS = [
 ]
 
 
+def _sequence_collection(container):
+    sequences = getattr(container, 'sequences_all', None)
+    if sequences is None:
+        sequences = getattr(container, 'sequences', None)
+    return sequences
+
+
+def _iter_sequences(container):
+    sequences = _sequence_collection(container)
+    if not sequences:
+        return
+
+    for sequence in sequences:
+        yield sequence
+
+        child_sequences = getattr(sequence, 'sequences', None)
+        if child_sequences:
+            yield from _iter_sequences(child_sequences)
+
+
+def _find_sequence(container, name):
+    sequences = _sequence_collection(container)
+    if not sequences:
+        return None
+
+    sequence = getattr(sequences, 'get', None)
+    if sequence is not None:
+        found = sequences.get(name, None)
+        if found is not None:
+            return found
+
+    for sequence in _iter_sequences(container):
+        if sequence.name == name:
+            return sequence
+
+    return None
+
+
 def dump_sequence(sequence) -> dict:
     """ Dump a sequence to a dict
 
@@ -303,7 +345,7 @@ def load_sequence(sequence_data: dict,
     strip_channel = sequence_data.get('channel')
     strip_frame_start = sequence_data.get('frame_start')
 
-    sequence = sequence_editor.sequences_all.get(strip_name, None)
+    sequence = _find_sequence(sequence_editor, strip_name)
 
     if sequence is None:
         if strip_type == 'SCENE':
@@ -339,8 +381,10 @@ def load_sequence(sequence_data: dict,
             seq = {}
 
             for i in range(sequence_data['input_count']):
-                seq[f"seq{i+1}"] = sequence_editor.sequences_all.get(
-                    sequence_data.get(f"input_{i+1}", None))
+                seq[f"seq{i+1}"] = _find_sequence(
+                    sequence_editor,
+                    sequence_data.get(f"input_{i+1}", None),
+                )
 
             sequence = sequence_editor.sequences.new_effect(name=strip_name,
                                                             type=strip_type,
@@ -389,7 +433,7 @@ class BlScene(ReplicatedDatablock):
 
         # Annotation
         gpencil_uid = data.get('grease_pencil')
-        if gpencil_uid:
+        if gpencil_uid and hasattr(datablock, 'grease_pencil'):
             datablock.grease_pencil = resolve_datablock_from_uuid(gpencil_uid, bpy.data.grease_pencils)
         prefs = get_preferences()
         if prefs and prefs.sync_flags.sync_render_settings:
@@ -421,7 +465,7 @@ class BlScene(ReplicatedDatablock):
             vse = datablock.sequence_editor
 
             # Clear removed sequences
-            for seq in vse.sequences_all:
+            for seq in _iter_sequences(vse):
                 if seq.name not in sequences:
                     vse.sequences.remove(seq)
             # Load existing sequences
@@ -508,7 +552,7 @@ class BlScene(ReplicatedDatablock):
         vse = datablock.sequence_editor
         if vse:
             dumped_sequences = {}
-            for seq in vse.sequences_all:
+            for seq in _iter_sequences(vse):
                 dumped_sequences[seq.name] = dump_sequence(seq)
             data['sequences'] = dumped_sequences
 
@@ -516,8 +560,9 @@ class BlScene(ReplicatedDatablock):
         if datablock.timeline_markers:
             data['timeline_markers'] = [(m.name, m.frame, getattr(m.camera, 'uuid', None)) for m in datablock.timeline_markers]
 
-        if datablock.grease_pencil:
-            data['grease_pencil'] = datablock.grease_pencil.uuid
+        grease_pencil = _get_scene_grease_pencil(datablock)
+        if grease_pencil:
+            data['grease_pencil'] = grease_pencil.uuid
 
         return data
 
@@ -533,15 +578,16 @@ class BlScene(ReplicatedDatablock):
             deps.append(datablock.world)
 
         # annotations
-        if datablock.grease_pencil:
-            deps.append(datablock.grease_pencil)
+        grease_pencil = _get_scene_grease_pencil(datablock)
+        if grease_pencil:
+            deps.append(grease_pencil)
 
         deps.extend(resolve_animation_dependencies(datablock))
 
         # Sequences
         vse = datablock.sequence_editor
         if vse:
-            for sequence in vse.sequences_all:
+            for sequence in _iter_sequences(vse):
                 if sequence.type == 'MOVIE' and sequence.filepath:
                     deps.append(Path(bpy.path.abspath(sequence.filepath)))
                 elif sequence.type == 'SOUND' and sequence.sound:
