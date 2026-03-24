@@ -6,8 +6,8 @@ from tests import runner
 
 
 def test_stage_banner_is_stable_for_install_and_test_phases():
-    assert runner_tui.format_stage_banner("install") == "== INSTALL PHASE =="
-    assert runner_tui.format_stage_banner("test") == "== TEST PHASE =="
+    assert runner_tui.format_stage_banner("install") == "[ INSTALL ]"
+    assert runner_tui.format_stage_banner("test") == "[ TEST ]"
 
 
 def test_compact_nodeid_keeps_file_test_and_param_case_readable():
@@ -15,16 +15,42 @@ def test_compact_nodeid_keeps_file_test_and_param_case_readable():
         runner_tui.compact_nodeid(
             "tests/unit/test_example.py::test_ok[latest]"
         )
-        == "test_example.py::test_ok [latest]"
+        == "example.ok [latest]"
     )
 
 
-def test_format_progress_shows_checkbox_and_percentage():
+def test_format_progress_grid_uses_unicode_blocks_not_ascii_bar_chars():
+    assert runner_tui.format_progress_grid(3, 8) == "⣿⣿⣿⣀⣀⣀⣀⣀"
+
+
+def test_format_status_mark_uses_colored_heavy_unicode_symbols():
+    assert runner_tui.format_status_mark("pass") == "\x1b[32m✔\x1b[0m"
+    assert runner_tui.format_status_mark("fail") == "\x1b[31m✖\x1b[0m"
+    assert runner_tui.format_status_mark("skip") == "\x1b[33m↷\x1b[0m"
+
+
+def test_format_matrix_progress_line_includes_version_counts_and_percentage():
     assert (
-        runner_tui.format_test_progress(
-            "tests/unit/test_example.py::test_ok", "passed", 3, 10
+        runner_tui.format_matrix_progress_line(3, 8, "Blender 4.2.1", 2, 5)
+        == "Blender 4.2.1 [2/5] 3/8 37% ⣿⣿⣿⣀⣀⣀⣀⣀"
+    )
+
+
+def test_format_test_footer_shows_colored_status_and_matrix_progress():
+    assert (
+        runner_tui.format_test_footer(
+            "test",
+            "tests/unit/test_example.py::test_ok",
+            3,
+            10,
+            3,
+            0,
+            0,
+            current_version="Blender 4.2.1",
+            current_run_index=2,
+            run_count=5,
         )
-        == "[x] test_example.py::test_ok (3/10, 30%)"
+        == "TEST    \x1b[32m✔\x1b[0m example.ok | Blender 4.2.1 [2/5] 3/10 30% ⣿⣿⣀⣀⣀⣀⣀⣀"
     )
 
 
@@ -37,7 +63,13 @@ def test_format_collection_summary_includes_selected_counts():
 
 def test_tui_plugin_emits_stage_header_collection_progress_and_summary():
     stream = StringIO()
-    plugin = runner_tui.build_pytest_tui("install", stream=stream)
+    plugin = runner_tui.build_pytest_tui(
+        "install",
+        stream=stream,
+        current_version="Blender 4.2.1",
+        current_run_index=2,
+        run_count=5,
+    )
 
     plugin.pytest_sessionstart(SimpleNamespace())
     plugin.pytest_deselected([object(), object()])
@@ -54,16 +86,22 @@ def test_tui_plugin_emits_stage_header_collection_progress_and_summary():
     plugin.pytest_sessionfinish(SimpleNamespace(), 0)
 
     assert stream.getvalue().splitlines() == [
-        "== INSTALL PHASE ==",
+        "[ INSTALL ]",
         "selected 3 of 5 tests (2 deselected)",
-        "[x] test_example.py::test_ok (1/3, 33%)",
-        "install phase complete: 1 passed, 0 failed, 0 skipped",
+        "INSTALL \x1b[32m✔\x1b[0m example.ok | Blender 4.2.1 [2/5] 1/3 33% ⣿⣿⣀⣀⣀⣀⣀⣀",
+        "install complete | passed 1 | failed 0 | skipped 0",
     ]
 
 
 def test_tui_plugin_prints_failure_details_only_for_failing_tests():
     stream = StringIO()
-    plugin = runner_tui.build_pytest_tui("test", stream=stream)
+    plugin = runner_tui.build_pytest_tui(
+        "test",
+        stream=stream,
+        current_version="Blender 4.2.1",
+        current_run_index=1,
+        run_count=1,
+    )
 
     plugin.pytest_sessionstart(SimpleNamespace())
     plugin.pytest_collection_finish(SimpleNamespace(items=[object(), object()]))
@@ -89,14 +127,14 @@ def test_tui_plugin_prints_failure_details_only_for_failing_tests():
     plugin.pytest_sessionfinish(SimpleNamespace(), 1)
 
     assert stream.getvalue().splitlines() == [
-        "== TEST PHASE ==",
+        "[ TEST ]",
         "selected 2 of 2 tests (0 deselected)",
-        "[x] test_example.py::test_ok (1/2, 50%)",
-        "[ ] test_example.py::test_bad (2/2, 100%)",
-        "test phase complete: 1 passed, 1 failed, 0 skipped",
+        "TEST    \x1b[32m✔\x1b[0m example.ok | Blender 4.2.1 [1/1] 1/2 50% ⣿⣿⣿⣿⣀⣀⣀⣀",
+        "TEST    \x1b[31m✖\x1b[0m example.bad | Blender 4.2.1 [1/1] 2/2 100% ⣿⣿⣿⣿⣿⣿⣿⣿",
+        "test complete | passed 1 | failed 1 | skipped 0",
         "",
         "FAILURES (1 failure)",
-        "[ ] test_example.py::test_bad",
+        "- example.bad",
         "AssertionError: boom",
         "Captured stdout call",
         "helpful detail",
