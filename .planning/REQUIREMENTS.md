@@ -38,6 +38,12 @@ Planned for the GitBlocks brand cleanup phase.
 - [x] **TEST-06**: Surface Blender download progress and selected version status in the test harness so long installs do not look frozen.
 - [x] **TEST-07**: Replace the noisy Blender-side test output with a structured terminal UI that prints stage headers, readable per-test results, and concise summaries.
 
+### Testing Runner Progress and Logging
+
+- [x] **TEST-08**: Render whole-run progress with a compact `⣿` grid, percentage, current Blender version, and colored heavy-mark status symbols for pass, fail, and skip.
+- [ ] **TEST-09**: Keep running every selected Blender version and every collected test after failures, then print a final per-version failure digest with test names and failure messages.
+- [ ] **TEST-10**: Write detailed per-run logs to timestamped files under `./logs` while keeping the terminal output minimal and readable.
+
 ## Out of Scope
 
 | Feature | Reason |
@@ -60,15 +66,18 @@ Planned for the GitBlocks brand cleanup phase.
 | TEST-02 | Phase 03 | Complete |
 | TEST-03 | Phase 03 | Complete |
 | TEST-04 | Phase 03 | Complete |
-| TEST-05 | Phase 04 | Planned |
-| TEST-06 | Phase 05 | Planned |
-| TEST-07 | Phase 05 | Planned |
+| TEST-05 | Phase 04 | Complete |
+| TEST-06 | Phase 05 | Complete |
+| TEST-07 | Phase 05 | Complete |
+| TEST-08 | Phase 06 | Planned |
+| TEST-09 | Phase 06 | Planned |
+| TEST-10 | Phase 06 | Planned |
 
 **Coverage:**
-- Requirements: 12 total
-- Mapped to phases: 12
+- Requirements: 15 total
+- Mapped to phases: 15
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after Phase 02 cleanup*
+*Last updated: 2026-03-24 after Phase 06 planning*

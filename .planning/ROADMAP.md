@@ -53,3 +53,13 @@ Goal: Make Blender test runs readable by surfacing download progress, selected v
 Plans:
 - [x] 05-testing-tui-overhaul-01-PLAN.md — surface download progress and version status in the outer harness
 - [x] 05-testing-tui-overhaul-02-PLAN.md — replace the noisy Blender-side test output with a structured terminal UI
+
+## Phase 06: Testing runner progress and logging
+
+Goal: Make Blender test runs easy to monitor with colored progress, continued execution after failures, and timestamped logs for diagnosis.
+
+**Requirements:** [TEST-08, TEST-09, TEST-10]
+
+Plans:
+- [x] 06-testing-runner-progress-and-logging-01-PLAN.md — add the colored grid progress/status renderer and unit coverage
+- [ ] 06-testing-runner-progress-and-logging-02-PLAN.md — keep the matrix running through failures, write timestamped logs, and summarize failures at the end
