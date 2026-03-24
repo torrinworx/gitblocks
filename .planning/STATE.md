@@ -114,6 +114,7 @@ Recent decisions affecting current work:
 - Add multi-version Blender test harness (testing)
 - Add individual test shorthand (testing)
 - Handle missing repo during refresh_ui_state (general)
+- Break up state.py into smaller files (general)
 
 ### Blockers/Concerns
 
