@@ -113,6 +113,7 @@ Recent decisions affecting current work:
 - Add Blender compatibility preflight (testing)
 - Add multi-version Blender test harness (testing)
 - Add individual test shorthand (testing)
+- Handle missing repo during refresh_ui_state (general)
 
 ### Blockers/Concerns
 
