@@ -1,0 +1,1 @@
+- Out-of-scope: `tests/unit/test_test_entrypoint.py` raises `SystemExit(0)` when run directly under pytest in the current environment. This predates the TUI wiring change and is unrelated to the structured test output task.

@@ -36,7 +36,7 @@ Planned for the GitBlocks brand cleanup phase.
 ### Testing TUI Overhaul
 
 - [x] **TEST-06**: Surface Blender download progress and selected version status in the test harness so long installs do not look frozen.
-- [ ] **TEST-07**: Replace the noisy Blender-side test output with a structured terminal UI that prints stage headers, readable per-test results, and concise summaries.
+- [x] **TEST-07**: Replace the noisy Blender-side test output with a structured terminal UI that prints stage headers, readable per-test results, and concise summaries.
 
 ## Out of Scope
 

@@ -52,4 +52,4 @@ Goal: Make Blender test runs readable by surfacing download progress, selected v
 
 Plans:
 - [x] 05-testing-tui-overhaul-01-PLAN.md — surface download progress and version status in the outer harness
-- [ ] 05-testing-tui-overhaul-02-PLAN.md — replace the noisy Blender-side test output with a structured terminal UI
+- [x] 05-testing-tui-overhaul-02-PLAN.md — replace the noisy Blender-side test output with a structured terminal UI

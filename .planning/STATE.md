@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 05-testing-tui-overhaul-01-PLAN.md
-last_updated: "2026-03-24T00:54:11.419Z"
+stopped_at: Completed 05-testing-tui-overhaul-02-PLAN.md
+last_updated: "2026-03-24T00:54:53.528Z"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 14
-  completed_plans: 14
+  completed_plans: 15
 ---
 
 # Project State
@@ -56,6 +56,7 @@ Plan: 2 of 2
 | Phase 03-multi-version-blender-test-harness P02 | 1h 10m | 3 tasks | 5 files |
 | Phase 04-blender-test-harness-import-path-repair P01 | 20min | 2 tasks | 3 files |
 | Phase 05-testing-tui-overhaul P01 | 20 min | 2 tasks | 4 files |
+| Phase 05-testing-tui-overhaul P02 | 3 min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -89,6 +90,8 @@ Recent decisions affecting current work:
 - [Phase 04-blender-test-harness-import-path-repair]: Keep the matrix test assertions unchanged and limit the phase to the import-path repair only.
 - [Phase 05-testing-tui-overhaul]: Model install progress as lightweight BlenderInstallEvent objects so callers can render cache-hit and download state consistently.
 - [Phase 05-testing-tui-overhaul]: Kept the fallback binary path behavior intact while removing silent launches.
+- [Phase 05-testing-tui-overhaul]: Keep the TUI implementation standard-library only and avoid adding a terminal UI dependency.
+- [Phase 05-testing-tui-overhaul]: Use a small pytest plugin per phase so install and normal runs stay visually distinct.
 
 ### Pending Todos
 
@@ -103,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T00:54:11.417Z
-Stopped at: Completed 05-testing-tui-overhaul-01-PLAN.md
+Last session: 2026-03-24T00:54:53.526Z
+Stopped at: Completed 05-testing-tui-overhaul-02-PLAN.md
 Resume file: None
