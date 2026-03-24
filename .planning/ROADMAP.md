@@ -43,3 +43,13 @@ Goal: Make the Blender embedded pytest run collect `tests/integration/test_blend
 
 Plans:
 - [x] 04-blender-test-harness-import-path-repair-01-PLAN.md — expose the harness through the tests package and switch matrix coverage to the package-safe import path
+
+## Phase 05: Testing TUI overhaul
+
+Goal: Make Blender test runs readable by surfacing download progress, selected versions, and a cleaner terminal UI during the testing phase.
+
+**Requirements:** [TEST-06, TEST-07]
+
+Plans:
+- [x] 05-testing-tui-overhaul-01-PLAN.md — surface download progress and version status in the outer harness
+- [ ] 05-testing-tui-overhaul-02-PLAN.md — replace the noisy Blender-side test output with a structured terminal UI
