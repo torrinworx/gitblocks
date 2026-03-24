@@ -3,11 +3,13 @@ from pathlib import Path
 import pytest
 
 from tests.blender_versions import (
+    BlenderCompatibilityResult,
     BlenderVersionError,
     BlenderInstallEvent,
     archive_url_for_version,
     cache_root,
     checksum_url_for_version,
+    check_blender_compatibility,
     ensure_installed,
     installed_versions,
     resolve_version,
@@ -185,3 +187,36 @@ def test_resolved_binary_path_is_stable_for_version_and_cache_root(tmp_path):
     info_two = resolve_version("5.1.0", cache_dir=tmp_path)
 
     assert info_one.binary_path == info_two.binary_path
+
+
+def test_supported_blender_versions_are_compatible():
+    result = check_blender_compatibility(("4.1.0", "5.1.0"))
+
+    assert result == BlenderCompatibilityResult(
+        selected_versions=("4.1.0", "5.1.0"),
+        supported_versions=("4.1.0", "4.5.1", "5.1.0"),
+        unsupported_versions=(),
+        ok=True,
+        message="All selected Blender versions are supported: 4.1.0, 5.1.0",
+    )
+
+
+def test_unsupported_blender_version_names_the_matrix():
+    result = check_blender_compatibility(("4.0.2",))
+
+    assert result == BlenderCompatibilityResult(
+        selected_versions=("4.0.2",),
+        supported_versions=("4.1.0", "4.5.1", "5.1.0"),
+        unsupported_versions=("4.0.2",),
+        ok=False,
+        message="Unsupported Blender version(s): 4.0.2. Supported versions: 4.1.0, 4.5.1, 5.1.0",
+    )
+
+
+def test_mixed_blender_versions_preserve_selection_order_and_isolate_unsupported_entries():
+    result = check_blender_compatibility(("4.1.0", "4.0.2"))
+
+    assert result.selected_versions == ("4.1.0", "4.0.2")
+    assert result.unsupported_versions == ("4.0.2",)
+    assert result.ok is False
+    assert result.message == "Unsupported Blender version(s): 4.0.2. Supported versions: 4.1.0, 4.5.1, 5.1.0"

@@ -8,6 +8,7 @@ import re
 import tarfile
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Sequence
 from urllib.request import Request, urlopen
 
 
@@ -63,6 +64,18 @@ class BlenderVersionInfo:
         return self.cache_root / self.release_dir / f"blender-{self.version}.sha256"
 
 
+SUPPORTED_BLENDER_VERSIONS = ("4.1.0", "4.5.1", "5.1.0")
+
+
+@dataclass(frozen=True)
+class BlenderCompatibilityResult:
+    selected_versions: tuple[str, ...]
+    supported_versions: tuple[str, ...]
+    unsupported_versions: tuple[str, ...]
+    ok: bool
+    message: str
+
+
 def _normalize_version(version: str) -> str:
     selector = (version or "").strip()
     if not selector:
@@ -107,6 +120,32 @@ def resolve_version(version: str, cache_dir: Path | None = None) -> BlenderVersi
         archive_url=archive_url_for_version(normalized),
         checksum_url=checksum_url_for_version(normalized),
         cache_root=root.expanduser(),
+    )
+
+
+def check_blender_compatibility(
+    selected_versions: Sequence[str],
+    supported_versions: Sequence[str] | None = None,
+) -> BlenderCompatibilityResult:
+    supported = tuple(supported_versions or SUPPORTED_BLENDER_VERSIONS)
+    selected = tuple(selected_versions)
+    unsupported = tuple(version for version in selected if version not in supported)
+    ok = not unsupported
+    if ok:
+        message = "All selected Blender versions are supported: " + ", ".join(selected)
+    else:
+        message = (
+            "Unsupported Blender version(s): "
+            + ", ".join(unsupported)
+            + ". Supported versions: "
+            + ", ".join(supported)
+        )
+    return BlenderCompatibilityResult(
+        selected_versions=selected,
+        supported_versions=supported,
+        unsupported_versions=unsupported,
+        ok=ok,
+        message=message,
     )
 
 
