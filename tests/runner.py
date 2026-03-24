@@ -14,6 +14,8 @@ import types
 from pathlib import Path
 import importlib.util
 
+from tests import runner_tui
+
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
@@ -137,16 +139,33 @@ def sanitize_target_directory(target: Path):
             shutil.rmtree(item, ignore_errors=True)
 
 
-if __name__ == "__main__":
-    argv = sys.argv
-    argv = argv[argv.index("--") + 1 :] if "--" in argv else []
-    parsed = parse_runner_args(argv) if argv else None
+def run_pytest_phase(tests_dir: Path, stage: str, extra_args: list[str] | None = None):
+    pytest_module = globals().get("pytest")
+    if pytest_module is None:
+        import pytest as pytest_module  # type: ignore
+
+    args = [
+        str(tests_dir),
+        "-q",
+        "-s",
+        "--disable-warnings",
+        "--maxfail=1",
+        "-p",
+        "no:terminal",
+    ]
+    if extra_args:
+        args.extend(extra_args)
+    return pytest_module.main(args, plugins=[runner_tui.build_pytest_tui(stage)])
+
+
+def main(argv: list[str] | None = None):
+    raw_argv = sys.argv[1:] if argv is None else argv
+    raw_argv = raw_argv[raw_argv.index("--") + 1 :] if "--" in raw_argv else raw_argv
+    parsed = parse_runner_args(raw_argv) if raw_argv else None
     target_path = parsed.target_dir.absolute() if parsed else Path.cwd()
     target_path = select_target_directory(target_path, getattr(parsed, "blender_version", None))
 
     ensure_pytest_installed()
-
-    import pytest
 
     # Silence Blender's banner in pytest output
     print("\n\033[36m[ runner ] Preparing clean GitBlocks test environment\033[0m")
@@ -183,40 +202,19 @@ if __name__ == "__main__":
         shutil.rmtree(addon_dest, ignore_errors=True)
     shutil.copytree(addon_src, addon_dest)
 
-    # Run pytest with its own coloured output
     tests_dir = Path(__file__).parent
     print(f"\033[36m[ runner ] Launching GitBlocks pytest in {tests_dir}\033[0m\n")
 
-    #  -q  : quiet start banner
-    #  -rA : show test summary
-    #  --color=yes : force colours when under Blender
-    install_code = pytest.main(
-        [
-            str(tests_dir),
-            "-vv",
-            "-q",
-            "--color=yes",
-            "--maxfail=1",
-            "--disable-warnings",
-            "-m",
-            "install",
-            "--ignore=tests/unit",
-        ]
+    install_code = run_pytest_phase(
+        tests_dir,
+        "install",
+        ["-m", "install", "--ignore=tests/unit"],
     )
     if install_code != 0:
-        sys.exit(install_code)
+        return install_code
 
-    exit_code = pytest.main(
-        [
-            str(tests_dir),
-            "-vv",
-            "-q",
-            "--color=yes",
-            "--maxfail=1",
-            "--disable-warnings",
-            "-m",
-            "not install",
-        ]
-    )
+    return run_pytest_phase(tests_dir, "test", ["-m", "not install"])
 
-    sys.exit(exit_code)
+
+if __name__ == "__main__":
+    sys.exit(main())
