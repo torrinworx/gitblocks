@@ -12,6 +12,7 @@ import subprocess
 import argparse
 import json
 import types
+from contextlib import nullcontext
 from dataclasses import dataclass, asdict
 from pathlib import Path
 import importlib.util
@@ -58,6 +59,14 @@ class PhaseResult:
     failed: int
     skipped: int
     exit_code: int
+    failures: tuple["FailureDetail", ...] = ()
+
+
+@dataclass(frozen=True)
+class FailureDetail:
+    nodeid: str
+    message: str
+    longreprtext: str
 
 
 def build_parser():
@@ -66,6 +75,11 @@ def build_parser():
     parser.add_argument(
         "--blender-version",
         help="Blender version selected by the outer harness for this run",
+    )
+    parser.add_argument(
+        "--log-file",
+        type=Path,
+        help="Write detailed pytest output to this log file",
     )
     return parser
 
@@ -163,26 +177,28 @@ def run_pytest_phase(
     current_version: str | None = None,
     current_run_index: int = 1,
     run_count: int = 1,
+    log_file: Path | None = None,
 ):
     pytest_module = globals().get("pytest")
     if pytest_module is None:
         import pytest as pytest_module  # type: ignore
 
-    tui = runner_tui.build_pytest_tui(
-        stage,
-        current_version=current_version,
-        current_run_index=current_run_index,
-        run_count=run_count,
-    )
-    args = [
-        str(tests_dir),
-        "--maxfail=1",
-        "-p",
-        "no:terminal",
-    ]
+    args = [str(tests_dir), "-p", "no:terminal"]
     if extra_args:
         args.extend(extra_args)
-    exit_code = pytest_module.main(args, plugins=[tui])
+    if log_file is not None:
+        args.extend(["--log-file", str(log_file)])
+        log_file.parent.mkdir(parents=True, exist_ok=True)
+    log_context = open(log_file, "a", encoding="utf-8") if log_file else nullcontext()
+    with log_context:
+        tui = runner_tui.build_pytest_tui(
+            stage,
+            stream=log_context if log_file else None,
+            current_version=current_version,
+            current_run_index=current_run_index,
+            run_count=run_count,
+        )
+        exit_code = pytest_module.main(args, plugins=[tui])
     return PhaseResult(
         stage=stage,
         selected=tui.selected,
@@ -191,14 +207,28 @@ def run_pytest_phase(
         failed=tui.failed,
         skipped=tui.skipped,
         exit_code=exit_code,
+        failures=tuple(
+            FailureDetail(
+                nodeid=failure.nodeid,
+                message=(failure.longreprtext.splitlines()[0] if failure.longreprtext else ""),
+                longreprtext=failure.longreprtext,
+            )
+            for failure in tui.failures
+        ),
     )
 
 
-def write_run_summary(target_path: Path, blender_version: str | None, phases: list[PhaseResult]) -> None:
+def write_run_summary(
+    target_path: Path,
+    blender_version: str | None,
+    phases: list[PhaseResult],
+    log_file: Path | None = None,
+) -> None:
     target_path.mkdir(parents=True, exist_ok=True)
     summary_path = target_path / SUMMARY_FILENAME
     payload = {
         "blender_version": blender_version,
+        "log_file": str(log_file) if log_file else None,
         "phases": [asdict(phase) for phase in phases],
     }
     summary_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
@@ -210,6 +240,7 @@ def main(argv: list[str] | None = None):
     parsed = parse_runner_args(raw_argv) if raw_argv else None
     target_path = parsed.target_dir.absolute() if parsed else Path.cwd()
     target_path = select_target_directory(target_path, getattr(parsed, "blender_version", None))
+    log_file = getattr(parsed, "log_file", None)
 
     ensure_pytest_installed()
 
@@ -253,10 +284,11 @@ def main(argv: list[str] | None = None):
         "install",
         ["-m", "install", "--ignore=tests/unit"],
         current_version=getattr(parsed, "blender_version", None),
+        log_file=log_file,
     )
     phase_results.append(install_result)
     if install_result.exit_code != 0:
-        write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results)
+        write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results, log_file=log_file)
         return install_result.exit_code
 
     test_result = run_pytest_phase(
@@ -264,9 +296,10 @@ def main(argv: list[str] | None = None):
         "test",
         ["-m", "not install"],
         current_version=getattr(parsed, "blender_version", None),
+        log_file=log_file,
     )
     phase_results.append(test_result)
-    write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results)
+    write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results, log_file=log_file)
     return test_result.exit_code
 
 

@@ -3,10 +3,15 @@ import sys
 import subprocess
 import argparse
 import inspect
+import json
+from datetime import UTC, datetime
 from dataclasses import dataclass
 from pathlib import Path
 
 from tests.blender_versions import ensure_installed
+
+
+SUMMARY_FILENAME = "gitblocks-test-summary.json"
 
 
 def load_env(env_path: Path):
@@ -34,6 +39,32 @@ class BlenderRun:
     blender_bin: Path
     test_dir: Path
     version: str | None = None
+
+
+@dataclass(frozen=True)
+class PhaseSummary:
+    stage: str
+    passed: int
+    failed: int
+    skipped: int
+    selected: int
+    deselected: int
+    exit_code: int
+    failures: tuple["FailureSummary", ...] = ()
+
+
+@dataclass(frozen=True)
+class FailureSummary:
+    nodeid: str
+    message: str
+    longreprtext: str
+
+
+@dataclass(frozen=True)
+class BlenderRunResult:
+    run: BlenderRun
+    exit_code: int
+    phases: tuple[PhaseSummary, ...] = ()
 
 
 def build_parser():
@@ -143,18 +174,118 @@ def print_blender_install_event(event) -> None:
         print(line)
 
 
+def summary_path_for_run(run: BlenderRun) -> Path:
+    return run.test_dir / SUMMARY_FILENAME
+
+
+def log_path_for_run(addon_root: Path, run: BlenderRun, started_at: datetime | None = None) -> Path:
+    started_at = started_at or datetime.utcnow()
+    stamp = started_at.strftime("%Y-%m-%d_%H-%M-%S")
+    version = (run.version or "blender").replace("/", "-")
+    logs_dir = addon_root / "logs"
+    logs_dir.mkdir(parents=True, exist_ok=True)
+    return logs_dir / f"gitblocks-test-{stamp}-{version}.log"
+
+
+def load_run_summary(summary_path: Path) -> tuple[PhaseSummary, ...]:
+    if not summary_path.exists():
+        return ()
+    data = json.loads(summary_path.read_text(encoding="utf-8"))
+    return tuple(
+        PhaseSummary(
+            stage=phase["stage"],
+            passed=phase["passed"],
+            failed=phase["failed"],
+            skipped=phase["skipped"],
+            selected=phase["selected"],
+            deselected=phase["deselected"],
+            exit_code=phase["exit_code"],
+            failures=tuple(
+                FailureSummary(
+                    nodeid=failure["nodeid"],
+                    message=failure.get("message", ""),
+                    longreprtext=failure.get("longreprtext", ""),
+                )
+                for failure in phase.get("failures", [])
+            ),
+        )
+        for phase in data.get("phases", [])
+    )
+
+
+def format_phase_totals(phase: PhaseSummary) -> str:
+    return f"{phase.stage} P:{phase.passed} F:{phase.failed} S:{phase.skipped}"
+
+
+def render_run_result(result: BlenderRunResult) -> str:
+    version = result.run.version or result.run.blender_bin.name
+    status = "PASS" if result.exit_code == 0 else "FAIL"
+    details = " | ".join(format_phase_totals(phase) for phase in result.phases)
+    if details:
+        return f"{version:<12} {status:<4} {details}"
+    return f"{version:<12} {status:<4} no summary captured"
+
+
+def render_failure_digest(results: list[BlenderRunResult]) -> list[str]:
+    grouped: list[tuple[str, list[FailureSummary]]] = []
+    for result in results:
+        failures: list[FailureSummary] = []
+        for phase in result.phases:
+            failures.extend(list(phase.failures))
+        if failures:
+            grouped.append((result.run.version or result.run.blender_bin.name, failures))
+
+    if not grouped:
+        return []
+
+    lines = ["FAILURE DIGEST"]
+    for version, failures in grouped:
+        lines.append(f"{version}")
+        for failure in failures:
+            lines.append(f"- {failure.nodeid} :: {failure.message}")
+    return lines
+
+
+def render_matrix_summary(results: list[BlenderRunResult]) -> str:
+    border = "=" * 60
+    lines = [border, "GitBlocks | Matrix Summary", border]
+    total_passed = 0
+    total_failed = 0
+    total_skipped = 0
+    for result in results:
+        lines.append(render_run_result(result))
+        for phase in result.phases:
+            total_passed += phase.passed
+            total_failed += phase.failed
+            total_skipped += phase.skipped
+    lines.append(border)
+    lines.append(
+        f"overall P:{total_passed} F:{total_failed} S:{total_skipped} across {len(results)} Blender run(s)"
+    )
+    digest = render_failure_digest(results)
+    if digest:
+        lines.append("")
+        lines.extend(digest)
+    return "\n".join(lines)
+
+
 def render_run_header(run: BlenderRun) -> str:
     if run.version:
-        return f"▶ Running Blender {run.version} at {run.blender_bin}"
-    return f"▶ Running Blender at {run.blender_bin}"
+        label = f"Blender {run.version}"
+    else:
+        label = "Blender"
+    border = "=" * 60
+    return f"{border}\nGitBlocks | {label}\n{border}"
 
 
-def build_blender_command(addon_root: Path, run: BlenderRun) -> list[str]:
+def build_blender_command(addon_root: Path, run: BlenderRun, log_file: Path | None = None) -> list[str]:
     runner = addon_root / "tests" / "runner.py"
     cmd = [
         str(run.blender_bin),
         "--factory-startup",
         "--background",
+        "--log-level",
+        "0",
         "--python",
         str(runner),
         "--",
@@ -162,6 +293,8 @@ def build_blender_command(addon_root: Path, run: BlenderRun) -> list[str]:
     ]
     if run.version:
         cmd.extend(["--blender-version", run.version])
+    if log_file is not None:
+        cmd.extend(["--log-file", str(log_file)])
     return cmd
 
 
@@ -182,6 +315,8 @@ def main():
         sys.exit(1)
 
     exit_code = 0
+    overall_exit_code = 0
+    results = []
     for run in runs:
         blender_path = run.blender_bin
         if not blender_path.exists():
@@ -189,14 +324,26 @@ def main():
             print("Set GITBLOCKS_BLENDER_BIN in .env")
             sys.exit(1)
 
-        cmd = build_blender_command(addon_root, run)
+        log_file = log_path_for_run(addon_root, run, datetime.now(UTC))
+        cmd = build_blender_command(addon_root, run, log_file=log_file)
+        summary_path = summary_path_for_run(run)
+        summary_path.unlink(missing_ok=True)
         print(render_run_header(run))
-        print(" ".join(cmd))
         exit_code = subprocess.call(cmd, cwd=str(addon_root))
-        if exit_code != 0:
-            break
+        results.append(
+            BlenderRunResult(
+                run=run,
+                exit_code=exit_code,
+                phases=load_run_summary(summary_path),
+            )
+        )
+        if exit_code != 0 and overall_exit_code == 0:
+            overall_exit_code = exit_code
 
-    sys.exit(exit_code)
+    if results:
+        print(render_matrix_summary(results))
+
+    sys.exit(overall_exit_code)
 
 
 if __name__ == "__main__":

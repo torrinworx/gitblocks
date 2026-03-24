@@ -1,5 +1,6 @@
 from types import SimpleNamespace
 from io import StringIO
+import json
 
 from tests import runner_tui
 from tests import runner
@@ -178,3 +179,52 @@ def test_runner_uses_structured_tui_for_install_then_test_phases(monkeypatch, tm
     assert [stage for _, stage in calls] == ["install", "test"]
     assert any("-p" in args and "no:terminal" in args for args, _ in calls)
     assert all("-s" not in args for args, _ in calls)
+
+
+def test_runner_parser_accepts_log_file_path(tmp_path):
+    parsed = runner.parse_runner_args([str(tmp_path), "--log-file", str(tmp_path / "run.log")])
+
+    assert parsed.log_file == tmp_path / "run.log"
+
+
+def test_run_pytest_phase_keeps_collecting_after_failure(monkeypatch, tmp_path):
+    captured = {}
+
+    def fake_main(args, plugins=None):
+        captured["args"] = args
+        captured["plugin"] = plugins[0]
+        return 1
+
+    monkeypatch.setattr(runner, "pytest", SimpleNamespace(main=fake_main), raising=False)
+
+    result = runner.run_pytest_phase(tmp_path, "test", ["-m", "not install"])
+
+    assert "--maxfail=1" not in captured["args"]
+    assert result.exit_code == 1
+
+
+def test_write_run_summary_serializes_failure_details(tmp_path):
+    summary_dir = tmp_path / "tests"
+    phase = runner.PhaseResult(
+        stage="test",
+        selected=2,
+        deselected=0,
+        passed=1,
+        failed=1,
+        skipped=0,
+        exit_code=1,
+        failures=(
+            runner.FailureDetail(
+                nodeid="tests/unit/test_example.py::test_bad",
+                message="AssertionError: boom",
+                longreprtext="AssertionError: boom\nCaptured stdout call\nhelpful detail",
+            ),
+        ),
+    )
+
+    runner.write_run_summary(summary_dir, "5.1.0", [phase])
+
+    payload = json.loads((summary_dir / runner.SUMMARY_FILENAME).read_text(encoding="utf-8"))
+
+    assert payload["phases"][0]["failures"][0]["nodeid"] == "tests/unit/test_example.py::test_bad"
+    assert payload["phases"][0]["failures"][0]["message"] == "AssertionError: boom"
