@@ -28,6 +28,17 @@ class BlenderVersionError(ValueError):
 
 
 @dataclass(frozen=True)
+class BlenderInstallEvent:
+    kind: str
+    version: str
+    archive_name: str | None = None
+    detail: str | None = None
+    bytes_downloaded: int | None = None
+    total_bytes: int | None = None
+    path: Path | None = None
+
+
+@dataclass(frozen=True)
 class BlenderVersionInfo:
     version: str
     release_dir: str
@@ -99,6 +110,11 @@ def resolve_version(version: str, cache_dir: Path | None = None) -> BlenderVersi
     )
 
 
+def _emit(progress, event: BlenderInstallEvent) -> None:
+    if progress is not None:
+        progress(event)
+
+
 def installed_versions(cache_dir: Path | None = None) -> list[str]:
     root = Path(cache_dir) if cache_dir is not None else cache_root()
     if not root.exists():
@@ -114,21 +130,62 @@ def installed_versions(cache_dir: Path | None = None) -> list[str]:
     return sorted(versions)
 
 
-def _download_text(url: str) -> str:
+def _download_text(url: str, *, version: str, archive_name: str, progress=None) -> str:
+    _emit(progress, BlenderInstallEvent(kind="start", version=version, archive_name=archive_name, detail="checksum"))
     request = Request(url, headers=_REQUEST_HEADERS)
     with urlopen(request) as response:
-        return response.read().decode("utf-8")
+        text = response.read().decode("utf-8")
+    _emit(progress, BlenderInstallEvent(kind="progress", version=version, archive_name=archive_name, detail="checksum"))
+    return text
 
 
-def _download_file(url: str, destination: Path) -> Path:
+def _download_file(url: str, destination: Path, *, version: str, progress=None) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
     request = Request(url, headers=_REQUEST_HEADERS)
+    total_bytes = None
+    _emit(
+        progress,
+        BlenderInstallEvent(
+            kind="start",
+            version=version,
+            archive_name=destination.name,
+            detail="archive",
+            path=destination,
+        ),
+    )
     with urlopen(request) as response, destination.open("wb") as handle:
+        total_bytes = int(response.headers.get("Content-Length", "0") or 0) or None
+        bytes_downloaded = 0
         while True:
             chunk = response.read(1024 * 1024)
             if not chunk:
                 break
             handle.write(chunk)
+            bytes_downloaded += len(chunk)
+            _emit(
+                progress,
+                BlenderInstallEvent(
+                    kind="progress",
+                    version=version,
+                    archive_name=destination.name,
+                    detail="archive",
+                    bytes_downloaded=bytes_downloaded,
+                    total_bytes=total_bytes,
+                    path=destination,
+                ),
+            )
+    _emit(
+        progress,
+        BlenderInstallEvent(
+            kind="progress",
+            version=version,
+            archive_name=destination.name,
+            detail="archive",
+            bytes_downloaded=bytes_downloaded,
+            total_bytes=total_bytes,
+            path=destination,
+        ),
+    )
     return destination
 
 
@@ -164,16 +221,46 @@ def _extract_archive(archive_path: Path, install_dir: Path) -> None:
         archive.extractall(path=install_dir.parent)
 
 
-def ensure_installed(version: str, cache_dir: Path | None = None) -> Path:
+def ensure_installed(version: str, cache_dir: Path | None = None, progress=None) -> Path:
     info = resolve_version(version, cache_dir=cache_dir)
     if info.binary_path.exists():
+        _emit(
+            progress,
+            BlenderInstallEvent(
+                kind="cache-hit",
+                version=info.version,
+                archive_name=info.archive_path.name,
+                detail="ready",
+                path=info.binary_path,
+            ),
+        )
         return info.binary_path
 
-    checksum_text = _download_text(info.checksum_url)
-    archive_path = _download_file(info.archive_url, info.archive_path)
+    checksum_text = _download_text(
+        info.checksum_url,
+        version=info.version,
+        archive_name=info.archive_path.name,
+        progress=progress,
+    )
+    archive_path = _download_file(
+        info.archive_url,
+        info.archive_path,
+        version=info.version,
+        progress=progress,
+    )
     _verify_checksum(archive_path, checksum_text)
     _extract_archive(archive_path, info.install_dir)
 
     if not info.binary_path.exists():
         raise BlenderVersionError(f"Blender binary was not extracted to {info.binary_path}")
+    _emit(
+        progress,
+        BlenderInstallEvent(
+            kind="complete",
+            version=info.version,
+            archive_name=info.archive_path.name,
+            detail="ready",
+            path=info.binary_path,
+        ),
+    )
     return info.binary_path
