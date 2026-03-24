@@ -62,4 +62,4 @@ Goal: Make Blender test runs easy to monitor with colored progress, continued ex
 
 Plans:
 - [x] 06-testing-runner-progress-and-logging-01-PLAN.md — add the colored grid progress/status renderer and unit coverage
-- [ ] 06-testing-runner-progress-and-logging-02-PLAN.md — keep the matrix running through failures, write timestamped logs, and summarize failures at the end
+- [x] 06-testing-runner-progress-and-logging-02-PLAN.md — keep the matrix running through failures, write timestamped logs, and summarize failures at the end

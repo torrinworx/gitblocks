@@ -41,8 +41,8 @@ Planned for the GitBlocks brand cleanup phase.
 ### Testing Runner Progress and Logging
 
 - [x] **TEST-08**: Render whole-run progress with a compact `⣿` grid, percentage, current Blender version, and colored heavy-mark status symbols for pass, fail, and skip.
-- [ ] **TEST-09**: Keep running every selected Blender version and every collected test after failures, then print a final per-version failure digest with test names and failure messages.
-- [ ] **TEST-10**: Write detailed per-run logs to timestamped files under `./logs` while keeping the terminal output minimal and readable.
+- [x] **TEST-09**: Keep running every selected Blender version and every collected test after failures, then print a final per-version failure digest with test names and failure messages.
+- [x] **TEST-10**: Write detailed per-run logs to timestamped files under `./logs` while keeping the terminal output minimal and readable.
 
 ## Out of Scope
 

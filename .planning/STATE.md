@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 06-testing-runner-progress-and-logging-01-PLAN.md
-last_updated: "2026-03-24T02:05:38.202Z"
+stopped_at: Completed 06-testing-runner-progress-and-logging-02-PLAN.md
+last_updated: "2026-03-24T02:11:24.577Z"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -58,6 +58,7 @@ Plan: 2 of 2
 | Phase 05-testing-tui-overhaul P01 | 20 min | 2 tasks | 4 files |
 | Phase 05-testing-tui-overhaul P02 | 3 min | 2 tasks | 3 files |
 | Phase 06-testing-runner-progress-and-logging P01 | 18 min | 2 tasks | 3 files |
+| Phase 06-testing-runner-progress-and-logging P02 | 12 min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,9 @@ Recent decisions affecting current work:
 - [Phase 06-testing-runner-progress-and-logging]: Kept the TUI dependency-free and implemented color/status rendering with the standard library.
 - [Phase 06-testing-runner-progress-and-logging]: Threaded the active Blender version through the runner so the in-progress footer can show the current matrix context.
 - [Phase 06-testing-runner-progress-and-logging]: Replaced the old bar-style progress contract with a compact Unicode grid and ANSI status marks.
+- [Phase 06-testing-runner-progress-and-logging]: Keep later Blender versions running after a failure while preserving a nonzero overall exit code.
+- [Phase 06-testing-runner-progress-and-logging]: Write one human-readable timestamped log file per Blender run and pass it through the harness CLI.
+- [Phase 06-testing-runner-progress-and-logging]: Surface failure details from inner pytest summaries in a grouped final digest.
 
 ### Pending Todos
 
@@ -106,10 +110,12 @@ Recent decisions affecting current work:
 
 ### Blockers/Concerns
 
-None yet.
+yet.
+
+- Full tests/unit collection still fails outside this plan scope because gitblocks_addon is not importable in the plain unit-test environment and deepdiff is missing from the local Python environment.
 
 ## Session Continuity
 
-Last session: 2026-03-24T02:05:32.131Z
-Stopped at: Completed 06-testing-runner-progress-and-logging-01-PLAN.md
+Last session: 2026-03-24T02:11:21.075Z
+Stopped at: Completed 06-testing-runner-progress-and-logging-02-PLAN.md
 Resume file: None

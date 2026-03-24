@@ -1,95 +1,103 @@
 ---
 phase: 06-testing-runner-progress-and-logging
-plan: 01
+plan: 02
 subsystem: testing
-tags: [pytest, blender, tui, terminal-output, ansi]
+tags: [blender, pytest, logging, matrix, tui]
 
 # Dependency graph
 requires:
   - phase: 05-testing-tui-overhaul
-    provides: structured Blender-side pytest terminal output and plugin wiring
+    provides: structured pytest TUI and version-aware terminal matrix output
+  - phase: 06-testing-runner-progress-and-logging-01
+    provides: active version threading and matrix progress rendering
 provides:
-  - compact Unicode grid progress instead of the old ASCII bar
-  - colored pass/fail/skip status marks in the Blender test runner
-  - matrix-style progress lines that keep Blender version context visible
-affects: [06-testing-runner-progress-and-logging-02, future Blender test runs, terminal UX]
+  - failure-tolerant Blender matrix execution across all selected versions
+  - timestamped per-run log files under `logs/`
+  - grouped final failure digests with version and test context
+affects: [future Blender harness runs, failure diagnosis, log inspection]
 
 # Tech tracking
 tech-stack:
-  added: [ANSI escapes, pytest hooks]
-  patterns: [Unicode grid progress rendering, colored heavy-mark status output, version-aware footer lines]
+  added: [json summary failures, timestamped log paths]
+  patterns: [non-halting matrix execution, structured failure digest rendering]
 
 key-files:
-  created: []
-  modified: [tests/runner_tui.py, tests/runner.py, tests/unit/test_runner_tui.py]
+  created: [.planning/phases/06-testing-runner-progress-and-logging/deferred-items.md]
+  modified: [test.py, tests/runner.py, tests/unit/test_runner_tui.py, tests/unit/test_test_entrypoint.py]
 
 key-decisions:
-  - "Kept the TUI dependency-free and implemented all color/status rendering with the standard library."
-  - "Threaded the active Blender version through the runner so the in-progress footer can show the current matrix context."
-  - "Replaced the old bar-style progress contract with a compact Unicode grid and ANSI status marks."
+  - "Keep later Blender versions running after a failure while preserving a nonzero overall exit code."
+  - "Write one human-readable timestamped log file per Blender run and pass it through the harness CLI."
+  - "Surface failure details from inner pytest summaries in a grouped final digest."
 
 patterns-established:
-  - "Pattern 1: pure formatter helpers own the output contract, while the pytest plugin only supplies run state."
-  - "Pattern 2: version-aware progress lines keep the live test footer readable without widening the terminal layout."
+  - "Pattern 1: runner summaries now carry structured failure details for downstream reporting."
+  - "Pattern 2: outer harness log filenames are derived from the run timestamp and Blender version."
 
-requirements-completed: [TEST-08]
+requirements-completed: [TEST-09, TEST-10]
 
 # Metrics
-duration: 18 min
+duration: 12 min
 completed: 2026-03-24
 ---
 
 # Phase 06: Testing Runner Progress and Logging Summary
 
-**Compact Unicode grid progress, ANSI status marks, and version-aware footer lines for Blender test runs.**
+**Failure-tolerant Blender matrix runs now keep going after individual version failures, emit timestamped per-run logs, and finish with a grouped failure digest.**
 
 ## Performance
 
-- **Duration:** 18 min
-- **Started:** 2026-03-24T02:20:00Z
-- **Completed:** 2026-03-24T02:38:00Z
+- **Duration:** 12 min
+- **Started:** 2026-03-24T02:00:00Z
+- **Completed:** 2026-03-24T02:10:51Z
 - **Tasks:** 2
-- **Files modified:** 3
+- **Files modified:** 5
 
 ## Accomplishments
-- Replaced the ASCII progress bar with a compact `⣿`/`⣀` grid and matrix-style percentage line.
-- Added colored `✔`, `✖`, and `↷` status marks for pass/fail/skip outcomes.
-- Kept the active Blender version visible in the live test footer and pinned the contract with deterministic unit tests.
+- Added `--log-file` plumbing and richer failure serialization to the inner Blender runner.
+- Kept matrix execution moving after a failing Blender version instead of breaking early.
+- Printed a final digest that groups failures by Blender version and test name.
 
 ## Task Commits
 
-1. **Task 1: Add colored grid progress helpers** - `4a2fbf1` (feat)
-2. **Task 2: Pin the new terminal output contract** - `fed94e4` (test)
+1. **Task 1: Keep the matrix running and persist detailed logs** - `26f19cc` (feat)
+2. **Task 2: Prove the non-halting matrix and final failure digest** - `ad66505` (feat)
 
 **Plan metadata:** pending final docs commit
 
 ## Files Created/Modified
-- `tests/runner_tui.py` - Unicode grid helpers, ANSI status marks, version-aware footer formatting
-- `tests/runner.py` - threads Blender version into the TUI plugin
-- `tests/unit/test_runner_tui.py` - deterministic assertions for the new terminal contract
+- `tests/runner.py` - accepts `--log-file`, records failure details, and writes structured run summaries.
+- `test.py` - generates per-run log paths, continues after failures, and renders the final digest.
+- `tests/unit/test_runner_tui.py` - covers log-file parsing, failure capture, and summary serialization.
+- `tests/unit/test_test_entrypoint.py` - covers matrix continuation, log path format, and failure digest output.
+- `.planning/phases/06-testing-runner-progress-and-logging/deferred-items.md` - records unrelated unit-test collection blockers.
 
 ## Decisions Made
-- Standard-library-only rendering stays in place; no terminal UI dependency was added.
-- The progress display uses Unicode cells rather than an ASCII bar to stay compact.
-- The live footer now includes Blender version context so matrix runs remain readable in progress.
+- Used timestamped `logs/gitblocks-test-YYYY-MM-DD_HH-MM-SS-<version>.log` names for per-run diagnostics.
+- Kept the harness exit code nonzero when any Blender run fails, even though later runs still execute.
+- Reused structured failure data from the inner runner instead of parsing terminal text.
 
 ## Deviations from Plan
 
-None - plan executed exactly as written.
+None - plan executed as written.
 
 ## Issues Encountered
-- The local system Python lacked `pytest`, so verification used a temporary virtual environment at `/tmp/gitblocks-venv`.
+- Full `tests/unit` collection still fails outside this scope because `gitblocks_addon` is unavailable in the plain unit-test environment.
+- Full `tests/unit` collection still fails outside this scope because `deepdiff` is missing from the local Python environment.
 
 ## User Setup Required
 
 None - no external service configuration required.
 
 ## Next Phase Readiness
-- Terminal progress/status rendering is now contract-tested and version-aware.
-- Phase 06 plan 02 can build on the updated TUI without changing the display conventions again.
+- The Blender matrix now keeps going through failures and preserves detailed logs for post-run diagnosis.
+- Ready for the next phase or milestone wrap-up.
 
 ---
 *Phase: 06-testing-runner-progress-and-logging*
 *Completed: 2026-03-24*
 
 ## Self-Check: PASSED
+
+- Summary file exists on disk.
+- Task commits found: `26f19cc`, `ad66505`.
