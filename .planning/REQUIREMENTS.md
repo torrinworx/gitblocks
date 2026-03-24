@@ -46,8 +46,8 @@ Planned for the GitBlocks brand cleanup phase.
 
 ### Blender Test Harness Preflight and Shorthand
 
-- [ ] **TEST-11**: Reject unsupported Blender version selections before the Blender matrix starts, and report the supported matrix in a clear preflight message.
-- [ ] **TEST-12**: Allow a single-test shorthand selector to flow from the outer harness into the Blender-side pytest run, while preserving the existing version-selection behavior and documented env examples.
+- [x] **TEST-11**: Reject unsupported Blender version selections before the Blender matrix starts, and report the supported matrix in a clear preflight message.
+- [x] **TEST-12**: Allow a single-test shorthand selector to flow from the outer harness into the Blender-side pytest run, while preserving the existing version-selection behavior and documented env examples.
 
 ## Out of Scope
 

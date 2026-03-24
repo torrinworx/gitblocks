@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed 06-testing-runner-progress-and-logging-02-PLAN.md
-last_updated: "2026-03-24T02:11:24.577Z"
+stopped_at: Completed 07-blender-test-harness-preflight-and-shorthand-PLAN.md
+last_updated: "2026-03-24T03:41:26.686Z"
 progress:
-  total_phases: 6
+  total_phases: 8
   completed_phases: 5
-  total_plans: 16
-  completed_plans: 16
+  total_plans: 18
+  completed_plans: 17
 ---
 
 # Project State
@@ -59,8 +59,13 @@ Plan: 2 of 2
 | Phase 05-testing-tui-overhaul P02 | 3 min | 2 tasks | 3 files |
 | Phase 06-testing-runner-progress-and-logging P01 | 18 min | 2 tasks | 3 files |
 | Phase 06-testing-runner-progress-and-logging P02 | 12 min | 2 tasks | 5 files |
+| Phase 07-blender-test-harness-preflight-and-shorthand P01+02 | 20m | 2 tasks | 8 files |
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 7 added: add this to the phase thing
 
 ### Decisions
 
@@ -100,6 +105,7 @@ Recent decisions affecting current work:
 - [Phase 06-testing-runner-progress-and-logging]: Keep later Blender versions running after a failure while preserving a nonzero overall exit code.
 - [Phase 06-testing-runner-progress-and-logging]: Write one human-readable timestamped log file per Blender run and pass it through the harness CLI.
 - [Phase 06-testing-runner-progress-and-logging]: Surface failure details from inner pytest summaries in a grouped final digest.
+- [Phase 07-blender-test-harness-preflight-and-shorthand]: Use the supported Blender matrix 4.1.0, 4.5.1, 5.1.0 for compatibility gating; forward --test / GITBLOCKS_TEST_FILTER as a pytest -k shorthand
 
 ### Pending Todos
 
@@ -116,6 +122,6 @@ yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T02:11:21.075Z
-Stopped at: Completed 06-testing-runner-progress-and-logging-02-PLAN.md
+Last session: 2026-03-24T03:41:26.684Z
+Stopped at: Completed 07-blender-test-harness-preflight-and-shorthand-PLAN.md
 Resume file: None

@@ -72,5 +72,5 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-blender-test-harness-preflight-and-shorthand-01-PLAN.md — define the compatibility gate and pin its failure contract
-- [ ] 07-blender-test-harness-preflight-and-shorthand-02-PLAN.md — wire the preflight, add the single-test shorthand, and refresh docs/examples
+- [x] 07-blender-test-harness-preflight-and-shorthand-01-PLAN.md — define the compatibility gate and pin its failure contract
+- [x] 07-blender-test-harness-preflight-and-shorthand-02-PLAN.md — wire the preflight, add the single-test shorthand, and refresh docs/examples
