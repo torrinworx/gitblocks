@@ -11,7 +11,8 @@ GitBlocks uses Blender's datablock system. It serializes individual datablocks i
 
 This runs alongside Blender's autosave without interfering with it, so you can keep autosave on and still get clean, reviewable history.
 
-[Screencast from 2026-03-11 22-57-20.webm](https://github.com/user-attachments/assets/dd081a9b-d05a-454a-84f5-aeebf6a0389a)
+[gitblocks demo](https://github.com/user-attachments/assets/b5cb62a3-379d-488b-8134-2add8986c39a)
+
 
 # Features
 - Datablock-based diffs written as readable files.
