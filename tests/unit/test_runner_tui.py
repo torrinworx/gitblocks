@@ -203,6 +203,35 @@ def test_run_pytest_phase_keeps_collecting_after_failure(monkeypatch, tmp_path):
     assert result.exit_code == 1
 
 
+def test_run_pytest_phase_mirrors_live_tui_output_to_stdout_and_log_file(monkeypatch, tmp_path, capsys):
+    def fake_main(args, plugins=None):
+        plugin = plugins[0]
+        plugin.pytest_sessionstart(SimpleNamespace())
+        plugin.pytest_collection_finish(SimpleNamespace(items=[object()]))
+        plugin.pytest_runtest_logreport(
+            SimpleNamespace(
+                when="call",
+                nodeid="tests/unit/test_example.py::test_ok",
+                passed=True,
+                failed=False,
+                skipped=False,
+            )
+        )
+        plugin.pytest_sessionfinish(SimpleNamespace(), 0)
+        return 0
+
+    monkeypatch.setattr(runner, "pytest", SimpleNamespace(main=fake_main), raising=False)
+
+    log_file = tmp_path / "run.log"
+    result = runner.run_pytest_phase(tmp_path, "test", ["-m", "not install"], log_file=log_file)
+
+    output = capsys.readouterr().out
+    assert "[ TEST ]" in output
+    assert "TEST    \x1b[32m✔\x1b[0m example.ok" in output
+    assert "[ TEST ]" in log_file.read_text(encoding="utf-8")
+    assert result.exit_code == 0
+
+
 def test_write_run_summary_serializes_failure_details(tmp_path):
     summary_dir = tmp_path / "tests"
     phase = runner.PhaseResult(

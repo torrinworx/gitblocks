@@ -69,6 +69,26 @@ class FailureDetail:
     longreprtext: str
 
 
+class TeeStream:
+    def __init__(self, *streams):
+        self._streams = streams
+
+    def write(self, text):
+        for stream in self._streams:
+            stream.write(text)
+
+    def flush(self):
+        for stream in self._streams:
+            stream.flush()
+
+    def isatty(self):
+        for stream in self._streams:
+            isatty = getattr(stream, "isatty", None)
+            if callable(isatty) and isatty():
+                return True
+        return False
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Run GitBlocks tests inside Blender")
     parser.add_argument("target_dir", type=Path, help="Directory where test data should be prepared")
@@ -189,11 +209,12 @@ def run_pytest_phase(
     if log_file is not None:
         args.extend(["--log-file", str(log_file)])
         log_file.parent.mkdir(parents=True, exist_ok=True)
-    log_context = open(log_file, "a", encoding="utf-8") if log_file else nullcontext()
+    log_context = open(log_file, "a", encoding="utf-8", buffering=1) if log_file else nullcontext()
+    stream = TeeStream(sys.stdout, log_context) if log_file else sys.stdout
     with log_context:
         tui = runner_tui.build_pytest_tui(
             stage,
-            stream=log_context if log_file else None,
+            stream=stream,
             current_version=current_version,
             current_run_index=current_run_index,
             run_count=run_count,

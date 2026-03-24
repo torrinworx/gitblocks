@@ -9,6 +9,14 @@ def test_runner_uses_version_specific_target_directory(tmp_path):
     assert target == tmp_path / "5.1.0"
 
 
+def test_runner_keeps_existing_version_specific_directory(tmp_path):
+    versioned = tmp_path / "5.1.0"
+
+    target = runner.select_target_directory(versioned, "5.1.0")
+
+    assert target == versioned
+
+
 def test_runner_keeps_base_target_directory_without_version(tmp_path):
     target = runner.select_target_directory(tmp_path, None)
 
