@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import argparse
+import inspect
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -51,12 +52,30 @@ def _parse_version_list(value: str | None) -> list[str]:
     return [entry.strip() for entry in value.split(",") if entry.strip()]
 
 
+def _resolver_supports_progress(resolver) -> bool:
+    try:
+        signature = inspect.signature(resolver)
+    except (TypeError, ValueError):
+        return False
+    for parameter in signature.parameters.values():
+        if parameter.kind == inspect.Parameter.VAR_KEYWORD or parameter.name == "progress":
+            return True
+    return False
+
+
+def _resolve_blender_binary(resolver, version: str, *, progress=None):
+    if progress is not None and _resolver_supports_progress(resolver):
+        return resolver(version, progress=progress)
+    return resolver(version)
+
+
 def plan_blender_runs(
     argv: list[str],
     *,
     addon_root: Path,
     env: dict[str, str] | None = None,
     resolver=ensure_installed,
+    progress=None,
 ) -> list[BlenderRun]:
     env = dict(env or {})
     args = build_parser().parse_args(argv)
@@ -82,7 +101,7 @@ def plan_blender_runs(
     if selected_versions:
         return [
             BlenderRun(
-                blender_bin=Path(resolver(version)),
+                blender_bin=Path(_resolve_blender_binary(resolver, version, progress=progress)),
                 test_dir=test_dir / version,
                 version=version,
             )
@@ -99,6 +118,35 @@ def plan_blender_runs(
             test_dir=test_dir,
         )
     ]
+
+
+def render_blender_install_event(event) -> str | None:
+    if event.kind == "start":
+        return f"◆ Preparing Blender {event.version}"
+    if event.kind == "cache-hit":
+        return f"✓ Blender {event.version} ready (cached)"
+    if event.kind == "progress":
+        if event.detail == "checksum":
+            return f"… Checking Blender {event.version} download"
+        if event.bytes_downloaded is not None and event.total_bytes:
+            percent = int((event.bytes_downloaded / event.total_bytes) * 100)
+            return f"… Downloading Blender {event.version}: {percent}%"
+        return f"… Downloading Blender {event.version}"
+    if event.kind == "complete":
+        return f"✓ Blender {event.version} ready"
+    return None
+
+
+def print_blender_install_event(event) -> None:
+    line = render_blender_install_event(event)
+    if line:
+        print(line)
+
+
+def render_run_header(run: BlenderRun) -> str:
+    if run.version:
+        return f"▶ Running Blender {run.version} at {run.blender_bin}"
+    return f"▶ Running Blender at {run.blender_bin}"
 
 
 def build_blender_command(addon_root: Path, run: BlenderRun) -> list[str]:
@@ -121,7 +169,12 @@ def main():
     addon_root = Path(__file__).parent.resolve()
     load_env(addon_root / ".env")
 
-    runs = plan_blender_runs(sys.argv[1:], addon_root=addon_root, env=os.environ)
+    runs = plan_blender_runs(
+        sys.argv[1:],
+        addon_root=addon_root,
+        env=os.environ,
+        progress=print_blender_install_event,
+    )
 
     runner = addon_root / "tests" / "runner.py"
     if not runner.exists():
@@ -137,7 +190,7 @@ def main():
             sys.exit(1)
 
         cmd = build_blender_command(addon_root, run)
-        print("Running GitBlocks Blender tests:")
+        print(render_run_header(run))
         print(" ".join(cmd))
         exit_code = subprocess.call(cmd, cwd=str(addon_root))
         if exit_code != 0:
