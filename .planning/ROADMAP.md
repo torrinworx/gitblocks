@@ -63,3 +63,14 @@ Goal: Make Blender test runs easy to monitor with colored progress, continued ex
 Plans:
 - [x] 06-testing-runner-progress-and-logging-01-PLAN.md — add the colored grid progress/status renderer and unit coverage
 - [x] 06-testing-runner-progress-and-logging-02-PLAN.md — keep the matrix running through failures, write timestamped logs, and summarize failures at the end
+
+### Phase 07: Blender test harness preflight and shorthand
+
+**Goal:** Reject unsupported Blender selections before the matrix starts, and add a shorthand selector for single-test runs without disturbing the existing supported-version workflow.
+**Requirements:** [TEST-11, TEST-12]
+**Depends on:** Phase 6
+**Plans:** 2 plans
+
+Plans:
+- [ ] 07-blender-test-harness-preflight-and-shorthand-01-PLAN.md — define the compatibility gate and pin its failure contract
+- [ ] 07-blender-test-harness-preflight-and-shorthand-02-PLAN.md — wire the preflight, add the single-test shorthand, and refresh docs/examples

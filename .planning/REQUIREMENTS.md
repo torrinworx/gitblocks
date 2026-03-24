@@ -44,6 +44,11 @@ Planned for the GitBlocks brand cleanup phase.
 - [x] **TEST-09**: Keep running every selected Blender version and every collected test after failures, then print a final per-version failure digest with test names and failure messages.
 - [x] **TEST-10**: Write detailed per-run logs to timestamped files under `./logs` while keeping the terminal output minimal and readable.
 
+### Blender Test Harness Preflight and Shorthand
+
+- [ ] **TEST-11**: Reject unsupported Blender version selections before the Blender matrix starts, and report the supported matrix in a clear preflight message.
+- [ ] **TEST-12**: Allow a single-test shorthand selector to flow from the outer harness into the Blender-side pytest run, while preserving the existing version-selection behavior and documented env examples.
+
 ## Out of Scope
 
 | Feature | Reason |
@@ -72,12 +77,14 @@ Planned for the GitBlocks brand cleanup phase.
 | TEST-08 | Phase 06 | Planned |
 | TEST-09 | Phase 06 | Planned |
 | TEST-10 | Phase 06 | Planned |
+| TEST-11 | Phase 07 | Planned |
+| TEST-12 | Phase 07 | Planned |
 
 **Coverage:**
-- Requirements: 15 total
-- Mapped to phases: 15
+- Requirements: 17 total
+- Mapped to phases: 17
 - Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-23*
-*Last updated: 2026-03-24 after Phase 06 planning*
+*Last updated: 2026-03-24 after Phase 07 planning*
