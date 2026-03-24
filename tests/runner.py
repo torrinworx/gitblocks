@@ -10,16 +10,20 @@ import sys
 import shutil
 import subprocess
 import argparse
+import json
 import types
+from dataclasses import dataclass, asdict
 from pathlib import Path
 import importlib.util
-
-from tests import runner_tui
-
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
+
+from tests import runner_tui
+
+
+SUMMARY_FILENAME = "gitblocks-test-summary.json"
 
 try:
     import bpy  # type: ignore
@@ -45,6 +49,17 @@ except ModuleNotFoundError:  # pragma: no cover - Blender-only dependency
 
 
 # Helpers
+@dataclass(frozen=True)
+class PhaseResult:
+    stage: str
+    selected: int
+    deselected: int
+    passed: int
+    failed: int
+    skipped: int
+    exit_code: int
+
+
 def build_parser():
     parser = argparse.ArgumentParser(description="Run GitBlocks tests inside Blender")
     parser.add_argument("target_dir", type=Path, help="Directory where test data should be prepared")
@@ -56,7 +71,9 @@ def build_parser():
 
 
 def select_target_directory(target: Path, version: str | None):
-    return target / version if version else target
+    if version and target.name != version:
+        return target / version
+    return target
 
 
 def parse_runner_args(argv: list[str] | None = None):
@@ -139,23 +156,52 @@ def sanitize_target_directory(target: Path):
             shutil.rmtree(item, ignore_errors=True)
 
 
-def run_pytest_phase(tests_dir: Path, stage: str, extra_args: list[str] | None = None):
+def run_pytest_phase(
+    tests_dir: Path,
+    stage: str,
+    extra_args: list[str] | None = None,
+    current_version: str | None = None,
+    current_run_index: int = 1,
+    run_count: int = 1,
+):
     pytest_module = globals().get("pytest")
     if pytest_module is None:
         import pytest as pytest_module  # type: ignore
 
+    tui = runner_tui.build_pytest_tui(
+        stage,
+        current_version=current_version,
+        current_run_index=current_run_index,
+        run_count=run_count,
+    )
     args = [
         str(tests_dir),
-        "-q",
-        "-s",
-        "--disable-warnings",
         "--maxfail=1",
         "-p",
         "no:terminal",
     ]
     if extra_args:
         args.extend(extra_args)
-    return pytest_module.main(args, plugins=[runner_tui.build_pytest_tui(stage)])
+    exit_code = pytest_module.main(args, plugins=[tui])
+    return PhaseResult(
+        stage=stage,
+        selected=tui.selected,
+        deselected=tui.deselected,
+        passed=tui.passed,
+        failed=tui.failed,
+        skipped=tui.skipped,
+        exit_code=exit_code,
+    )
+
+
+def write_run_summary(target_path: Path, blender_version: str | None, phases: list[PhaseResult]) -> None:
+    target_path.mkdir(parents=True, exist_ok=True)
+    summary_path = target_path / SUMMARY_FILENAME
+    payload = {
+        "blender_version": blender_version,
+        "phases": [asdict(phase) for phase in phases],
+    }
+    summary_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
 def main(argv: list[str] | None = None):
@@ -166,9 +212,6 @@ def main(argv: list[str] | None = None):
     target_path = select_target_directory(target_path, getattr(parsed, "blender_version", None))
 
     ensure_pytest_installed()
-
-    # Silence Blender's banner in pytest output
-    print("\n\033[36m[ runner ] Preparing clean GitBlocks test environment\033[0m")
 
     sanitize_target_directory(target_path)
 
@@ -203,17 +246,28 @@ def main(argv: list[str] | None = None):
     shutil.copytree(addon_src, addon_dest)
 
     tests_dir = Path(__file__).parent
-    print(f"\033[36m[ runner ] Launching GitBlocks pytest in {tests_dir}\033[0m\n")
+    phase_results = []
 
-    install_code = run_pytest_phase(
+    install_result = run_pytest_phase(
         tests_dir,
         "install",
         ["-m", "install", "--ignore=tests/unit"],
+        current_version=getattr(parsed, "blender_version", None),
     )
-    if install_code != 0:
-        return install_code
+    phase_results.append(install_result)
+    if install_result.exit_code != 0:
+        write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results)
+        return install_result.exit_code
 
-    return run_pytest_phase(tests_dir, "test", ["-m", "not install"])
+    test_result = run_pytest_phase(
+        tests_dir,
+        "test",
+        ["-m", "not install"],
+        current_version=getattr(parsed, "blender_version", None),
+    )
+    phase_results.append(test_result)
+    write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results)
+    return test_result.exit_code
 
 
 if __name__ == "__main__":
