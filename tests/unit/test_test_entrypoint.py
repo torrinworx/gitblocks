@@ -13,6 +13,7 @@ def test_help_includes_blender_version_flags():
 
     assert "--blender-version" in help_text
     assert "--blender-versions" in help_text
+    assert "--test" in help_text
 
 
 def test_direct_binary_override_wins_over_version_selectors(monkeypatch, tmp_path):
@@ -30,19 +31,57 @@ def test_direct_binary_override_wins_over_version_selectors(monkeypatch, tmp_pat
     assert runs[0].blender_bin == Path("/opt/blender/bin/blender")
 
 
+def test_compatibility_gate_rejects_unsupported_versions_before_resolving(monkeypatch, tmp_path, capsys):
+    resolver_calls = []
+
+    def resolver(version, progress=None):
+        resolver_calls.append((version, progress))
+        return tmp_path / version / "blender"
+
+    with pytest.raises(SystemExit) as exc:
+        harness.plan_blender_runs(
+            ["--blender-version", "4.0.2"],
+            addon_root=tmp_path,
+            env={"GITBLOCKS_TEST_DIR": str(tmp_path / "tests")},
+            resolver=resolver,
+        )
+
+    assert exc.value.code == 1
+    assert resolver_calls == []
+
+    output = capsys.readouterr().out
+    assert "GitBlocks compatibility preflight failed:" in output
+    assert "Unsupported Blender version(s): 4.0.2" in output
+    assert "Supported versions: 4.1.0, 4.5.1, 5.1.0" in output
+
+
 def test_version_matrix_expands_to_one_run_per_version(tmp_path):
     runs = harness.plan_blender_runs(
-        ["--blender-versions", "5.0.1,5.1.0"],
+        ["--blender-versions", "4.1.0,5.1.0"],
         addon_root=tmp_path,
         env={"GITBLOCKS_TEST_DIR": str(tmp_path / "tests")},
         resolver=lambda version: tmp_path / version / "blender",
     )
 
-    assert [run.version for run in runs] == ["5.0.1", "5.1.0"]
+    assert [run.version for run in runs] == ["4.1.0", "5.1.0"]
     assert [run.test_dir for run in runs] == [
-        tmp_path / "tests" / "5.0.1",
+        tmp_path / "tests" / "4.1.0",
         tmp_path / "tests" / "5.1.0",
     ]
+
+
+def test_test_filter_is_forwarded_into_the_blender_command(tmp_path):
+    run = harness.BlenderRun(
+        blender_bin=tmp_path / "blender",
+        test_dir=tmp_path / "tests",
+        version="5.1.0",
+        test_filter="commit_preflight",
+    )
+
+    command = harness.build_blender_command(tmp_path, run)
+
+    assert "--test" in command
+    assert "commit_preflight" in command
 
 
 def test_version_resolution_forwards_progress_callback(tmp_path):
@@ -114,6 +153,38 @@ def test_main_prints_version_headers_before_each_run(monkeypatch, tmp_path, caps
     assert "5.1.0        PASS install P:2 F:0 S:0" in output
     assert "5.0.1        PASS test P:80 F:0 S:0" in output
     assert "--blender-version" not in output
+
+
+def test_main_forwards_test_filter_into_the_blender_command(monkeypatch, tmp_path):
+    blender_bin = tmp_path / "5.1.0" / "blender"
+    blender_bin.parent.mkdir(parents=True)
+    blender_bin.write_text("ok", encoding="utf-8")
+
+    run = harness.BlenderRun(
+        blender_bin=blender_bin,
+        test_dir=tmp_path / "tests" / "5.1.0",
+        version="5.1.0",
+        test_filter="commit_preflight",
+    )
+
+    captured = {}
+
+    def fake_call(cmd, cwd=None):
+        captured["cmd"] = cmd
+        run.test_dir.mkdir(parents=True, exist_ok=True)
+        (run.test_dir / harness._MODULE.SUMMARY_FILENAME).write_text(json.dumps({"phases": []}), encoding="utf-8")
+        return 0
+
+    monkeypatch.setattr(harness._MODULE, "plan_blender_runs", lambda *args, **kwargs: [run])
+    monkeypatch.setattr(harness._MODULE.subprocess, "call", fake_call)
+    monkeypatch.setattr("sys.argv", ["test.py", "--test", "commit_preflight"])
+
+    with pytest.raises(SystemExit) as exc:
+        harness.main()
+
+    assert exc.value.code == 0
+    assert "--test" in captured["cmd"]
+    assert "commit_preflight" in captured["cmd"]
 
 
 def test_main_keeps_running_after_a_failing_blender_version(monkeypatch, tmp_path, capsys):

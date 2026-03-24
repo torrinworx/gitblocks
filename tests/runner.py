@@ -97,6 +97,10 @@ def build_parser():
         help="Blender version selected by the outer harness for this run",
     )
     parser.add_argument(
+        "--test",
+        help="Forward a single test expression to the not-install pytest phase",
+    )
+    parser.add_argument(
         "--log-file",
         type=Path,
         help="Write detailed pytest output to this log file",
@@ -312,10 +316,15 @@ def main(argv: list[str] | None = None):
         write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results, log_file=log_file)
         return install_result.exit_code
 
+    test_args = ["-m", "not install"]
+    test_filter = getattr(parsed, "test", None)
+    if test_filter:
+        test_args.extend(["-k", test_filter])
+
     test_result = run_pytest_phase(
         tests_dir,
         "test",
-        ["-m", "not install"],
+        test_args,
         current_version=getattr(parsed, "blender_version", None),
         log_file=log_file,
     )

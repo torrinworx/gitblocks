@@ -28,3 +28,15 @@ def test_runner_parses_version_argument():
 
     assert args.target_dir == Path("/tmp/tests")
     assert args.blender_version == "5.1.0"
+
+
+def test_runner_parses_test_filter_argument():
+    args = runner.build_parser().parse_args(["/tmp/tests", "--test", "commit_preflight"])
+
+    assert args.test == "commit_preflight"
+
+
+def test_runner_parse_help_includes_test_filter():
+    help_text = runner.build_parser().format_help()
+
+    assert "--test" in help_text

@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from tests.blender_versions import ensure_installed
+from tests.blender_versions import check_blender_compatibility
 from tests.runner_tui import compact_nodeid
 
 
@@ -40,6 +41,7 @@ class BlenderRun:
     blender_bin: Path
     test_dir: Path
     version: str | None = None
+    test_filter: str | None = None
 
 
 @dataclass(frozen=True)
@@ -75,6 +77,10 @@ def build_parser():
         "--blender-versions",
         help="Run tests against a comma-separated matrix of Blender versions",
     )
+    parser.add_argument(
+        "--test",
+        help="Run a single test expression inside Blender using pytest -k",
+    )
     return parser
 
 
@@ -82,6 +88,12 @@ def _parse_version_list(value: str | None) -> list[str]:
     if not value:
         return []
     return [entry.strip() for entry in value.split(",") if entry.strip()]
+
+
+def _read_test_filter(args, env: dict[str, str]) -> str | None:
+    cli_value = (getattr(args, "test", None) or "").strip() or None
+    env_value = (env.get("GITBLOCKS_TEST_FILTER") or "").strip() or None
+    return cli_value or env_value
 
 
 def _resolver_supports_progress(resolver) -> bool:
@@ -119,16 +131,24 @@ def plan_blender_runs(
     env_versions = _parse_version_list(env.get("GITBLOCKS_BLENDER_VERSIONS"))
     cli_version = (args.blender_version or "").strip() or None
     env_version = (env.get("GITBLOCKS_BLENDER_VERSION") or "").strip() or None
+    test_filter = _read_test_filter(args, env)
 
     if blender_bin_override:
         return [
             BlenderRun(
                 blender_bin=Path(blender_bin_override).expanduser(),
                 test_dir=test_dir,
+                test_filter=test_filter,
             )
         ]
 
     selected_versions = cli_versions or env_versions or ([] if cli_version is None and env_version is None else [cli_version or env_version])
+
+    compatibility = check_blender_compatibility(selected_versions)
+    if selected_versions and not compatibility.ok:
+        print("GitBlocks compatibility preflight failed:")
+        print(compatibility.message)
+        sys.exit(1)
 
     if selected_versions:
         return [
@@ -136,6 +156,7 @@ def plan_blender_runs(
                 blender_bin=Path(_resolve_blender_binary(resolver, version, progress=progress)),
                 test_dir=test_dir / version,
                 version=version,
+                test_filter=test_filter,
             )
             for version in selected_versions
         ]
@@ -148,6 +169,7 @@ def plan_blender_runs(
         BlenderRun(
             blender_bin=Path(fallback_bin).expanduser(),
             test_dir=test_dir,
+            test_filter=test_filter,
         )
     ]
 
@@ -294,6 +316,8 @@ def build_blender_command(addon_root: Path, run: BlenderRun, log_file: Path | No
     ]
     if run.version:
         cmd.extend(["--blender-version", run.version])
+    if run.test_filter:
+        cmd.extend(["--test", run.test_filter])
     if log_file is not None:
         cmd.extend(["--log-file", str(log_file)])
     return cmd
