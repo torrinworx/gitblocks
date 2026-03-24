@@ -58,7 +58,7 @@ def plan_blender_runs(
     env: dict[str, str] | None = None,
     resolver=ensure_installed,
 ) -> list[BlenderRun]:
-    env = {**os.environ, **(env or {})}
+    env = dict(env or {})
     args = build_parser().parse_args(argv)
 
     test_dir = Path(env.get("GITBLOCKS_TEST_DIR", "/tmp/gitblocks_addon_tests"))

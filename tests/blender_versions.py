@@ -8,11 +8,19 @@ import re
 import tarfile
 from dataclasses import dataclass
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 
 ARCHIVE_BASE_URL = "https://download.blender.org/release/"
 _VERSION_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
+_REQUEST_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+}
 
 
 class BlenderVersionError(ValueError):
@@ -107,13 +115,15 @@ def installed_versions(cache_dir: Path | None = None) -> list[str]:
 
 
 def _download_text(url: str) -> str:
-    with urlopen(url) as response:
+    request = Request(url, headers=_REQUEST_HEADERS)
+    with urlopen(request) as response:
         return response.read().decode("utf-8")
 
 
 def _download_file(url: str, destination: Path) -> Path:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    with urlopen(url) as response, destination.open("wb") as handle:
+    request = Request(url, headers=_REQUEST_HEADERS)
+    with urlopen(request) as response, destination.open("wb") as handle:
         while True:
             chunk = response.read(1024 * 1024)
             if not chunk:
@@ -130,13 +140,17 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _expected_checksum(checksum_text: str) -> str:
+def _expected_checksum(checksum_text: str, archive_name: str) -> str:
+    for line in checksum_text.strip().splitlines():
+        parts = line.split()
+        if len(parts) >= 2 and parts[-1] == archive_name:
+            return parts[0].strip()
     first_line = checksum_text.strip().splitlines()[0]
     return first_line.split()[0].strip()
 
 
 def _verify_checksum(archive_path: Path, checksum_text: str) -> None:
-    expected = _expected_checksum(checksum_text)
+    expected = _expected_checksum(checksum_text, archive_path.name)
     actual = _sha256(archive_path)
     if actual != expected:
         raise BlenderVersionError(

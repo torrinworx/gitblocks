@@ -73,6 +73,24 @@ def test_checksum_is_verified_before_extraction(monkeypatch, tmp_path):
     assert [step[0] for step in call_order] == ["checksum", "archive", "verify", "extract"]
 
 
+def test_checksum_matching_uses_the_requested_archive_name(tmp_path, monkeypatch):
+    info = resolve_version("4.1.0", cache_dir=tmp_path)
+
+    checksum_text = (
+        "b0d7286f79b54a9aa0c5cfb1c36e85aa674bae1ca776f8e6d52b5a22c6626598  "
+        "blender-4.1.0-windows-x64.msix\n"
+        "d2ac5390f4a9cb9416c8eb23bdd8fa8e49e68165a889575fd8f56563f5cccaf1  "
+        "blender-4.1.0-linux-x64.tar.xz\n"
+    )
+
+    monkeypatch.setattr("tests.blender_versions._download_text", lambda *_: checksum_text)
+    monkeypatch.setattr("tests.blender_versions._download_file", lambda *_: info.archive_path)
+    monkeypatch.setattr("tests.blender_versions._extract_archive", lambda archive_path, install_dir: (install_dir.mkdir(parents=True, exist_ok=True), (install_dir / "blender").write_text("ok", encoding="utf-8")))
+    monkeypatch.setattr("tests.blender_versions._sha256", lambda *_: "d2ac5390f4a9cb9416c8eb23bdd8fa8e49e68165a889575fd8f56563f5cccaf1")
+
+    assert ensure_installed("4.1.0", cache_dir=tmp_path).name == "blender"
+
+
 def test_installed_versions_are_sorted_deterministically(tmp_path):
     first = tmp_path / "Blender5.0" / "blender-5.0.1-linux-x64"
     second = tmp_path / "Blender5.1" / "blender-5.1.0-linux-x64"

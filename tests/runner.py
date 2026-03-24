@@ -14,7 +14,10 @@ import types
 from pathlib import Path
 import importlib.util
 
-import pytest
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 try:
     import bpy  # type: ignore
@@ -90,14 +93,30 @@ def parse_requirements(path: Path):
     return pkgs
 
 
+def addon_install_root():
+    try:
+        return Path(bpy.utils.user_resource("EXTENSIONS"))
+    except Exception:
+        return Path(bpy.utils.user_resource("SCRIPTS")) / "addons"
+
+
 def disable_addon(name: str):
     if name in bpy.context.preferences.addons:
         bpy.ops.preferences.addon_disable(module=name)
 
 
 def remove_existing_addons(name: str):
-    ext_root = Path(bpy.utils.user_resource("EXTENSIONS")).parent
-    for repo in ext_root.iterdir():
+    install_root = addon_install_root()
+    if install_root.name == "addons":
+        addon_dir = install_root / name
+        if addon_dir.exists():
+            if addon_dir.is_symlink() or addon_dir.is_file():
+                addon_dir.unlink(missing_ok=True)
+            else:
+                shutil.rmtree(addon_dir, ignore_errors=True)
+        return
+
+    for repo in install_root.parent.iterdir():
         addon_dir = repo / name
         if addon_dir.exists():
             if addon_dir.is_symlink() or addon_dir.is_file():
@@ -127,6 +146,8 @@ if __name__ == "__main__":
 
     ensure_pytest_installed()
 
+    import pytest
+
     # Silence Blender's banner in pytest output
     print("\n\033[36m[ runner ] Preparing clean GitBlocks test environment\033[0m")
 
@@ -154,7 +175,7 @@ if __name__ == "__main__":
     disable_addon(addon_name)
     remove_existing_addons(addon_name)
 
-    user_repo = Path(bpy.utils.user_resource("EXTENSIONS")) / "user_default"
+    user_repo = addon_install_root() / "user_default"
     user_repo.mkdir(parents=True, exist_ok=True)
 
     addon_dest = user_repo / addon_src.name

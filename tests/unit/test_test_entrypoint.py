@@ -12,12 +12,13 @@ def test_help_includes_blender_version_flags():
 
 
 def test_direct_binary_override_wins_over_version_selectors(monkeypatch, tmp_path):
-    monkeypatch.setenv("GITBLOCKS_BLENDER_BIN", "/opt/blender/bin/blender")
-
     runs = harness.plan_blender_runs(
         ["--blender-version", "5.1.0"],
         addon_root=tmp_path,
-        env={"GITBLOCKS_TEST_DIR": str(tmp_path / "tests")},
+        env={
+            "GITBLOCKS_TEST_DIR": str(tmp_path / "tests"),
+            "GITBLOCKS_BLENDER_BIN": "/opt/blender/bin/blender",
+        },
         resolver=lambda version: tmp_path / version / "blender",
     )
 

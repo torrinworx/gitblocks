@@ -105,8 +105,7 @@ def disable_addon(addon_name: str):
 
 def install_addon_to_extensions(addon_src: Path, addon_name: str):
     _require_bpy()
-    ext_root = Path(bpy.utils.user_resource("EXTENSIONS"))
-    user_repo = ext_root / "user_default"
+    user_repo = addon_install_root() / "user_default"
     user_repo.mkdir(parents=True, exist_ok=True)
 
     addon_dest = user_repo / addon_src.name
@@ -115,6 +114,14 @@ def install_addon_to_extensions(addon_src: Path, addon_name: str):
     shutil.copytree(addon_src, addon_dest)
 
     return addon_dest
+
+
+def addon_install_root():
+    _require_bpy()
+    try:
+        return Path(bpy.utils.user_resource("EXTENSIONS"))
+    except Exception:
+        return Path(bpy.utils.user_resource("SCRIPTS")) / "addons"
 
 
 def ensure_install_operator(gitblocks_mod):

@@ -3,13 +3,14 @@ from pathlib import Path
 from tests import harness
 
 
-def test_cli_version_wins_over_env_version(tmp_path, monkeypatch):
-    monkeypatch.setenv("GITBLOCKS_BLENDER_VERSION", "5.0.1")
-
+def test_cli_version_wins_over_env_version(tmp_path):
     runs = harness.plan_blender_runs(
         ["--blender-version", "5.1.0"],
         addon_root=tmp_path,
-        env={"GITBLOCKS_TEST_DIR": str(tmp_path / "tests")},
+        env={
+            "GITBLOCKS_TEST_DIR": str(tmp_path / "tests"),
+            "GITBLOCKS_BLENDER_VERSION": "5.0.1",
+        },
         resolver=lambda version: tmp_path / version / "blender",
     )
 

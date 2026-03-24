@@ -228,3 +228,5 @@ cython_debug/
 #.idea/
 
 build.zip
+
+/blender

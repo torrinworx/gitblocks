@@ -6,6 +6,8 @@ from pathlib import Path
 import bpy
 import pytest
 
+from tests.helpers import addon_install_root
+
 
 ADDON_MODULE = "gitblocks_addon"
 
@@ -16,21 +18,22 @@ def test_zip_install_addon():
     if ADDON_MODULE in bpy.context.preferences.addons:
         bpy.ops.preferences.addon_disable(module=ADDON_MODULE)
 
-    ext_root = Path(bpy.utils.user_resource("EXTENSIONS")).parent
-    for repo in ext_root.iterdir():
-        addon_dir = repo / ADDON_MODULE
+    install_root = addon_install_root()
+    if install_root.name == "addons":
+        addon_dir = install_root / ADDON_MODULE
         if addon_dir.exists():
             if addon_dir.is_symlink() or addon_dir.is_file():
                 addon_dir.unlink(missing_ok=True)
             else:
                 shutil.rmtree(addon_dir, ignore_errors=True)
-
-    scripts_addon_dir = Path(bpy.utils.user_resource("SCRIPTS")) / "addons" / ADDON_MODULE
-    if scripts_addon_dir.exists():
-        if scripts_addon_dir.is_symlink() or scripts_addon_dir.is_file():
-            scripts_addon_dir.unlink(missing_ok=True)
-        else:
-            shutil.rmtree(scripts_addon_dir, ignore_errors=True)
+    else:
+        for repo in install_root.parent.iterdir():
+            addon_dir = repo / ADDON_MODULE
+            if addon_dir.exists():
+                if addon_dir.is_symlink() or addon_dir.is_file():
+                    addon_dir.unlink(missing_ok=True)
+                else:
+                    shutil.rmtree(addon_dir, ignore_errors=True)
 
     addon_src = Path(__file__).resolve().parents[2]
     staging_root = Path(tempfile.mkdtemp(prefix="gitblocks_addon_zip_"))
@@ -38,7 +41,12 @@ def test_zip_install_addon():
     shutil.copytree(
         addon_src,
         staging_addon,
-        ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache"),
+        ignore=shutil.ignore_patterns(
+            ".git",
+            "__pycache__",
+            ".pytest_cache",
+            "blender",
+        ),
     )
 
     zip_path = staging_root / f"{ADDON_MODULE}.zip"
