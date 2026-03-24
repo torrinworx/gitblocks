@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from tests.blender_versions import ensure_installed
+from tests.runner_tui import compact_nodeid
 
 
 SUMMARY_FILENAME = "gitblocks-test-summary.json"
@@ -242,7 +243,7 @@ def render_failure_digest(results: list[BlenderRunResult]) -> list[str]:
     for version, failures in grouped:
         lines.append(f"{version}")
         for failure in failures:
-            lines.append(f"- {failure.nodeid} :: {failure.message}")
+            lines.append(f"- {compact_nodeid(failure.nodeid)} :: {failure.message}")
     return lines
 
 

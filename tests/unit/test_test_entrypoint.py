@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -134,10 +135,31 @@ def test_main_keeps_running_after_a_failing_blender_version(monkeypatch, tmp_pat
     def fake_call(*args, **kwargs):
         run = runs[len(calls)]
         run.test_dir.mkdir(parents=True, exist_ok=True)
-        (run.test_dir / harness._MODULE.SUMMARY_FILENAME).write_text(
-            json.dumps({"phases": []}),
-            encoding="utf-8",
+        summary = (
+            {
+                "phases": [
+                    {
+                        "stage": "test",
+                        "passed": 0,
+                        "failed": 1,
+                        "skipped": 0,
+                        "selected": 1,
+                        "deselected": 0,
+                        "exit_code": 1,
+                        "failures": [
+                            {
+                                "nodeid": "tests/unit/test_example.py::test_bad",
+                                "message": "AssertionError: boom",
+                                "longreprtext": "AssertionError: boom\nCaptured stdout call\nhelpful detail",
+                            }
+                        ],
+                    }
+                ]
+            }
+            if run.version == "5.1.0"
+            else {"phases": []}
         )
+        (run.test_dir / harness._MODULE.SUMMARY_FILENAME).write_text(json.dumps(summary), encoding="utf-8")
         calls.append(run.version)
         return 1 if run.version == "5.1.0" else 0
 
@@ -155,6 +177,19 @@ def test_main_keeps_running_after_a_failing_blender_version(monkeypatch, tmp_pat
     assert "GitBlocks | Blender 5.1.0" in output
     assert "GitBlocks | Blender 5.0.1" in output
     assert "Matrix Summary" in output
+    assert "FAILURE DIGEST" in output
+    assert "5.1.0" in output
+    assert "- example.bad :: AssertionError: boom" in output
+
+
+def test_log_path_for_run_is_timestamped_and_rooted_in_logs(tmp_path):
+    run = harness.BlenderRun(blender_bin=tmp_path / "blender", test_dir=tmp_path / "tests", version="5.1.0")
+    started_at = datetime(2026, 3, 24, 0, 0, 0, tzinfo=UTC)
+
+    log_file = harness._MODULE.log_path_for_run(tmp_path, run, started_at)
+
+    assert log_file == tmp_path / "logs" / "gitblocks-test-2026-03-24_00-00-00-5.1.0.log"
+    assert log_file.parent.name == "logs"
 
 
 def test_build_blender_command_can_take_a_log_file(tmp_path):
