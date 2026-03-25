@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Sequence
 from urllib.request import Request, urlopen
 
-SUPPORTED_BLENDER_VERSIONS = ("4.0.0", "4.1.0", "4.2.0", "4.3.0", "4.4.0", "4.5.0", "5.0.0", "5.1.0")
+SUPPORTED_BLENDER_VERSIONS = ("4.1.0", "4.5.1", "5.1.0")
 ARCHIVE_BASE_URL = "https://download.blender.org/release/"
 _VERSION_RE = re.compile(r"^(\d+)\.(\d+)\.(\d+)$")
 _REQUEST_HEADERS = {
