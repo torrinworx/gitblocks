@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 
+from tests.blender_versions import SUPPORTED_BLENDER_VERSIONS
 from tests import harness
 
 
@@ -52,7 +53,7 @@ def test_compatibility_gate_rejects_unsupported_versions_before_resolving(monkey
     output = capsys.readouterr().out
     assert "GitBlocks compatibility preflight failed:" in output
     assert "Unsupported Blender version(s): 4.0.2" in output
-    assert "Supported versions: 4.1.0, 4.5.1, 5.1.0" in output
+    assert f"Supported versions: {', '.join(SUPPORTED_BLENDER_VERSIONS)}" in output
 
 
 def test_version_matrix_expands_to_one_run_per_version(tmp_path):

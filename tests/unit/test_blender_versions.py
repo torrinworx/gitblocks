@@ -12,6 +12,7 @@ from tests.blender_versions import (
     check_blender_compatibility,
     ensure_installed,
     installed_versions,
+    SUPPORTED_BLENDER_VERSIONS,
     resolve_version,
 )
 
@@ -194,7 +195,7 @@ def test_supported_blender_versions_are_compatible():
 
     assert result == BlenderCompatibilityResult(
         selected_versions=("4.1.0", "5.1.0"),
-        supported_versions=("4.1.0", "4.5.1", "5.1.0"),
+        supported_versions=SUPPORTED_BLENDER_VERSIONS,
         unsupported_versions=(),
         ok=True,
         message="All selected Blender versions are supported: 4.1.0, 5.1.0",
@@ -206,10 +207,10 @@ def test_unsupported_blender_version_names_the_matrix():
 
     assert result == BlenderCompatibilityResult(
         selected_versions=("4.0.2",),
-        supported_versions=("4.1.0", "4.5.1", "5.1.0"),
+        supported_versions=SUPPORTED_BLENDER_VERSIONS,
         unsupported_versions=("4.0.2",),
         ok=False,
-        message="Unsupported Blender version(s): 4.0.2. Supported versions: 4.1.0, 4.5.1, 5.1.0",
+        message=f"Unsupported Blender version(s): 4.0.2. Supported versions: {', '.join(SUPPORTED_BLENDER_VERSIONS)}",
     )
 
 
@@ -219,4 +220,4 @@ def test_mixed_blender_versions_preserve_selection_order_and_isolate_unsupported
     assert result.selected_versions == ("4.1.0", "4.0.2")
     assert result.unsupported_versions == ("4.0.2",)
     assert result.ok is False
-    assert result.message == "Unsupported Blender version(s): 4.0.2. Supported versions: 4.1.0, 4.5.1, 5.1.0"
+    assert result.message == f"Unsupported Blender version(s): 4.0.2. Supported versions: {', '.join(SUPPORTED_BLENDER_VERSIONS)}"
