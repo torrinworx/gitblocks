@@ -105,7 +105,7 @@ Recent decisions affecting current work:
 - [Phase 06-testing-runner-progress-and-logging]: Keep later Blender versions running after a failure while preserving a nonzero overall exit code.
 - [Phase 06-testing-runner-progress-and-logging]: Write one human-readable timestamped log file per Blender run and pass it through the harness CLI.
 - [Phase 06-testing-runner-progress-and-logging]: Surface failure details from inner pytest summaries in a grouped final digest.
-- [Phase 07-blender-test-harness-preflight-and-shorthand]: Use the supported Blender matrix 4.1.0, 4.5.1, 5.1.0 for compatibility gating; forward --test / GITBLOCKS_TEST_FILTER as a pytest -k shorthand
+- [Phase 07-blender-test-harness-preflight-and-shorthand]: Keep Blender compatibility gating sourced from `tests/blender_versions.py::SUPPORTED_BLENDER_VERSIONS`; forward --test / GITBLOCKS_TEST_FILTER as a pytest -k shorthand
 
 ### Pending Todos
 
