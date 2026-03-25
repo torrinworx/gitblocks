@@ -126,7 +126,7 @@ yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
-| 260324-twt | Remove `gitblocks-test-summary.json` from the test harness | 2026-03-25 | pending | [260324-twt-investigate-why-the-test-system-creates-](./quick/260324-twt-investigate-why-the-test-system-creates-/) |
+| 260324-twt | Remove `gitblocks-test-summary.json` from the test harness | 2026-03-25 | `b611684` | [260324-twt-investigate-why-the-test-system-creates-](./quick/260324-twt-investigate-why-the-test-system-creates-/) |
 
 ## Session Continuity
 
