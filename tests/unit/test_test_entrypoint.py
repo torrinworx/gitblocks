@@ -1,4 +1,3 @@
-import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -119,24 +118,11 @@ def test_main_prints_version_headers_before_each_run(monkeypatch, tmp_path, caps
         harness.BlenderRun(blender_bin=second_bin, test_dir=tmp_path / "tests" / "5.0.1", version="5.0.1"),
     ]
 
-    summaries = iter(
-        [
-            {"phases": [{"stage": "install", "passed": 2, "failed": 0, "skipped": 0, "selected": 2, "deselected": 40, "exit_code": 0}]},
-            {"phases": [{"stage": "test", "passed": 80, "failed": 0, "skipped": 0, "selected": 80, "deselected": 2, "exit_code": 0}]},
-        ]
-    )
+    calls = []
 
     def fake_call(*args, **kwargs):
-        run = runs[fake_call.calls]
-        run.test_dir.mkdir(parents=True, exist_ok=True)
-        (run.test_dir / harness._MODULE.SUMMARY_FILENAME).write_text(
-            json.dumps(next(summaries)),
-            encoding="utf-8",
-        )
-        fake_call.calls += 1
+        calls.append(len(calls))
         return 0
-
-    fake_call.calls = 0
 
     monkeypatch.setattr(harness._MODULE, "plan_blender_runs", lambda *args, **kwargs: runs)
     monkeypatch.setattr(harness._MODULE.subprocess, "call", fake_call)
@@ -146,13 +132,14 @@ def test_main_prints_version_headers_before_each_run(monkeypatch, tmp_path, caps
         harness.main()
 
     assert exc.value.code == 0
+    assert calls == [0, 1]
 
     output = capsys.readouterr().out
     assert "GitBlocks | Blender 5.1.0" in output
     assert "GitBlocks | Blender 5.0.1" in output
     assert "Matrix Summary" in output
-    assert "5.1.0        PASS install P:2 F:0 S:0" in output
-    assert "5.0.1        PASS test P:80 F:0 S:0" in output
+    assert "5.1.0        PASS exit 0" in output
+    assert "5.0.1        PASS exit 0" in output
     assert "--blender-version" not in output
 
 
@@ -172,8 +159,6 @@ def test_main_forwards_test_filter_into_the_blender_command(monkeypatch, tmp_pat
 
     def fake_call(cmd, cwd=None):
         captured["cmd"] = cmd
-        run.test_dir.mkdir(parents=True, exist_ok=True)
-        (run.test_dir / harness._MODULE.SUMMARY_FILENAME).write_text(json.dumps({"phases": []}), encoding="utf-8")
         return 0
 
     monkeypatch.setattr(harness._MODULE, "plan_blender_runs", lambda *args, **kwargs: [run])
@@ -206,32 +191,6 @@ def test_main_keeps_running_after_a_failing_blender_version(monkeypatch, tmp_pat
 
     def fake_call(*args, **kwargs):
         run = runs[len(calls)]
-        run.test_dir.mkdir(parents=True, exist_ok=True)
-        summary = (
-            {
-                "phases": [
-                    {
-                        "stage": "test",
-                        "passed": 0,
-                        "failed": 1,
-                        "skipped": 0,
-                        "selected": 1,
-                        "deselected": 0,
-                        "exit_code": 1,
-                        "failures": [
-                            {
-                                "nodeid": "tests/unit/test_example.py::test_bad",
-                                "message": "AssertionError: boom",
-                                "longreprtext": "AssertionError: boom\nCaptured stdout call\nhelpful detail",
-                            }
-                        ],
-                    }
-                ]
-            }
-            if run.version == "5.1.0"
-            else {"phases": []}
-        )
-        (run.test_dir / harness._MODULE.SUMMARY_FILENAME).write_text(json.dumps(summary), encoding="utf-8")
         calls.append(run.version)
         return 1 if run.version == "5.1.0" else 0
 
@@ -249,9 +208,8 @@ def test_main_keeps_running_after_a_failing_blender_version(monkeypatch, tmp_pat
     assert "GitBlocks | Blender 5.1.0" in output
     assert "GitBlocks | Blender 5.0.1" in output
     assert "Matrix Summary" in output
-    assert "FAILURE DIGEST" in output
-    assert "5.1.0" in output
-    assert "- example.bad :: AssertionError: boom" in output
+    assert "5.1.0        FAIL exit 1" in output
+    assert "5.0.1        PASS exit 0" in output
 
 
 def test_log_path_for_run_is_timestamped_and_rooted_in_logs(tmp_path):
@@ -281,11 +239,6 @@ def test_main_keeps_single_binary_fallback_without_version_label(monkeypatch, tm
     runs = [harness.BlenderRun(blender_bin=blender_bin, test_dir=tmp_path / "tests", version=None)]
 
     def fake_call(*args, **kwargs):
-        runs[0].test_dir.mkdir(parents=True, exist_ok=True)
-        (runs[0].test_dir / harness._MODULE.SUMMARY_FILENAME).write_text(
-            json.dumps({"phases": []}),
-            encoding="utf-8",
-        )
         return 0
 
     monkeypatch.setattr(harness._MODULE, "plan_blender_runs", lambda *args, **kwargs: runs)

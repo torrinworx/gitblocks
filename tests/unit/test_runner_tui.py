@@ -1,6 +1,5 @@
 from types import SimpleNamespace
 from io import StringIO
-import json
 
 from tests import runner_tui
 from tests import runner
@@ -230,30 +229,3 @@ def test_run_pytest_phase_mirrors_live_tui_output_to_stdout_and_log_file(monkeyp
     assert "TEST    \x1b[32m✔\x1b[0m example.ok" in output
     assert "[ TEST ]" in log_file.read_text(encoding="utf-8")
     assert result.exit_code == 0
-
-
-def test_write_run_summary_serializes_failure_details(tmp_path):
-    summary_dir = tmp_path / "tests"
-    phase = runner.PhaseResult(
-        stage="test",
-        selected=2,
-        deselected=0,
-        passed=1,
-        failed=1,
-        skipped=0,
-        exit_code=1,
-        failures=(
-            runner.FailureDetail(
-                nodeid="tests/unit/test_example.py::test_bad",
-                message="AssertionError: boom",
-                longreprtext="AssertionError: boom\nCaptured stdout call\nhelpful detail",
-            ),
-        ),
-    )
-
-    runner.write_run_summary(summary_dir, "5.1.0", [phase])
-
-    payload = json.loads((summary_dir / runner.SUMMARY_FILENAME).read_text(encoding="utf-8"))
-
-    assert payload["phases"][0]["failures"][0]["nodeid"] == "tests/unit/test_example.py::test_bad"
-    assert payload["phases"][0]["failures"][0]["message"] == "AssertionError: boom"

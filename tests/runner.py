@@ -10,10 +10,9 @@ import sys
 import shutil
 import subprocess
 import argparse
-import json
 import types
 from contextlib import nullcontext
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from pathlib import Path
 import importlib.util
 
@@ -22,9 +21,6 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from tests import runner_tui
-
-
-SUMMARY_FILENAME = "gitblocks-test-summary.json"
 
 try:
     import bpy  # type: ignore
@@ -243,22 +239,6 @@ def run_pytest_phase(
     )
 
 
-def write_run_summary(
-    target_path: Path,
-    blender_version: str | None,
-    phases: list[PhaseResult],
-    log_file: Path | None = None,
-) -> None:
-    target_path.mkdir(parents=True, exist_ok=True)
-    summary_path = target_path / SUMMARY_FILENAME
-    payload = {
-        "blender_version": blender_version,
-        "log_file": str(log_file) if log_file else None,
-        "phases": [asdict(phase) for phase in phases],
-    }
-    summary_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
-
-
 def main(argv: list[str] | None = None):
     raw_argv = sys.argv[1:] if argv is None else argv
     raw_argv = raw_argv[raw_argv.index("--") + 1 :] if "--" in raw_argv else raw_argv
@@ -302,7 +282,6 @@ def main(argv: list[str] | None = None):
     shutil.copytree(addon_src, addon_dest)
 
     tests_dir = Path(__file__).parent
-    phase_results = []
 
     install_result = run_pytest_phase(
         tests_dir,
@@ -311,9 +290,7 @@ def main(argv: list[str] | None = None):
         current_version=getattr(parsed, "blender_version", None),
         log_file=log_file,
     )
-    phase_results.append(install_result)
     if install_result.exit_code != 0:
-        write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results, log_file=log_file)
         return install_result.exit_code
 
     test_args = ["-m", "not install"]
@@ -328,8 +305,6 @@ def main(argv: list[str] | None = None):
         current_version=getattr(parsed, "blender_version", None),
         log_file=log_file,
     )
-    phase_results.append(test_result)
-    write_run_summary(target_path, getattr(parsed, "blender_version", None), phase_results, log_file=log_file)
     return test_result.exit_code
 
 
