@@ -38,10 +38,10 @@ This runs alongside Blender's autosave without interfering with it, so you can k
 
 # Blender test harness
 The local test harness still honors `GITBLOCKS_BLENDER_BIN` as the strongest direct override.
-If you want Blender to be downloaded into a cache instead, set `GITBLOCKS_BLENDER_CACHE_DIR` and choose either a single version or a version matrix. Unsupported Blender selections fail fast before the matrix starts, and the supported matrix is `4.1.0,4.5.1,5.1.0`:
+If you want Blender to be downloaded into a cache instead, set `GITBLOCKS_BLENDER_CACHE_DIR` and choose either a single version or a version matrix. Unsupported Blender selections fail fast before the matrix starts, and the supported matrix is defined in `tests/blender_versions.py` as `SUPPORTED_BLENDER_VERSIONS`:
 
-- `python3 test.py --blender-version 5.1.0`
-- `python3 test.py --blender-versions 4.1.0,4.5.1,5.1.0`
+- `python3 test.py --blender-version <one of SUPPORTED_BLENDER_VERSIONS>`
+- `python3 test.py --blender-versions "$(python3 -c 'from tests.blender_versions import SUPPORTED_BLENDER_VERSIONS; print(",".join(SUPPORTED_BLENDER_VERSIONS))')"`
 - `python3 test.py --test commit_preflight`
 
 Blender archives are pulled from the official release archive at `https://download.blender.org/release/`.

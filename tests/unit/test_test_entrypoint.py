@@ -109,13 +109,14 @@ def test_main_prints_version_headers_before_each_run(monkeypatch, tmp_path, caps
     versioned_bin.parent.mkdir(parents=True)
     versioned_bin.write_text("ok", encoding="utf-8")
 
-    second_bin = tmp_path / "5.0.1" / "blender"
+    second_version = SUPPORTED_BLENDER_VERSIONS[-2]
+    second_bin = tmp_path / second_version / "blender"
     second_bin.parent.mkdir(parents=True, exist_ok=True)
     second_bin.write_text("ok", encoding="utf-8")
 
     runs = [
         harness.BlenderRun(blender_bin=versioned_bin, test_dir=tmp_path / "tests" / "5.1.0", version="5.1.0"),
-        harness.BlenderRun(blender_bin=second_bin, test_dir=tmp_path / "tests" / "5.0.1", version="5.0.1"),
+        harness.BlenderRun(blender_bin=second_bin, test_dir=tmp_path / "tests" / second_version, version=second_version),
     ]
 
     calls = []
@@ -136,10 +137,10 @@ def test_main_prints_version_headers_before_each_run(monkeypatch, tmp_path, caps
 
     output = capsys.readouterr().out
     assert "GitBlocks | Blender 5.1.0" in output
-    assert "GitBlocks | Blender 5.0.1" in output
+    assert f"GitBlocks | Blender {second_version}" in output
     assert "Matrix Summary" in output
     assert "5.1.0        PASS exit 0" in output
-    assert "5.0.1        PASS exit 0" in output
+    assert f"{second_version}        PASS exit 0" in output
     assert "--blender-version" not in output
 
 
@@ -178,13 +179,14 @@ def test_main_keeps_running_after_a_failing_blender_version(monkeypatch, tmp_pat
     first_bin.parent.mkdir(parents=True)
     first_bin.write_text("ok", encoding="utf-8")
 
-    second_bin = tmp_path / "5.0.1" / "blender"
+    second_version = SUPPORTED_BLENDER_VERSIONS[-2]
+    second_bin = tmp_path / second_version / "blender"
     second_bin.parent.mkdir(parents=True, exist_ok=True)
     second_bin.write_text("ok", encoding="utf-8")
 
     runs = [
         harness.BlenderRun(blender_bin=first_bin, test_dir=tmp_path / "tests" / "5.1.0", version="5.1.0"),
-        harness.BlenderRun(blender_bin=second_bin, test_dir=tmp_path / "tests" / "5.0.1", version="5.0.1"),
+        harness.BlenderRun(blender_bin=second_bin, test_dir=tmp_path / "tests" / second_version, version=second_version),
     ]
 
     calls = []
@@ -202,14 +204,14 @@ def test_main_keeps_running_after_a_failing_blender_version(monkeypatch, tmp_pat
         harness.main()
 
     assert exc.value.code == 1
-    assert calls == ["5.1.0", "5.0.1"]
+    assert calls == [SUPPORTED_BLENDER_VERSIONS[-1], second_version]
 
     output = capsys.readouterr().out
     assert "GitBlocks | Blender 5.1.0" in output
-    assert "GitBlocks | Blender 5.0.1" in output
+    assert f"GitBlocks | Blender {second_version}" in output
     assert "Matrix Summary" in output
     assert "5.1.0        FAIL exit 1" in output
-    assert "5.0.1        PASS exit 0" in output
+    assert f"{second_version}        PASS exit 0" in output
 
 
 def test_log_path_for_run_is_timestamped_and_rooted_in_logs(tmp_path):

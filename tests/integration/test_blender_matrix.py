@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from tests import harness
+from tests.blender_versions import SUPPORTED_BLENDER_VERSIONS
 
 
 def test_cli_version_wins_over_env_version(tmp_path):
@@ -9,7 +10,7 @@ def test_cli_version_wins_over_env_version(tmp_path):
         addon_root=tmp_path,
         env={
             "GITBLOCKS_TEST_DIR": str(tmp_path / "tests"),
-            "GITBLOCKS_BLENDER_VERSION": "4.5.1",
+            "GITBLOCKS_BLENDER_VERSION": SUPPORTED_BLENDER_VERSIONS[5],
         },
         resolver=lambda version: tmp_path / version / "blender",
     )
@@ -32,14 +33,15 @@ def test_default_fallback_keeps_single_binary_path(tmp_path):
 
 def test_version_matrix_creates_one_run_per_version(tmp_path):
     runs = harness.plan_blender_runs(
-        ["--blender-versions", "4.5.1,5.1.0"],
+        ["--blender-versions", ",".join(SUPPORTED_BLENDER_VERSIONS[-3:])],
         addon_root=tmp_path,
         env={"GITBLOCKS_TEST_DIR": str(tmp_path / "tests")},
         resolver=lambda version: tmp_path / version / "blender",
     )
 
-    assert [run.version for run in runs] == ["4.5.1", "5.1.0"]
+    assert [run.version for run in runs] == list(SUPPORTED_BLENDER_VERSIONS[-3:])
     assert [run.test_dir for run in runs] == [
-        tmp_path / "tests" / "4.5.1",
-        tmp_path / "tests" / "5.1.0",
+        tmp_path / "tests" / SUPPORTED_BLENDER_VERSIONS[5],
+        tmp_path / "tests" / SUPPORTED_BLENDER_VERSIONS[6],
+        tmp_path / "tests" / SUPPORTED_BLENDER_VERSIONS[7],
     ]

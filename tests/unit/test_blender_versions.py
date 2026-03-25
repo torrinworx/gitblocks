@@ -173,14 +173,16 @@ def test_checksum_matching_uses_the_requested_archive_name(tmp_path, monkeypatch
 
 
 def test_installed_versions_are_sorted_deterministically(tmp_path):
-    first = tmp_path / "Blender5.0" / "blender-5.0.1-linux-x64"
-    second = tmp_path / "Blender5.1" / "blender-5.1.0-linux-x64"
+    first_version = SUPPORTED_BLENDER_VERSIONS[-2]
+    second_version = SUPPORTED_BLENDER_VERSIONS[-1]
+    first = tmp_path / "Blender5.0" / f"blender-{first_version}-linux-x64"
+    second = tmp_path / "Blender5.1" / f"blender-{second_version}-linux-x64"
     first.mkdir(parents=True)
     second.mkdir(parents=True)
     (first / "blender").write_text("ok", encoding="utf-8")
     (second / "blender").write_text("ok", encoding="utf-8")
 
-    assert installed_versions(tmp_path) == ["5.0.1", "5.1.0"]
+    assert installed_versions(tmp_path) == [first_version, second_version]
 
 
 def test_resolved_binary_path_is_stable_for_version_and_cache_root(tmp_path):
